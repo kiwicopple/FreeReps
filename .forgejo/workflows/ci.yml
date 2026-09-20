@@ -14,8 +14,8 @@ jobs:
       run:
         working-directory: server
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: server/go.mod
           # The module checksums sit under server/, and the action looks for
@@ -41,8 +41,8 @@ jobs:
       run:
         working-directory: server/web
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -54,7 +54,7 @@ jobs:
   documents:
     runs-on: docker
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       # check-docs.sh reads the module selection from
       # .claude/project-standards.json with python3. Without python3, has_module
       # returns false, the language sweep prints "skipped" and this job goes
