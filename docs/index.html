@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>FreeReps - Self-Hosted Health Data Server for Apple Watch &amp; Oura Ring</title>
 <meta name="description" content="Self-hosted health data server for Apple Watch and Oura Ring with web dashboard, correlation explorer, source-priority dedup, and MCP interface for AI assistants.">
 <style>
@@ -48,8 +49,12 @@ a:hover { text-decoration: underline; }
   max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 4rem;
   display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;
 }
+/* The picture element is the grid item, not the img inside it. Under
+   display:contents the <source> is hoisted into the grid as well and takes a
+   cell of its own, which leaves every second cell empty. */
+.screenshots picture { display: block; }
 .screenshots img {
-  width: 100%; border-radius: 12px;
+  display: block; width: 100%; border-radius: 12px;
   border: 1px solid var(--card-border);
 }
 
@@ -124,12 +129,30 @@ footer nav { display: flex; gap: 1.5rem; justify-content: center; margin-bottom:
 <h2 class="section-heading">Web Dashboard</h2>
 <p class="section-sub">Your health data, beautifully visualized.</p>
 <div class="screenshots">
-  <img src="screenshots/dashboard.png" alt="Dashboard showing daily health metrics" loading="lazy">
-  <img src="screenshots/sleep.png" alt="Sleep analysis with stage breakdown" loading="lazy">
-  <img src="screenshots/workouts.png" alt="Workout list with heart rate zones" loading="lazy">
-  <img src="screenshots/correlations.png" alt="Correlation explorer with scatter plot and Pearson r" loading="lazy">
-  <img src="screenshots/metrics.png" alt="Metric explorer with time series charts" loading="lazy">
-  <img src="screenshots/trends.png" alt="Long-term trend analysis" loading="lazy">
+  <picture>
+    <source srcset="screenshots/dashboard-dark.png" media="(prefers-color-scheme: dark)">
+    <img src="screenshots/dashboard.png" alt="Dashboard showing daily health metrics" loading="lazy">
+  </picture>
+  <picture>
+    <source srcset="screenshots/sleep-dark.png" media="(prefers-color-scheme: dark)">
+    <img src="screenshots/sleep.png" alt="Sleep analysis with stage breakdown" loading="lazy">
+  </picture>
+  <picture>
+    <source srcset="screenshots/workouts-dark.png" media="(prefers-color-scheme: dark)">
+    <img src="screenshots/workouts.png" alt="Workout list with heart rate zones" loading="lazy">
+  </picture>
+  <picture>
+    <source srcset="screenshots/correlations-dark.png" media="(prefers-color-scheme: dark)">
+    <img src="screenshots/correlations.png" alt="Correlation explorer with scatter plot and Pearson r" loading="lazy">
+  </picture>
+  <picture>
+    <source srcset="screenshots/metrics-dark.png" media="(prefers-color-scheme: dark)">
+    <img src="screenshots/metrics.png" alt="Metric explorer with time series charts" loading="lazy">
+  </picture>
+  <picture>
+    <source srcset="screenshots/trends-dark.png" media="(prefers-color-scheme: dark)">
+    <img src="screenshots/trends.png" alt="Long-term trend analysis" loading="lazy">
+  </picture>
   <img src="screenshots/claude-mcp.png" alt="Claude analyzing health data via MCP" loading="lazy">
 </div>
 
