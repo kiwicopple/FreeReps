@@ -100,7 +100,7 @@ export default function AlertsTab() {
     setNotice(null);
     try {
       await saveAlertSettings(settings);
-      setNotice("Saved. The watcher picks this up on its next cycle.");
+      setNotice("Saved. The next check cycle uses these values.");
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save");
@@ -126,10 +126,14 @@ export default function AlertsTab() {
   return (
     <>
       <TabHeader title="Alerts">
-        A failing data source is reported into the homelab's ntfy topic, where
-        the session on juno reads it and diagnoses it. The payload follows Uptime
-        Kuma's shape, and each condition keeps its own monitor id — juno threads
-        one conversation per id. Saved here, not in the deployed config file.
+        A data source that stops delivering is reported to an{" "}
+        <a href="https://ntfy.sh" target="_blank" rel="noreferrer">
+          ntfy
+        </a>{" "}
+        topic, so a silent integration surfaces without anyone reading the import
+        log. The payload follows Uptime Kuma's webhook shape, and each condition
+        carries its own monitor id — a receiver can group by it. Stored in the
+        database, not in the config file.
       </TabHeader>
 
       {error ? (
@@ -194,7 +198,7 @@ export default function AlertsTab() {
                 type="url"
                 value={settings.ntfy_url}
                 onChange={(e) => patch({ ntfy_url: e.target.value })}
-                placeholder="https://ntfy.example.ts.net/kuma-json"
+                placeholder="https://ntfy.example.com/freereps-alerts"
               />
               <p
                 style={{
@@ -203,8 +207,9 @@ export default function AlertsTab() {
                   margin: "6px 0 0",
                 }}
               >
-                The full topic URL. juno subscribes to one topic only, so the
-                topic name decides whether the message reaches it.
+                The full topic URL, including the topic name — that name is what
+                a subscriber listens on. Any endpoint accepting an ntfy-style
+                POST works; the body is JSON either way.
               </p>
             </Row>
 
@@ -223,8 +228,8 @@ export default function AlertsTab() {
                   margin: "6px 0 0",
                 }}
               >
-                Fills the payload's <code>hostname</code>, so a test instance is
-                distinguishable from the production one.
+                Fills the payload's <code>hostname</code>, so a receiver can
+                tell a test instance from the production one.
               </p>
             </Row>
 

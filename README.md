@@ -300,6 +300,82 @@ Upload via the dashboard, the iOS companion app (share sheet / file picker), or 
 - **Metrics Deep Dive** — Time-series with moving average, normal range band
 - **Saved Views** — Store correlation configurations for quick recall
 
+## Alerts
+
+An integration that stops delivering is the failure this project could not see:
+the container is healthy, the dashboard answers, and a source simply writes no
+more rows. FreeReps therefore reports that state itself, as a JSON POST to an
+[ntfy](https://ntfy.sh) topic — or to any endpoint that accepts one.
+
+The conditions are evaluated from `import_logs` rather than from inside the sync
+loops, so a syncer that stopped running is covered as well:
+
+| `monitor_id` | Condition |
+|---|---|
+| 9200 | the manual test from Settings → Alerts |
+| 9201 | the Withings sync failed the configured number of times in a row |
+| 9202 | the Oura sync failed the configured number of times in a row |
+| 9203 | the Hevy sync failed the configured number of times in a row |
+| 9204 | no Health Auto Export delivery for longer than the silence threshold |
+
+The payload follows Uptime Kuma's webhook shape, so an existing Kuma consumer
+needs no second parser:
+
+```json
+{
+  "schema": 1,
+  "monitor_id": 9201,
+  "service": "freereps - withings sync",
+  "status": 0,
+  "hostname": "freereps",
+  "monitor_type": "freereps",
+  "since": "2026-09-20T11:18:08Z",
+  "msg": "3 consecutive failed runs — user 2 since 2026-09-20T09:41:56Z: …"
+}
+```
+
+`status` is `0` for a problem and `1` for its resolution. Four rules shape what
+arrives:
+
+- **One message per transition.** The state per condition is stored
+  (`alert_state`), so a problem is reported when it starts and again when it
+  clears — not on every check cycle.
+- **A resolution always follows.** A condition that only ever sent `0` would
+  leave a stale alert in whatever reads the topic.
+- **A threshold sits in front of the channel.** The default is three consecutive
+  failed runs of one source for one user, which at a 30-minute sync interval
+  reports a real defect within two hours while a single DNS timeout stays out.
+- **The state is written after the send succeeded.** An unreachable topic delays
+  an alert; it does not swallow it.
+
+Failures are counted per user, because a second user whose sync works would
+otherwise mask a first user whose sync does not.
+
+### Configuring it
+
+Settings → **Alerts**: the topic URL, the name to report as, the check interval,
+the failure threshold, the silence threshold, and a button that posts a test
+message on 9200 with `status: 1`. The values live in the database; the `alerts`
+block in `config.yaml` seeds them on first start only, so a redeploy cannot
+overwrite what was entered in the UI.
+
+```yaml
+alerts:
+  enabled: false
+  ntfy_url: "https://ntfy.example.com/freereps-alerts"
+  hostname: "freereps"
+  check_interval: "5m"
+  failure_threshold: 3
+  apple_silence: "36h"   # 0 turns the Health Auto Export rule off
+```
+
+Reading the topic back is the quickest way to tell "FreeReps did not send" from
+"the subscriber did not receive":
+
+```bash
+curl -s "https://ntfy.example.com/freereps-alerts/json?poll=1&since=10m"
+```
+
 ## MCP Server
 
 FreeReps exposes health data to Claude (and other LLMs) via the Model Context Protocol.
@@ -400,6 +476,9 @@ No local FreeReps binary needed — `mcp-proxy` handles the transport bridging, 
 | `/api/v1/withings/authorize` | POST | Start Withings OAuth2 flow |
 | `/api/v1/withings/sync` | POST | Trigger manual Withings sync |
 | `/api/v1/withings/disconnect` | DELETE | Remove Withings connection |
+| `/api/v1/alerts` | GET | Alert channel configuration and per-condition state |
+| `/api/v1/alerts` | PUT | Save the alert channel configuration |
+| `/api/v1/alerts/test` | POST | Post a test message on `monitor_id` 9200 |
 | `/api/v1/me` | GET | Current user identity |
 
 ## Documents
