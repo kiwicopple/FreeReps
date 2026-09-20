@@ -116,7 +116,7 @@ export default function Scatter({ pairs }: Props) {
           cx={xFor(p.x)}
           cy={yFor(p.y)}
           r={3.6}
-          fill="var(--color-neutral-700)"
+          fill="var(--color-data-2)"
           fillOpacity={0.55}
         />
       ))}
@@ -127,7 +127,7 @@ export default function Scatter({ pairs }: Props) {
           y1={yFor(fit.intercept + fit.slope * xMin)}
           x2={xFor(xMax)}
           y2={yFor(fit.intercept + fit.slope * xMax)}
-          stroke="var(--color-accent)"
+          stroke="var(--color-data-5)"
           strokeWidth={2.5}
         />
       ) : null}

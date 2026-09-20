@@ -70,6 +70,40 @@ holds a REM swatch and a zone 3 swatch at the same visual weight.
 `data-4` and `data-5` can carry a label inside the fill. The composition and
 zone bars already put their labels outside it, so no component changed.
 
+**Measured series carry the ramp; frame and derived references stay neutral.**
+A chart with one series takes `--color-data-3`: the metric line
+(`MetricChart.tsx`), the daily series in the Trends small multiples, the heart
+rate line (`HRTimelineChart.tsx`) and the active bar of the correlation-by-lag
+list. Axes, grids, ticks and labels keep `--color-neutral-300`/`-600` and the
+2px baseline keeps `--color-text`. The 7-day rolling mean stays a dashed
+`--color-neutral-500`, because it is context to the daily value rather than a
+measurement of its own, and the dashed neutral separates it from the solid data
+line.
+
+Two derived references take a ramp step anyway, because each is the statement
+its screen exists to make: the regression line in `Scatter.tsx` and the Pearson
+figure on Correlations both take `--color-data-5`, so the number and the line
+read as one thing. Drawn neutral, the line would disappear among 150
+half-transparent points. The scatter's points take `--color-data-2` at 55 %.
+
+The p25–p75 band gets `--color-data-band` (`#dfeaea` light, `#192a2a` dark), one
+step of its own rather than a mix, so the uPlot path resolves it too. It
+previously used `--color-accent-100`, which is also the table hover.
+
+`VERDICT_COLOR` in `trend.ts` moves to the `--color-positive-700` /
+`--color-negative-700` pair that `deltaColor()` already uses, so the Trends page
+and the delta column of the metric table state the same thing in the same
+colour. The Trends legend becomes four entries, because one swatch labelled
+"Fitted trend" named a colour the chart never draws.
+
+What keeps the brand: the metric rail selection in `MetricsPage`, the range
+switch, and the workout type filter — those are selection, not data.
+
+The minimum block height in `NightsChart.tsx` rises from `PLOT_HEIGHT * 0.0045`
+to `* 0.01`, 1.35px to 3px. Awake sits at the light end of the ramp at 2.4:1
+against the ground, which a hairline does not carry; the fix belongs to the
+layout, because raising that step's contrast would break the stage order.
+
 **Trigger to re-open.** A thin `data-1` lane — the step reaches 2.4:1 on light
 ground and 2.0:1 on dark, which carries a wide block and not a 4px lane. The fix
 would lower that step by about .04 L rather than raise its chroma. A sixth
@@ -78,6 +112,11 @@ than adding a second hue.
 
 **Design handoff:** `design_handoff_datenfarben`, which supersedes
 `design_handoff_farbsystem` on this point.
+
+**Revisions.** 2026-09-20: extended from the two classified series to every
+measured series, with the chart rule, `--color-data-band` and the `NightsChart`
+minimum height, after the handoff added them. The ramp, the mapping and the
+rejected alternatives are unchanged.
 
 ---
 

@@ -33,8 +33,8 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
 
     const axis = tokenColor("--color-neutral-600", "#79848c");
     const grid = tokenColor("--color-neutral-300", "#cfd4d6");
-    const accent = tokenColor("--color-accent", "#1d5fa8");
-    const zoneTint = tokenColorAlpha("--color-accent", 0.07);
+    const line = tokenColor("--color-data-3", "#337475");
+    const zoneTint = tokenColorAlpha("--color-data-5", 0.1);
 
     const opts: uPlot.Options = {
       width: 0,
@@ -43,7 +43,7 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
         {},
         {
           label: "bpm",
-          stroke: accent,
+          stroke: line,
           width: 1.5,
         },
       ],
@@ -66,7 +66,7 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
       cursor: { drag: { x: true, y: false } },
       hooks: {
         draw: [
-          // Tint the top zone only. Banding all five in one accent would read
+          // Tint the top zone only. Banding all five in one tone would read
           // as a gradient rather than a threshold.
           (u: uPlot) => {
             const yScale = u.scales.y;

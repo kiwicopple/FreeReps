@@ -82,6 +82,11 @@
   --color-stage-rem: var(--color-data-3);
   --color-stage-awake: var(--color-data-1);
 
+  /* The p25–p75 band behind a metric line. One step of its own rather than a
+     mix, so the uPlot path resolves it too; about half a neutral step from the
+     ground, which makes it visible without crowding the line on top of it. */
+  --color-data-band: #dfeaea;
+
   --font-heading: "Archivo Variable", "Archivo", system-ui, sans-serif;
   --font-body: "Archivo Variable", "Archivo", system-ui, sans-serif;
 
@@ -145,6 +150,7 @@
   --color-stage-core: var(--color-data-2);
   --color-stage-rem: var(--color-data-3);
   --color-stage-awake: var(--color-data-5);
+  --color-data-band: #192a2a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -180,6 +186,7 @@
     --color-stage-core: var(--color-data-2);
     --color-stage-rem: var(--color-data-3);
     --color-stage-awake: var(--color-data-5);
+    --color-data-band: #192a2a;
   }
 }
 
@@ -213,6 +220,7 @@
   --color-data-3: var(--color-data-3);
   --color-data-4: var(--color-data-4);
   --color-data-5: var(--color-data-5);
+  --color-data-band: var(--color-data-band);
   --font-sans: var(--font-body);
   --radius-md: 0px;
 }

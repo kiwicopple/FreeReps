@@ -4,14 +4,15 @@ export type Verdict = "improving" | "flat" | "declining";
 
 /**
  * A verdict is a judgement, so it reads the judgement roles rather than the
- * brand token. deltaColor() in metricDirection.ts was carried onto them when
- * the roles split; this call site was not, which left a declining trend in the
- * same neutral tone as one that had not moved.
+ * brand token, in the same pair deltaColor() uses in metricDirection.ts: the
+ * Trends page and the delta column of the metric table then state the same
+ * thing in the same colour. Before the role split improvement carried the
+ * brand and regression carried the tone of a metric that had not moved.
  */
 export const VERDICT_COLOR: Record<Verdict, string> = {
-  improving: "var(--color-positive)",
+  improving: "var(--color-positive-700)",
   flat: "var(--color-neutral-500)",
-  declining: "var(--color-negative)",
+  declining: "var(--color-negative-700)",
 };
 
 export interface Fit {

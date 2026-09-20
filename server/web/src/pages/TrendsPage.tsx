@@ -102,13 +102,13 @@ export default function TrendsPage() {
         <VerdictCount
           label="Improving"
           value={counts.improving}
-          color={VERDICT_COLOR.improving}
+          color="var(--color-positive)"
         />
         <VerdictCount label="Flat" value={counts.flat} />
         <VerdictCount
           label="Declining"
           value={counts.declining}
-          color={VERDICT_COLOR.declining}
+          color="var(--color-negative)"
         />
         {isDesktop ? (
           <p
@@ -159,8 +159,12 @@ export default function TrendsPage() {
         className="page-x flex items-center gap-6 flex-wrap"
         style={{ paddingTop: 18, paddingBottom: 40, marginTop: "auto" }}
       >
-        <LegendLine color="var(--color-neutral-500)" label="Daily value" />
-        <LegendLine color="var(--color-accent)" label="Fitted trend" />
+        <LegendLine color="var(--color-data-3)" label="Daily value" />
+        {/* The fitted line is drawn in one of three colours, so one swatch
+            labelled "Fitted trend" would state a colour the chart never uses. */}
+        <LegendLine color={VERDICT_COLOR.improving} label="Improving" />
+        <LegendLine color={VERDICT_COLOR.flat} label="Flat" />
+        <LegendLine color={VERDICT_COLOR.declining} label="Declining" />
         <Link
           to="/settings?tab=front-page"
           className="btn btn-ghost"
@@ -388,7 +392,7 @@ function TrendChart({
       <polyline
         points={scalePoints(series, width, min, span, height)}
         fill="none"
-        stroke="var(--color-neutral-500)"
+        stroke="var(--color-data-3)"
         strokeWidth={1.4}
         vectorEffect="non-scaling-stroke"
       />

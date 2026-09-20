@@ -344,7 +344,11 @@ function PearsonBlock({
   yLabel: string;
 }) {
   const strong = r != null && Math.abs(r) >= 0.4;
-  const color = strong ? "var(--color-accent)" : "var(--color-text)";
+  // The strongest step of the data ramp, the same one the regression line in
+  // the scatter takes, so the figure and the line read as one statement. The
+  // accent said "good" and "selected", which a strong negative correlation is
+  // neither.
+  const color = strong ? "var(--color-data-5)" : "var(--color-text)";
 
   return (
     <div
@@ -439,7 +443,7 @@ function DivergingBar({
   active: boolean;
 }) {
   const magnitude = value == null ? 0 : Math.min(Math.abs(value), 1) * 50;
-  const color = active ? "var(--color-accent)" : "var(--color-neutral-500)";
+  const color = active ? "var(--color-data-3)" : "var(--color-neutral-500)";
 
   return (
     <div

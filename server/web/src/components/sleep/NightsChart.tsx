@@ -168,8 +168,11 @@ function buildNights(
         const bottom = yFor(axisHour(new Date(s.EndTime)));
         return {
           top,
-          // Minimum height so a two-minute awakening still renders.
-          height: Math.max(bottom - top, PLOT_HEIGHT * 0.0045),
+          // Minimum height so a two-minute awakening still renders. 3px
+          // rather than the 1.35px this was: Awake sits at the light end of
+          // the data ramp, where 2.4:1 against the ground does not carry a
+          // hairline.
+          height: Math.max(bottom - top, PLOT_HEIGHT * 0.01),
           color: stageColor(s.Stage),
         };
       })

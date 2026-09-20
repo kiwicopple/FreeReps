@@ -50,7 +50,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
             y={model.band.top}
             width={PLOT_RIGHT - PLOT_LEFT}
             height={model.band.height}
-            fill="var(--color-accent-100)"
+            fill="var(--color-data-band)"
           />
         ) : null}
 
@@ -99,7 +99,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
           <polyline
             points={model.line}
             fill="none"
-            stroke="var(--color-accent)"
+            stroke="var(--color-data-3)"
             strokeWidth={2}
           />
         ) : null}
@@ -129,7 +129,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
       >
         <LegendItem label="Daily value">
           <span
-            style={{ width: 16, height: 2, background: "var(--color-accent)" }}
+            style={{ width: 16, height: 2, background: "var(--color-data-3)" }}
           />
         </LegendItem>
         <LegendItem label="7-day rolling mean">
@@ -146,7 +146,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
             style={{
               width: 16,
               height: 10,
-              background: "var(--color-accent-100)",
+              background: "var(--color-data-band)",
             }}
           />
         </LegendItem>
