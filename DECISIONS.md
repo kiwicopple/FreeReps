@@ -19,6 +19,66 @@ is as recorded there; where the record named no alternative, none is claimed.
 
 ---
 
+## 2026-09-20 — The front page keeps the per-metric latest-value lookup
+
+**Decided:** 2026-09-20
+
+**Decision.** The front page loads in about 0.65s, and `GetLatestMetricsFor` in
+`server/internal/storage/health_metrics.go` keeps its per-metric
+`LATERAL … LIMIT 1`. No further work is done on the lookup.
+
+**Reasoning.** The load went from about 5s to about 0.65s across `a3c634c`,
+`5a75915` and `8c1ed3d`, the four cores given to `freereps-lxc` and the memory
+fix recorded in the homelab repo. `pg_stat_statements` is enabled on the
+instance and attributes 531ms of the remaining 652ms to one statement, the
+per-metric lookup; the daily series accounts for 76ms and every other statement
+for under 1ms. The remaining 0.65s was not raised again after `8c1ed3d`.
+
+**Alternatives rejected, both measured.** Widening or staging the time window
+changes nothing, because the cost scales with the number of per-metric lookups
+rather than with the window: `bc4196a` made the page about a third slower and
+was reverted in `03cbb3b`. A continuous aggregate addresses the 76ms
+daily-series half of the profile, not the 531ms half.
+
+**What a fix would have to change.** Either the chunk layout — the 514 7-day
+chunks merged into fewer — or the query shape, deriving the latest value from
+the daily-series query that already runs, which needs `max(time)` and the
+winning source added to it. Both are recorded here so the two dead ends above
+are not measured a second time.
+
+**Trigger to re-open.** The load is raised as a complaint again, or the number
+of allowlisted metrics grows, since the 531ms scales with the count of
+per-metric lookups.
+
+---
+
+## 2026-09-20 — No FreeReps endpoint is reachable outside the tailnet
+
+**Decided:** 2026-09-20
+
+**Decision.** The public instance at `https://freereps-test.meltforce.net/`,
+deployed without Tailscale so that an App Store reviewer could reach it, is shut
+down. Every FreeReps endpoint is reachable inside the tailnet only, which
+restores the state `DECISIONS.md`, 2026-03-15 describes.
+
+**Reasoning.** The review instance was a bounded exception: it served demo data
+rather than real health data, and it existed because a reviewer cannot join the
+tailnet. App Store approval removed the reason for it. Neither
+`freereps-test.meltforce.net` nor `freereps-test.coydog-fence.ts.net` resolves
+as of 2026-09-20, while `https://freereps.coydog-fence.ts.net/api/v1/version`
+answers, which is the check the Uptime Kuma row in the homelab repo performs.
+
+**Residual.** `configuration/nihilist/roles/caddy/files/Caddyfile:140` in the
+homelab repo notes that per-site configs on that host are managed outside the
+repo and names `freereps-testserver` as the example. Whether a site file for it
+remains on `nihilist` is not visible from this repo. DNS does not resolve, so a
+remaining file serves nothing.
+
+**Trigger to re-open.** A further App Store submission whose review requires a
+server the reviewer can reach.
+
+---
+
 ## 2026-09-20 — Sleep belongs to one channel, decided at the entrance
 
 **Decided:** 2026-09-20
