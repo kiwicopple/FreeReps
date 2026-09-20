@@ -62,7 +62,12 @@ export default function RouteMap({ route }: Props) {
             <Polyline
               positions={positions}
               pathOptions={{
-                color: tokenColor("--color-accent", "#1d5fa8"),
+                /* The fallback moves with the token: it applies when the
+                   variable is missing, where a hard-coded brand blue would set
+                   the track back to the brand colour without saying so. On OSM
+                   tiles the blue competed with water and trunk roads, which
+                   are blue there themselves. */
+                color: tokenColor("--color-data-3", "#337475"),
                 weight: 3,
                 opacity: 0.9,
               }}

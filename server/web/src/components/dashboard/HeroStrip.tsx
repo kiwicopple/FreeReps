@@ -6,9 +6,6 @@ import { formatTimeAgo } from "../../utils/format";
 import { sourceLabel } from "../../utils/sourceLabel";
 import { displayDelta, displayValue } from "./metricDisplay";
 
-/** HRV is the accent one because it is the metric the user watches. */
-const ACCENT_METRIC = "heart_rate_variability";
-
 interface Props {
   metrics: FrontPageMetric[];
   loading: boolean;
@@ -17,6 +14,12 @@ interface Props {
 /**
  * Four numbers between 2px rules — 4-up on desktop, 2×2 on the phone. Each cell
  * carries a label, the value, a delta and meta line, and a sparkline.
+ *
+ * All four sparklines take the same data colour. One of them used to be drawn
+ * in the brand token as the metric to watch, which put that line directly under
+ * a delta figure in the same blue whenever the metric had improved, so the two
+ * read as one statement. The cell is labelled; the emphasis carried nothing the
+ * label does not.
  */
 export default function HeroStrip({ metrics, loading }: Props) {
   const isDesktop = useIsDesktop();
@@ -45,8 +48,6 @@ function HeroCell({
   metric: FrontPageMetric | null;
   isDesktop: boolean;
 }) {
-  const accent = m?.metric_name === ACCENT_METRIC;
-
   return (
     <div
       style={{
@@ -129,7 +130,7 @@ function HeroCell({
           values={m?.series ?? []}
           width={isDesktop ? 260 : 160}
           height={isDesktop ? 34 : 24}
-          stroke={accent ? "var(--color-accent)" : "var(--color-neutral-500)"}
+          stroke="var(--color-data-3)"
           strokeWidth={1.6}
         />
       </div>
