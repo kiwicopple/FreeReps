@@ -98,10 +98,14 @@ Success body:
 - **Refresh token: 1 year, and it rotates.** Each refresh returns a new refresh
   token; the previous one expires 8 hours after the new one is issued, or
   immediately once the new access token is first used. A refresh whose result is
-  not persisted therefore costs the connection — the stored token is dead within
-  hours and reconnecting requires the user to walk the consent flow again. The
-  new token is written to the database before the new access token is used for
-  anything.
+  not persisted therefore risks the connection, and the new token is written to
+  the database before the new access token is used for anything. **Measured
+  exception:** 2,197 refresh responses were discarded between 2026-08-05 and
+  2026-09-20 because the body failed to decode, and the token stored on
+  2026-08-05 still refreshed afterwards. What ends the previous token is the first
+  use of the new access token, which never happened here — so a refresh whose
+  response is lost before any request carries the new token is recoverable
+  ([`INCIDENTS.md`](../../INCIDENTS.md), 2026-09-20).
 - `userid` identifies the Withings account. FreeReps stores it; it is the key
   webhook notifications would arrive under if push is added later.
 - **`userid` arrives quoted or as a bare number**, and the encoding changed on

@@ -22,16 +22,20 @@ the fix was verified, this file does not claim it was.
 `status = error` and the message `getting token: refreshing token: decoding token
 body: json: cannot unmarshal number into Go struct field tokenBody.userid of type
 string`. Measured against the deployed instance on 2026-09-20 over the last
-40,000 log rows: 2,204 `withings_sync` runs, of which 7 succeeded — all on
-2026-08-05, the day the integration was deployed, each with
-`metrics_inserted = 0`. The first failure is 2026-08-05 18:48Z, 30 minutes after
-the last success. `GET /api/v1/metrics?metric=weight_body_mass` returned no row
-for 2026-07-01 to 2026-09-21, so no weight, body composition or blood pressure
-value ever reached the database through this path.
+40,000 log rows: 2,204 `withings_sync` runs, of which 7 succeeded, all on
+2026-08-05. The first of those wrote the deployment-day backfill (54 metrics
+received, 54 inserted at 15:31Z); the six after it received one row and inserted
+none. The first failure is 2026-08-05 18:48Z, 30 minutes after the last success,
+and every run from then to the fix carried the same message.
+
+The measurement series therefore stops on 2026-08-05 and resumes only with the
+fix: `GET /api/v1/metrics?name=weight_body_mass` holds 56 rows with
+`source = 'Withings'`, and the 29 of them dated after 2026-08-05 were all written
+by the first run on the fixed binary.
 
 The dashboard showed no error. The metrics stayed registered in
-`metric_allowlist` and simply carried no data, which reads the same as "not
-measured yet".
+`metric_allowlist` and their series simply ended, which reads the same as "not
+measured lately".
 
 **Root cause.** `tokenBody.UserID` in `server/internal/withings/models.go` was
 declared `string` with tag `json:"userid"`, matching the quoted form the Public
@@ -43,23 +47,37 @@ Two properties turned one wrong field type into a 46-day outage:
 
 - **The access token lives 3 hours**, so almost every sync cycle refreshes first.
   A refresh that cannot be decoded fails every subsequent sync, not only one.
-- **The refresh token rotates.** Withings issued a new pair on each of the 2,197
-  failed refreshes while FreeReps discarded the response, so the stored refresh
-  token is long dead and the fix alone does not restore the connection — the
-  consent flow has to run again.
+- **The refresh token rotates, and the stored one survived anyway.** Withings
+  issued a new pair on each of the 2,197 refreshes whose response FreeReps
+  discarded. The expectation before the deploy was that the stored token was dead
+  and the consent flow would have to run again; it was not. The rotation
+  invalidates the previous token once the *new access token is first used*
+  (`server/specs/withings-api.md`), and FreeReps never got that far, so the token
+  stored on 2026-08-05 still refreshed 46 days later. Verified on the deployed
+  instance: the run at 2026-09-20 10:46Z refreshed and wrote 29 measurements
+  without any re-authorization.
 
 **Fix.** `flexString` reads the field from either encoding, mirroring the
-existing `flexBool` for `more` (commit in this change). `postToken` keeps
-returning an error when the token pair is empty, so a genuinely malformed body
-still fails loudly. `server/specs/withings-api.md` records both encodings and the
-date the change was observed. `token_test.go` covers the numeric and the quoted
-form, because a fix that swaps one for the other breaks the other direction.
+existing `flexBool` for `more` (commit `5bd5712`). `postToken` keeps returning an
+error when the token pair is empty, so a genuinely malformed body still fails
+loudly. `server/specs/withings-api.md` records both encodings and the date the
+change was observed. `token_test.go` covers the numeric and the quoted form,
+because a fix that swaps one for the other breaks the other direction.
+
+**Verified** on the deployed binary `edge-5bd5712`: the 10:41Z run still carried
+the decode error, the 10:46Z run succeeded with 30 metrics received and 29
+inserted, and the weight series now ends 2026-09-20 06:42Z with
+`source = 'Withings'`.
 
 **Lesson.** A vendor field typed from the vendor's example is a single point of
 failure for the whole response; read scalars that carry an identifier through a
 decoder that accepts both encodings. The second lesson is about visibility: an
 integration whose only failure signal is a row in `import_logs` can be down for
-six weeks while every screen looks merely empty.
+six weeks while every screen looks merely empty. The third is about the
+diagnosis: the first reading of this outage claimed no measurement had ever
+arrived, on the strength of a query sent with `?metric=` while the endpoint reads
+`?name=` — an unknown parameter answers 400, and the empty result read as an
+empty table.
 
 ---
 
