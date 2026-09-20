@@ -2,10 +2,16 @@ import { linearRegression } from "./stats";
 
 export type Verdict = "improving" | "flat" | "declining";
 
+/**
+ * A verdict is a judgement, so it reads the judgement roles rather than the
+ * brand token. deltaColor() in metricDirection.ts was carried onto them when
+ * the roles split; this call site was not, which left a declining trend in the
+ * same neutral tone as one that had not moved.
+ */
 export const VERDICT_COLOR: Record<Verdict, string> = {
-  improving: "var(--color-accent)",
+  improving: "var(--color-positive)",
   flat: "var(--color-neutral-500)",
-  declining: "var(--color-neutral-700)",
+  declining: "var(--color-negative)",
 };
 
 export interface Fit {

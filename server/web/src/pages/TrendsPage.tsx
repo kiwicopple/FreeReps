@@ -102,10 +102,14 @@ export default function TrendsPage() {
         <VerdictCount
           label="Improving"
           value={counts.improving}
-          color="var(--color-accent)"
+          color={VERDICT_COLOR.improving}
         />
         <VerdictCount label="Flat" value={counts.flat} />
-        <VerdictCount label="Declining" value={counts.declining} />
+        <VerdictCount
+          label="Declining"
+          value={counts.declining}
+          color={VERDICT_COLOR.declining}
+        />
         {isDesktop ? (
           <p
             style={{

@@ -56,6 +56,32 @@
   --color-negative-100: #f7eee4;
   --color-negative-700: #8a5512;
 
+  /* Data scale — sleep stages and heart rate zones. One hue, five steps, the
+     order carried by lightness alone: OKLCH hue 196 at chroma .044–.074, on the
+     same lightness scale as neutral-500 through -900. Lightness rather than hue
+     keeps the order readable in greyscale and under the common colour vision
+     deficiencies, where this petrol collapses to grey while the brand blue keeps
+     its blueness and stays apart from it. 58° from the brand hue and 128° from
+     the negative amber at about half their chroma, so a data area is never read
+     as selected or as judged. Plain hex on purpose: tokenColor() resolves these
+     for the uPlot canvas, and an alpha step would shift its lightness against
+     the ground and break the order. */
+  --color-data-1: #76a4a4;
+  --color-data-2: #538e8e;
+  --color-data-3: #337475;
+  --color-data-4: #1b5454;
+  --color-data-5: #133b3b;
+
+  /* Sleep stages take the ramp by absolute lightness — Deep at the dark end,
+     Awake at the light one — which reverses in index when the ramp mirrors on
+     dark ground. The aliases keep that reversal in CSS, so stageColors.ts stays
+     a static map. data-2 is unused here: the skipped step is what lifts Awake
+     out of the series without giving it a colour of its own. */
+  --color-stage-deep: var(--color-data-5);
+  --color-stage-core: var(--color-data-4);
+  --color-stage-rem: var(--color-data-3);
+  --color-stage-awake: var(--color-data-1);
+
   --font-heading: "Archivo Variable", "Archivo", system-ui, sans-serif;
   --font-body: "Archivo Variable", "Archivo", system-ui, sans-serif;
 
@@ -109,6 +135,16 @@
   --color-negative: #e0a95c;
   --color-negative-100: #2e2418;
   --color-negative-700: #e0a95c;
+  --color-data-1: #185455;
+  --color-data-2: #307475;
+  --color-data-3: #469091;
+  --color-data-4: #63a8a8;
+  --color-data-5: #8bc3c3;
+  /* Ramp mirrored, rule unchanged: Deep at the dark end, Awake at the light. */
+  --color-stage-deep: var(--color-data-1);
+  --color-stage-core: var(--color-data-2);
+  --color-stage-rem: var(--color-data-3);
+  --color-stage-awake: var(--color-data-5);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -135,6 +171,15 @@
     --color-negative: #e0a95c;
     --color-negative-100: #2e2418;
     --color-negative-700: #e0a95c;
+    --color-data-1: #185455;
+    --color-data-2: #307475;
+    --color-data-3: #469091;
+    --color-data-4: #63a8a8;
+    --color-data-5: #8bc3c3;
+    --color-stage-deep: var(--color-data-1);
+    --color-stage-core: var(--color-data-2);
+    --color-stage-rem: var(--color-data-3);
+    --color-stage-awake: var(--color-data-5);
   }
 }
 
@@ -163,6 +208,11 @@
   --color-neutral-700: var(--color-neutral-700);
   --color-neutral-800: var(--color-neutral-800);
   --color-neutral-900: var(--color-neutral-900);
+  --color-data-1: var(--color-data-1);
+  --color-data-2: var(--color-data-2);
+  --color-data-3: var(--color-data-3);
+  --color-data-4: var(--color-data-4);
+  --color-data-5: var(--color-data-5);
   --font-sans: var(--font-body);
   --radius-md: 0px;
 }
@@ -413,15 +463,23 @@ a:hover {
 }
 
 /* — navigation — */
+/* The bar carries the one tonal step the system already has, so chrome and
+   content stop sharing a surface. The edge then comes from the surface change
+   and the rule drops to a hairline; without it the page read as a document
+   rather than an application. The page header stays on --color-bg on purpose:
+   moved into the chrome, the page title sits at the rank of a nav link. */
 .nav {
   display: flex;
   align-items: center;
   gap: var(--space-6);
   padding: 16px var(--page-x);
-  border-bottom: 2px solid var(--color-text);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-divider);
 }
 
-.nav-brand {
+/* Qualified with `a` because .nav a below would otherwise win on specificity
+   (0-1-1 against 0-1-0) and render the brand at 13px/500. */
+.nav a.nav-brand {
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 19px;
@@ -541,8 +599,8 @@ a:hover {
   z-index: 20;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  border-top: 2px solid var(--color-text);
-  background: var(--color-bg);
+  border-top: 1px solid var(--color-divider);
+  background: var(--color-surface);
 }
 
 .tabs a {

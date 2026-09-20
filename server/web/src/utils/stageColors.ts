@@ -1,14 +1,19 @@
 /**
- * The neutral ramp carries depth and intensity; the accent is reserved for the
- * one thing that should pop out — being awake, and the top heart rate zone.
+ * Sleep stages and heart rate zones share one sequential data ramp. The order
+ * lives in lightness alone, so it survives greyscale and colour vision
+ * deficiency. Zones take the steps by index; stages go through the
+ * --color-stage-* aliases, because their mapping turns over with the theme —
+ * Deep belongs at the dark end of the ramp and Awake at the light one. None of
+ * these is the accent, which means brand and selection.
+ *
  * One mapping, shared by the desktop and phone layouts.
  */
 
 export const STAGE_COLOR: Record<string, string> = {
-  Deep: "var(--color-neutral-900)",
-  Core: "var(--color-neutral-700)",
-  REM: "var(--color-neutral-400)",
-  Awake: "var(--color-accent)",
+  Deep: "var(--color-stage-deep)",
+  Core: "var(--color-stage-core)",
+  REM: "var(--color-stage-rem)",
+  Awake: "var(--color-stage-awake)",
 };
 
 /** Top to bottom in the hypnogram: shallowest first. */
@@ -22,11 +27,11 @@ export function stageColor(stage: string): string {
 }
 
 export const ZONE_COLORS = [
-  "var(--color-neutral-300)",
-  "var(--color-neutral-500)",
-  "var(--color-neutral-700)",
-  "var(--color-neutral-900)",
-  "var(--color-accent)",
+  "var(--color-data-1)",
+  "var(--color-data-2)",
+  "var(--color-data-3)",
+  "var(--color-data-4)",
+  "var(--color-data-5)",
 ];
 
 /**
