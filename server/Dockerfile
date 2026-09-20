@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Stage 1: Build frontend
-FROM node:22-alpine AS frontend
+FROM node:24-alpine AS frontend
 WORKDIR /build
 COPY web/package.json web/package-lock.json ./
 # The cache mount survives between builds on a persistent builder, so a
@@ -11,7 +11,7 @@ COPY web/ ./
 RUN npm run build
 
 # Stage 2: Build Go binary
-FROM golang:1.25-alpine AS backend
+FROM golang:1.27-alpine AS backend
 ARG VERSION=dev
 WORKDIR /build
 COPY go.mod go.sum ./
