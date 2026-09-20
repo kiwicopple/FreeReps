@@ -22,7 +22,26 @@ rather than the missing directory.
 `go test ./...` skips the integration tests. Those need a running TimescaleDB and
 run with `go test -tags integration ./...` — run them when the change touches
 `server/internal/storage/` or a migration, because the unit tests do not execute
-a single SQL statement against a real server.
+a single SQL statement against a real server. The aggregation tests in
+`server/internal/storage/aggregation_integration_test.go` are the reason that
+matters: they check figures, and a unit test that inspects the generated SQL
+string proves the shape and nothing about the numbers.
+
+A scratch database for them, in the version the deployment runs:
+
+```bash
+docker run -d --name freereps-scratch \
+  -e POSTGRES_DB=freereps_scratch -e POSTGRES_USER=freereps \
+  -e POSTGRES_PASSWORD=scratch -p 55432:5432 \
+  timescale/timescaledb:latest-pg16
+
+FREEREPS_TEST_DSN="postgres://freereps:scratch@localhost:55432/freereps_scratch?sslmode=disable" \
+  go test -tags integration ./internal/storage/
+```
+
+The harness refuses to run against a database named `freereps` and removes only
+its own user's rows, so a scratch database shared with other tests keeps its
+contents.
 
 ## 2. golangci-lint
 
