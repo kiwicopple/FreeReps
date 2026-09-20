@@ -19,6 +19,49 @@ is as recorded there; where the record named no alternative, none is claimed.
 
 ---
 
+## 2026-09-20 — Colour carries four roles, not one
+
+**Decided:** 2026-09-20
+
+**Decision.** `--color-accent` no longer means brand, selection, data and
+judgement at once. Four roles, each with its own token:
+
+- **brand** — nav marker, links, buttons, selected states
+- **positive** (`--color-positive*`) — a metric moving the right way
+- **negative** (`--color-negative*`) — a metric moving the wrong way
+- **data** — sleep stages, heart rate zones; still on the brand token, see the
+  open item in `ROADMAP.md`
+
+`deltaColor()` in `server/web/src/utils/metricDirection.ts` gives regression
+`--color-negative-700` instead of the neutral tone it shared with movement that
+carries no judgement. Metrics whose `DIRECTION` is `"neutral"` — weight, BMI,
+heart rate, respiratory rate — stay neutral whichever way they move.
+
+Ground and ink move with it: paper is cool-tinted rather than near-white
+(`#edf0f1`), ink is blue-grey rather than near-black (`#232c33`), and the
+neutral ramp is pulled cool to match. Type, spacing, radii and layout are
+untouched.
+
+**Reasoning.** One colour cannot mean "this is us" and "this is good" at the
+same time. With a single accent, every hovered table row read as signalled, and
+a worsening metric had no colour of its own: `deltaColor()` returned the same
+neutral tone for regression and for a number that had not really moved.
+
+Blue against amber rather than green against red. Red-green deficiency affects
+roughly 8% of men, while blue and orange stay distinguishable under all the
+common deficiencies. Both tones sit at the same lightness and saturation and
+differ only in hue, so neither reads as louder than the other.
+
+`--color-positive` deliberately equals `--color-accent` on light ground. It is
+a token of its own so brand and improvement can part later without touching a
+call site.
+
+**Trigger to re-open.** Data semantics still borrow the brand token
+(`stageColors.ts`), which is the piece this change does not finish. Should
+brand and positive need to differ, `--color-positive` is already the seam.
+
+---
+
 ## 2026-09-20 — Source selection and sample reduction are separate steps
 
 **Decided:** 2026-09-20

@@ -31,9 +31,9 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
     );
     const edges = ZONE_BOUNDS.map((f) => f * peak);
 
-    const axis = tokenColor("--color-neutral-600", "#7d7979");
-    const grid = tokenColor("--color-neutral-300", "#d7d3d3");
-    const accent = tokenColor("--color-accent", "#ec3013");
+    const axis = tokenColor("--color-neutral-600", "#79848c");
+    const grid = tokenColor("--color-neutral-300", "#cfd4d6");
+    const accent = tokenColor("--color-accent", "#1d5fa8");
     const zoneTint = tokenColorAlpha("--color-accent", 0.07);
 
     const opts: uPlot.Options = {

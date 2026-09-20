@@ -79,15 +79,20 @@ export function directionOf(metricName: string): Direction {
 }
 
 /**
- * Improvement is the accent; regression and neutral movement are neutral-700;
- * genuinely flat is neutral-500. Green and red are absent by design — this
- * palette has one accent and reads direction from context plus the word beside
- * the number.
+ * Improvement carries the positive tone, regression the negative one — a
+ * diverging blue/amber pair that stays distinguishable under the common colour
+ * vision deficiencies. Regression used to share the neutral tone with movement
+ * that carries no judgement, which left the two unable to be told apart.
+ *
+ * A metric with no direction stays neutral whichever way it moves: weight, BMI,
+ * heart rate, respiratory rate and the rest of the "neutral" entries above are
+ * not the kind of number that gets better or worse on its own. Genuinely flat
+ * movement is neutral-500.
  */
 export function deltaColor(metricName: string, delta: number | null): string {
   if (delta == null || delta === 0) return "var(--color-neutral-500)";
   const dir = directionOf(metricName);
   if (dir === "neutral") return "var(--color-neutral-700)";
   const improving = dir === "higher" ? delta > 0 : delta < 0;
-  return improving ? "var(--color-accent-700)" : "var(--color-neutral-700)";
+  return improving ? "var(--color-positive-700)" : "var(--color-negative-700)";
 }

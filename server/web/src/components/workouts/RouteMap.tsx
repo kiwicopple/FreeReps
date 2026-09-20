@@ -62,7 +62,7 @@ export default function RouteMap({ route }: Props) {
             <Polyline
               positions={positions}
               pathOptions={{
-                color: tokenColor("--color-accent", "#ec3013"),
+                color: tokenColor("--color-accent", "#1d5fa8"),
                 weight: 3,
                 opacity: 0.9,
               }}
