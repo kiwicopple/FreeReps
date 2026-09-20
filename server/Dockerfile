@@ -1,8 +1,12 @@
+# syntax=docker/dockerfile:1
+
 # Stage 1: Build frontend
 FROM node:22-alpine AS frontend
 WORKDIR /build
 COPY web/package.json web/package-lock.json ./
-RUN npm ci
+# The cache mount survives between builds on a persistent builder, so a
+# lockfile change re-resolves rather than re-downloads.
+RUN --mount=type=cache,target=/root/.npm npm ci
 COPY web/ ./
 RUN npm run build
 
@@ -11,17 +15,31 @@ FROM golang:1.25-alpine AS backend
 ARG VERSION=dev
 WORKDIR /build
 COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+
+# Only what the compiler reads, rather than the whole context. migrations/,
+# specs/ and scripts/ are not compiled — copying them here meant every
+# migration invalidated this layer and rebuilt the binary.
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+COPY web.go ./
+# web.go embeds all:web/dist, so the assets have to be in place before the build.
 COPY --from=frontend /build/dist ./web/dist
-RUN CGO_ENABLED=0 go build -ldflags "-X main.Version=${VERSION}" -o freereps ./cmd/freereps
+
+# The build cache is what makes an incremental build incremental: without it Go
+# recompiles every dependency, tailscale.com included, on every run.
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 go build -ldflags "-X main.Version=${VERSION}" -o freereps ./cmd/freereps
 
 # Stage 3: Runtime
 FROM alpine:3.24
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 COPY --from=backend /build/freereps .
-COPY --from=backend /build/migrations ./migrations
+# Read at startup, not embedded — so they join the image after the build and a
+# migration-only change reuses the compiled binary layer.
+COPY migrations ./migrations
 # Port 8080 for dev mode (tailscale.enabled: false); tsnet mode uses port 80 via tailnet
 EXPOSE 8080
 ENTRYPOINT ["./freereps"]
