@@ -11,7 +11,7 @@ import (
 
 const (
 	withingsStateCookieName = "withings_state"
-	withingsRedirectURI     = "https://freereps.coydog-fence.ts.net/withings/callback"
+	withingsCallbackPath    = "/withings/callback"
 )
 
 // handleWithingsStatus returns the Withings connection status for the current user.
@@ -31,6 +31,10 @@ func (s *Server) handleWithingsStatus(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{
 			"configured": false,
 			"connected":  false,
+			// Reported even with nothing configured: this is the value the
+			// provider needs registered before the first authorization, and
+			// guessing it is what the setup step gets wrong.
+			"redirect_uri": s.callbackURL(r, withingsCallbackPath),
 		})
 		return
 	}
@@ -38,9 +42,10 @@ func (s *Server) handleWithingsStatus(w http.ResponseWriter, r *http.Request) {
 	connected := token.AccessToken != ""
 
 	result := map[string]any{
-		"configured": true,
-		"connected":  connected,
-		"client_id":  token.ClientID,
+		"configured":   true,
+		"connected":    connected,
+		"redirect_uri": s.callbackURL(r, withingsCallbackPath),
+		"client_id":    token.ClientID,
 	}
 
 	if connected {
@@ -114,7 +119,7 @@ func (s *Server) handleWithingsAuthorize(w http.ResponseWriter, r *http.Request)
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	url, err := s.withingsTokenMgr.AuthorizeURL(r.Context(), uid, withingsRedirectURI, state)
+	url, err := s.withingsTokenMgr.AuthorizeURL(r.Context(), uid, s.callbackURL(r, withingsCallbackPath), state)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
@@ -163,7 +168,7 @@ func (s *Server) handleWithingsCallback(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := s.withingsTokenMgr.ExchangeCode(r.Context(), code, withingsRedirectURI, uid); err != nil {
+	if err := s.withingsTokenMgr.ExchangeCode(r.Context(), code, s.callbackURL(r, withingsCallbackPath), uid); err != nil {
 		s.log.Error("withings code exchange failed", "error", err)
 		http.Redirect(w, r, "/settings?tab=withings&error=exchange_failed", http.StatusFound)
 		return

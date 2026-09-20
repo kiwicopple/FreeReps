@@ -119,6 +119,9 @@ func main() {
 	// Create server
 	server.Version = Version
 	srv := server.New(db, healthProvider, alphaProvider, log)
+	// Empty by default: the OAuth redirect URIs are then derived from the request
+	// that starts the flow (internal/server.callbackURL).
+	srv.SetBaseURL(cfg.Server.BaseURL)
 
 	// Start Oura sync (always runs; no-ops if no users have Oura tokens)
 	ouraClient := oura.NewClient()

@@ -19,6 +19,45 @@ is as recorded there; where the record named no alternative, none is claimed.
 
 ---
 
+## 2026-09-20 — The OAuth redirect URIs are derived from the request, not configured
+
+**Decided:** 2026-09-20
+
+**Decision.** `/oura/callback` and `/withings/callback` are built per request from
+the origin the request arrived on (`internal/server.callbackURL`), honouring
+`X-Forwarded-Proto` and `X-Forwarded-Host`. `server.base_url` overrides the origin
+and is empty by default. Both integrations report the resulting value in their
+status endpoint, and each Settings tab shows it as the string to paste into the
+provider's form.
+
+**Reasoning.** The two URIs were compile-time constants naming one deployment's
+MagicDNS name, which made the OAuth flow unusable for any other installation and
+silently wrong in local development. Three properties decided the shape:
+
+- **The request already carries the right answer.** The user reached the UI on the
+  host the provider will redirect back to, so that host is the one to register.
+  Deriving it means a fresh installation configures nothing, and renaming a host
+  changes the URI without an edit.
+- **Start and exchange have to agree.** The provider compares the redirect URI
+  sent when the flow opens with the one sent when the code is exchanged. Both
+  calls build it the same way, and the callback arrives on the same origin as the
+  request that opened the flow.
+- **A displayed value beats a documented one.** The URI is the one setup value an
+  operator cannot look up, and a guess that differs in scheme, port or hostname
+  fails at the last step of the flow rather than when it is entered.
+
+**Why an override exists anyway.** A reverse proxy under a name the forwarding
+headers do not carry, and a UI reachable under several names while the provider
+accepts one registered URI. A `base_url` carrying a path is refused at startup,
+because it would produce `…/app/oura/callback` while the router serves
+`/oura/callback` — a mismatch the provider reports at the end of a flow.
+
+**Trigger to re-open.** A provider that requires a URI registered per user rather
+than per application, or a deployment that terminates TLS without setting either
+forwarding header.
+
+---
+
 ## 2026-09-20 — A failing data source reports itself to an ntfy topic
 
 **Decided:** 2026-09-20

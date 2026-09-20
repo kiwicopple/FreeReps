@@ -7,7 +7,7 @@ import {
   triggerWithingsSync,
   type WithingsStatus,
 } from "../../api";
-import { MONO, TabHeader } from "./parts";
+import { MONO, RedirectURIRow, TabHeader } from "./parts";
 
 export default function WithingsTab() {
   const [status, setStatus] = useState<WithingsStatus | null>(null);
@@ -95,6 +95,8 @@ export default function WithingsTab() {
         here, then authorize once. The same measurements keep arriving through
         Apple Health; where both cover a day, Withings wins by source priority.
       </TabHeader>
+
+      {status?.redirect_uri ? <RedirectURIRow uri={status.redirect_uri} /> : null}
 
       {error ? (
         <p

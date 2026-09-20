@@ -1,6 +1,12 @@
 server:
   host: "0.0.0.0"
   port: 8080
+  # Origin the OAuth redirect URIs are built from. Leave it out and each flow
+  # derives it from the request that started it — the address you reached
+  # FreeReps on — so a fresh installation needs nothing here. Set it behind a
+  # reverse proxy under a different name, or where the UI answers on several
+  # names while the provider accepts one registered URI. Scheme and host only.
+  # base_url: "https://freereps.example.ts.net"
 
 database:
   host: "localhost"

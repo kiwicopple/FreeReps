@@ -545,6 +545,8 @@ export async function deleteSourcePriority(category: string): Promise<void> {
 export interface OuraStatus {
   configured: boolean;
   connected: boolean;
+  /** The redirect URI this instance will use; register it with the provider. */
+  redirect_uri?: string;
   client_id?: string;
   expires_at?: string;
   sync_states?: Record<string, string>;
@@ -589,6 +591,8 @@ export async function disconnectOura(): Promise<void> {
 export interface WithingsStatus {
   configured: boolean;
   connected: boolean;
+  /** The redirect URI this instance will use; register it with the provider. */
+  redirect_uri?: string;
   client_id?: string;
   expires_at?: string;
   /** Job name -> RFC3339 timestamp the next delta fetch resumes from. */

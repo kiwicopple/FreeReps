@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -32,6 +33,16 @@ type Config struct {
 type ServerConfig struct {
 	Host string `yaml:"host"`
 	Port int    `yaml:"port"`
+
+	// BaseURL overrides the origin the OAuth redirect URIs are built from, e.g.
+	// https://freereps.example.ts.net. Leave it empty and the origin comes from
+	// the request that starts the flow, which is the host the user reached the
+	// UI on and therefore the host the provider has to redirect back to.
+	//
+	// Set it where the two differ: behind a reverse proxy that terminates TLS
+	// under a different name, or where the UI is reachable under several names
+	// while the provider accepts one registered URI.
+	BaseURL string `yaml:"base_url"`
 }
 
 type DatabaseConfig struct {
@@ -135,7 +146,7 @@ func (d DatabaseConfig) DSN() string {
 // Load reads config from a YAML file, then applies environment variable overrides.
 // Env vars use the prefix FREEREPS_ and underscore-separated paths:
 //
-//	FREEREPS_SERVER_HOST, FREEREPS_SERVER_PORT,
+//	FREEREPS_SERVER_HOST, FREEREPS_SERVER_PORT, FREEREPS_SERVER_BASE_URL,
 //	FREEREPS_DB_HOST, FREEREPS_DB_PORT, FREEREPS_DB_NAME,
 //	FREEREPS_DB_USER, FREEREPS_DB_PASSWORD, FREEREPS_DB_SSLMODE,
 //	FREEREPS_TS_ENABLED, FREEREPS_TS_HOSTNAME, FREEREPS_TS_STATE_DIR,
@@ -256,6 +267,27 @@ func Load(path string) (*Config, error) {
 		cfg.Alerts.AppleSilence = d
 	}
 
+	// A base URL with a path would produce redirect URIs like
+	// `https://host/app/oura/callback` where the router serves `/oura/callback`,
+	// and the provider would reject the mismatch at the end of the flow rather
+	// than at startup.
+	if cfg.Server.BaseURL != "" {
+		u, err := url.Parse(cfg.Server.BaseURL)
+		if err != nil {
+			return nil, fmt.Errorf("parsing server.base_url: %w", err)
+		}
+		if u.Scheme != "http" && u.Scheme != "https" {
+			return nil, fmt.Errorf("server.base_url must be an http or https URL, got %q", cfg.Server.BaseURL)
+		}
+		if u.Host == "" {
+			return nil, fmt.Errorf("server.base_url names no host: %q", cfg.Server.BaseURL)
+		}
+		if p := strings.TrimSuffix(u.Path, "/"); p != "" {
+			return nil, fmt.Errorf("server.base_url carries a path (%q); it must be scheme and host only", u.Path)
+		}
+		cfg.Server.BaseURL = strings.TrimSuffix(cfg.Server.BaseURL, "/")
+	}
+
 	// An enabled channel without a target is a configuration error rather than
 	// a silent no-op: the whole point of the channel is that a failure is not
 	// silent.
@@ -273,6 +305,9 @@ func Load(path string) (*Config, error) {
 func applyEnvOverrides(cfg *Config) {
 	if v := os.Getenv("FREEREPS_SERVER_HOST"); v != "" {
 		cfg.Server.Host = v
+	}
+	if v := os.Getenv("FREEREPS_SERVER_BASE_URL"); v != "" {
+		cfg.Server.BaseURL = v
 	}
 	if v := os.Getenv("FREEREPS_SERVER_PORT"); v != "" {
 		if port, err := strconv.Atoi(v); err == nil {

@@ -41,6 +41,10 @@ type Server struct {
 	withingsTokenMgr *withings.TokenManager
 	withingsSyncer   *withings.Syncer
 
+	// baseURL overrides the origin the OAuth redirect URIs are built from. Empty
+	// means: derive it from the request that starts the flow.
+	baseURL string
+
 	// Alert watcher (nil if not wired up). The handler needs it for the Settings
 	// screen's test message; the periodic checks run in the watcher's own
 	// goroutine.
@@ -62,6 +66,53 @@ func (s *Server) SetOura(tm *oura.TokenManager, syncer *oura.Syncer) {
 // Must be called before the server starts handling requests.
 func (s *Server) SetHevy(syncer *hevy.Syncer) {
 	s.hevySyncer = syncer
+}
+
+// SetBaseURL fixes the origin the OAuth redirect URIs are built from. Empty
+// keeps the default, which derives it per request.
+// Must be called before the server starts handling requests.
+func (s *Server) SetBaseURL(u string) {
+	s.baseURL = strings.TrimSuffix(u, "/")
+}
+
+// callbackURL returns the absolute redirect URI for an OAuth callback path.
+//
+// The origin comes from the request unless an override is configured, because
+// the request carries the host the user reached the UI on — which is the host the
+// provider will redirect back to, and therefore the one that has to be
+// registered there. Deriving it also means a fresh installation needs no
+// configuration for this, and that renaming the tailnet changes the URI without
+// an edit.
+//
+// The provider compares the value sent at the start of the flow with the one
+// sent when the code is exchanged, so both calls have to build it the same way.
+// They do: the callback request arrives on the same origin as the request that
+// started the flow.
+func (s *Server) callbackURL(r *http.Request, path string) string {
+	if s.baseURL != "" {
+		return s.baseURL + path
+	}
+	return requestOrigin(r) + path
+}
+
+// requestOrigin reconstructs scheme and host of the request.
+//
+// `X-Forwarded-Proto` is honoured because a reverse proxy terminating TLS
+// forwards plain HTTP, and a redirect URI with the wrong scheme is rejected by
+// the provider rather than corrected. A proxy under a different name needs
+// `server.base_url`; the header alone cannot express that.
+func requestOrigin(r *http.Request) string {
+	scheme := "http"
+	if proto := r.Header.Get("X-Forwarded-Proto"); proto != "" {
+		scheme = proto
+	} else if r.TLS != nil {
+		scheme = "https"
+	}
+	host := r.Host
+	if forwarded := r.Header.Get("X-Forwarded-Host"); forwarded != "" {
+		host = forwarded
+	}
+	return scheme + "://" + host
 }
 
 // SetAlerts configures the alert watcher.

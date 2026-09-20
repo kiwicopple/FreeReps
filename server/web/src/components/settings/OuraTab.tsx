@@ -7,7 +7,7 @@ import {
   triggerOuraSync,
   type OuraStatus,
 } from "../../api";
-import { MONO, TabHeader } from "./parts";
+import { MONO, RedirectURIRow, TabHeader } from "./parts";
 
 export default function OuraTab() {
   const [status, setStatus] = useState<OuraStatus | null>(null);
@@ -93,6 +93,8 @@ export default function OuraTab() {
         Oura is polled on a schedule. Register an app at
         cloud.ouraring.com, save its credentials here, then authorize once.
       </TabHeader>
+
+      {status?.redirect_uri ? <RedirectURIRow uri={status.redirect_uri} /> : null}
 
       {error ? (
         <p

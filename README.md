@@ -235,7 +235,9 @@ FreeReps integrates directly with the Oura API v2 to pull ring data. Syncs every
 #### Oura Setup
 
 1. **Register an Oura API app** at [cloud.ouraring.com/oauth/applications](https://cloud.ouraring.com/oauth/applications):
-   - Redirect URI: `https://your-freereps-host.ts.net/oura/callback`
+   - Redirect URI: the exact value shown under Settings > Oura Ring. FreeReps
+     derives it from the address you reach it on, so it needs no configuration —
+     see [Redirect URIs](#redirect-uris) if you need to pin it.
    - Privacy Policy URL: your FreeReps website's privacy page
    - Terms of Service URL: your FreeReps website's terms page
    - Enable all scopes
@@ -265,10 +267,10 @@ without a Withings account.
 
 1. **Register an app** in the [Withings Partner Hub](https://developer.withings.com/dashboard/).
    The Public API tier requires no contract and no approval.
-   - Redirect URI: `https://your-freereps-host.ts.net/withings/callback` — the
-     host must match the tailnet's current MagicDNS name. Renaming a tailnet
-     changes it, and the OAuth callback is the only place that breaks, because
-     token refresh sends no redirect URI.
+   - Redirect URI: the exact value shown under Settings > Withings. It follows
+     the address you reach FreeReps on, so renaming a host changes it — and the
+     OAuth callback is the only place that breaks, because token refresh sends no
+     redirect URI. See [Redirect URIs](#redirect-uris).
    - Scope: `user.metrics`
 
 2. **Enter credentials in FreeReps**: Settings > Withings, enter Client ID and
@@ -280,6 +282,29 @@ without a Withings account.
 
 4. **Sync starts automatically** every 30 minutes. Use "Sync now" for an
    immediate run; Settings > Import Logs carries the outcome.
+
+### Redirect URIs
+
+Both OAuth integrations need a redirect URI registered with the provider, and it
+has to match what FreeReps sends — the provider compares the value from the start
+of the flow with the one sent when the code is exchanged.
+
+**FreeReps derives it per request** from the origin you reached it on:
+`https://<host>/oura/callback` and `https://<host>/withings/callback`. A reverse
+proxy's `X-Forwarded-Proto` and `X-Forwarded-Host` are honoured. The current value
+is shown in the Settings tab of each integration, which is the value to paste into
+the provider's form.
+
+**Pin it** where the derived value is not stable or not the registered one — the
+UI answering on several names, or a proxy under a name the headers do not carry:
+
+```yaml
+server:
+  base_url: "https://freereps.example.ts.net"   # scheme and host only
+```
+
+`FREEREPS_SERVER_BASE_URL` overrides the same value. A path in it is refused at
+startup rather than producing a URI the provider rejects at the end of a flow.
 
 ### Health Auto Export (iOS, legacy)
 

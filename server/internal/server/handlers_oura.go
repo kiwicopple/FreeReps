@@ -11,7 +11,7 @@ import (
 
 const (
 	ouraStateCookieName = "oura_state"
-	ouraRedirectURI     = "https://freereps.coydog-fence.ts.net/oura/callback"
+	ouraCallbackPath    = "/oura/callback"
 )
 
 // handleOuraStatus returns the Oura connection status for the current user.
@@ -31,6 +31,10 @@ func (s *Server) handleOuraStatus(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{
 			"configured": false,
 			"connected":  false,
+			// Reported even with nothing configured: this is the value the
+			// provider needs registered before the first authorization, and
+			// guessing it is what the setup step gets wrong.
+			"redirect_uri": s.callbackURL(r, ouraCallbackPath),
 		})
 		return
 	}
@@ -38,9 +42,10 @@ func (s *Server) handleOuraStatus(w http.ResponseWriter, r *http.Request) {
 	connected := token.AccessToken != ""
 
 	result := map[string]any{
-		"configured": true,
-		"connected":  connected,
-		"client_id":  token.ClientID,
+		"configured":   true,
+		"connected":    connected,
+		"redirect_uri": s.callbackURL(r, ouraCallbackPath),
+		"client_id":    token.ClientID,
 	}
 
 	if connected {
@@ -114,7 +119,7 @@ func (s *Server) handleOuraAuthorize(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	url, err := s.ouraTokenMgr.AuthorizeURL(r.Context(), uid, ouraRedirectURI, state)
+	url, err := s.ouraTokenMgr.AuthorizeURL(r.Context(), uid, s.callbackURL(r, ouraCallbackPath), state)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
@@ -161,7 +166,7 @@ func (s *Server) handleOuraCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.ouraTokenMgr.ExchangeCode(r.Context(), code, ouraRedirectURI, uid); err != nil {
+	if err := s.ouraTokenMgr.ExchangeCode(r.Context(), code, s.callbackURL(r, ouraCallbackPath), uid); err != nil {
 		s.log.Error("oura code exchange failed", "error", err)
 		http.Redirect(w, r, "/settings?tab=oura&error=exchange_failed", http.StatusFound)
 		return
