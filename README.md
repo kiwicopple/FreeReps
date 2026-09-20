@@ -2,13 +2,26 @@
 
 **F**reely hosted **Re**cords, **E**valuation & **P**rocessing **S**erver
 
-A self-hosted server that receives health data from Apple Watch and Oura Ring, stores it persistently, visualizes it through a web dashboard with freely configurable correlations, and exposes it as an MCP server for LLMs. The iOS companion app syncs HealthKit data directly to your server, and the built-in Oura integration pulls data via the Oura API.
+A self-hosted server that collects health and training data from Apple Health,
+Oura, Withings and Hevy, stores it persistently, visualizes it through a web
+dashboard with freely configurable correlations, and exposes it as an MCP server
+for LLMs.
 
-[![Download on the App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/us/app/freereps/id6760661354)
+## Dashboard Features
 
-## Acknowledgements
-
-The FreeReps iOS companion app is based on [HealthBeat](https://github.com/kempu/HealthBeat) by kempu, an open-source iOS app for syncing Apple Health data. HealthBeat was adapted into the FreeReps companion app for the self-hosted FreeReps server. Licensed under the MIT License.
+- **Daily overview** — the four hero numbers are chosen per user, each with its
+  own sparkline, above a table of every visible metric
+- **Correlation explorer** — any metric against any other, as a scatter plot
+  with an overlay, Pearson r, and r recomputed at four lags from one payload
+- **Sleep** — hypnogram, stage composition, and HR, HRV and SpO2 through the
+  night
+- **Workouts** — heart rate zones against a maximum the user sets or FreeReps
+  estimates from a date of birth, the GPS route on a map, and the sets of a
+  strength session
+- **Metrics** — time series with a moving average and a normal range band
+- **Trends** — small multiples across the metric set, over a selectable window
+- **Settings** — per-metric visibility, source priority per category, the
+  integrations, the ingest log, and the alert channel
 
 ## Screenshots
 
@@ -28,9 +41,13 @@ The FreeReps iOS companion app is based on [HealthBeat](https://github.com/kempu
 |:-:|
 | ![Claude MCP](docs/screenshots/claude-mcp.png) |
 
-| iOS App | | | |
-|:-:|:-:|:-:|:-:|
-| ![Main](docs/screenshots/ios/framed-main.png) | ![Sync](docs/screenshots/ios/framed-sync.png) | ![Settings](docs/screenshots/ios/framed-settings.png) | ![Permissions](docs/screenshots/ios/framed-permissions.png) |
+## iOS companion app
+
+An iOS companion app that syncs HealthKit directly to the server exists, but it
+**does not work on iOS 27 and its development is likely to stop**. Documentation,
+screenshots and the App Store link are in [`app/README.md`](app/README.md).
+The supported Apple Health path is
+[Health Auto Export](#health-auto-export-ios-default).
 
 ## Why FreeReps?
 
@@ -41,83 +58,76 @@ Other apps compute scores but are closed-source, subscription-based, and opaque.
 ## Architecture
 
 ```
-┌──────────────┐     HealthKit       ┌─────────────────────────────────────────┐
-│ FreeReps     │ ────────────────→   │              FreeReps Server            │
-│ iOS App      │    HTTP POST        │                                         │
-└──────────────┘                     │  ┌──────────┐  ┌─────────────────┐     │
-                                     │  │ Ingest   │→ │  Storage (DB)   │     │
-┌──────────────┐     OAuth2 + Poll   │  │ API      │  │  Time Series    │     │
-│  Oura Ring   │ ←───────────────    │  └──────────┘  └────────┬────────┘     │
-│  (API v2)    │                     │  ┌──────────┐           │              │
-└──────────────┘                     │  │ Oura     │→──────────┘              │
-                                     │  │ Sync     │  (source-priority dedup) │
-                                     │  └──────────┘                          │
-                                     │              ┌──────────┬──────────┐   │
-                                     │              ▼                     ▼   │
-                                     │  ┌────────────────┐  ┌─────────────┐  │
-                                     │  │ Web Dashboard  │  │ MCP Server  │  │
-                                     │  │ Correlations   │  │ stdio / SSE │  │
-                                     │  │ Trends, Charts │  └──────┬──────┘  │
-                                     │  └────────────────┘         │         │
-                                     └─────────────────────────────┼─────────┘
-                                                                   ▼
-                                                          Claude (via MCP)
-                                                          = the actual
-                                                            "AI coach"
+  Apple Health ──┐
+  (iPhone/Watch) │
+                 │  Health Auto Export
+                 │  ├─ REST automation  ──── HTTPS POST ───┐
+                 │  ├─ .hae in iCloud ──┐                  │
+                 │  └─ TCP/JSON-RPC ────┤ freereps-upload  │
+                 │                      └──── HTTPS POST ──┤
+                 │                                         │
+  FreeReps iOS app (legacy) ──────────── HTTPS POST ───────┤
+  Alpha Progression CSV ──────── upload / POST /ingest/alpha┤
+                                                           ▼
+   Oura API v2    ←── OAuth2, 30 min ───┐    ┌──────────────────────────────┐
+   Withings API   ←── OAuth2, 30 min ───┼───→│        FreeReps Server       │
+   Hevy event feed←── API key, 30 min ──┘    │                              │
+                                             │  Ingest ─→ Storage           │
+                                             │            PostgreSQL +      │
+                                             │            TimescaleDB       │
+                                             │              │               │
+                                             │   source-priority dedup at   │
+                                             │   query time, per category   │
+                                             │              │               │
+                                             │  ┌───────────┼────────────┐  │
+                                             │  ▼           ▼            ▼  │
+                                             │ Web        MCP         Alert │
+                                             │ dashboard  stdio/SSE   watcher│
+                                             └──┼──────────┼────────────┼───┘
+                                                ▼          ▼            ▼
+                                            browser     Claude       ntfy topic
 ```
+
+Every inbound channel writes into one store, and overlapping measurements are
+resolved when a query runs rather than at ingest — see
+[`DECISIONS.md`](DECISIONS.md), 2026-03-25.
+
+## Design Principles
+
+- **Privacy first** — Measurements stay on your server. FreeReps sends nothing
+  outbound except the calls to the sources you connect and, if you enable it,
+  the alert POST to a topic you name. No telemetry.
+- **Self-hosted** — Runs on your own server/homelab.
+- **Data over scores** — Raw data + visualization + LLM instead of proprietary algorithms.
+- **Flexible over opinionated** — Correlation explorer instead of hard-wired dashboards.
+- **Single binary** — Go binary with embedded web UI.
 
 ## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
-| Backend | Go (single binary with embedded frontend) |
-| Frontend | React 19 + Vite + Tailwind CSS 4 |
-| Charts | uPlot (time-series) + Recharts (bar/scatter) |
-| Database | PostgreSQL + TimescaleDB |
+| Backend | Go (single binary with embedded frontend), chi router, pgx |
+| Frontend | React 19 + Vite + TypeScript + Tailwind CSS 4 |
+| Charts | uPlot (time series, sparklines, hypnogram), Leaflet (workout routes) |
+| Database | PostgreSQL + TimescaleDB (hypertable on `health_metrics`) |
 | Auth & Networking | [Tailscale](https://tailscale.com/) (tsnet) — zero-config TLS + identity |
-| iOS App | Swift (HealthKit, BackgroundTasks, ActivityKit) |
-| Config | YAML |
+| MCP | [mcp-go](https://github.com/mark3labs/mcp-go), stdio + SSE |
+| Migrations | [golang-migrate](https://github.com/golang-migrate/migrate), applied at startup |
+| Config | YAML, with `FREEREPS_*` environment overrides |
 | Deployment | Docker Compose |
 
-## iOS Companion App
-
-The FreeReps companion app syncs Apple HealthKit data directly to the server over HTTP. No intermediate cloud services, no third-party dependencies — just HealthKit to your server.
-
-### What it syncs
-
-- **85+ quantity types** — steps, heart rate, blood pressure, blood glucose, body temperature, VO2 max, nutrition, audio exposure, and more
-- **22 category types** — sleep analysis, menstrual cycles, symptoms, mindfulness, heart events, stand hours
-- **Workouts** — activity type, duration, energy burned, distance, swim strokes, flights climbed
-- **Blood pressure** — systolic/diastolic correlation pairs
-- **ECG recordings** — classification, heart rate, voltage measurements
-- **Audiograms** — hearing sensitivity by frequency
-- **Workout routes** — GPS coordinates recorded during workouts
-- **Activity summaries** — daily ring data (active energy, exercise minutes, stand hours)
-
-### Features
-
-- **Full and incremental sync** — initial backfill of all historical data, then ongoing incremental syncs
-- **Real-time background sync** — HealthKit observer queries for immediate delivery when new data is recorded
-- **Background processing** — periodic sync via BGProcessingTask when the app isn't active
-- **Live Activity** — sync progress on the lock screen and Dynamic Island
-- **CSV import** — import Alpha Progression CSV files via share sheet or file picker
-- **No dependencies** — pure Swift using only Apple frameworks
-
-### Requirements
-
-- iOS 16.2+
-- Physical device (HealthKit is not available in the Simulator)
-- A running FreeReps server accessible from the device's network
+The Go toolchain version is pinned in [`server/go.mod`](server/go.mod), the
+frontend dependency versions in
+[`server/web/package.json`](server/web/package.json).
 
 ## Prerequisites
 
 - **[Tailscale](https://tailscale.com/)** — FreeReps uses Tailscale for authentication and TLS natively (via [tsnet](https://tailscale.com/kb/1244/tsnet)). There are no passwords or API keys — access is controlled by your tailnet. Tailscale must be set up before running FreeReps.
-- **[Health Auto Export](https://apps.apple.com/app/health-auto-export-json-csv/id1115567069)** (iOS, optional) — An alternative way to get Apple Health data into FreeReps via `.hae` file exports uploaded with `freereps-upload`. Not needed if using the FreeReps companion app.
+- **[Health Auto Export](https://www.healthyapps.dev/apps/health-auto-export/)** (iOS) — the supported way to get Apple Health data into FreeReps. Its REST automation posts to the ingest endpoint directly; see [Health Auto Export](#health-auto-export-ios-default).
 - **[mcp-proxy](https://github.com/sparfenyuk/mcp-proxy)** (optional) — Required for connecting Claude Desktop to a remote FreeReps instance. Bridges stdio↔SSE transports. Install with `brew install mcp-proxy` or `pip install mcp-proxy`.
+- **`lzfse`** (optional, macOS) — Required by `freereps-upload` for reading `.hae` files. `brew install lzfse`.
 
 ## Quick Start
-
-### Server (Docker Compose)
 
 ```bash
 git clone https://github.com/meltforce/FreeReps.git
@@ -129,102 +139,47 @@ docker compose up -d
 
 To use the pre-built image from Docker Hub instead of building locally, replace the `app` service's `build: .` with `image: meltforce/freereps:latest` in `docker-compose.yml`.
 
-### Test Server (Demo Mode)
-
-Run a FreeReps server with demo data (e.g., for App Store review or sync testing):
-
-#### Using Docker (recommended)
-
-```bash
-cd FreeReps/server
-cp config.example.yaml config.yaml
-# Set tailscale.enabled: false in config.yaml for local dev
-
-docker compose up -d db
-docker compose run --rm -e FREEREPS_DEMO=true app
-```
-
-#### From source
-
-```bash
-cd FreeReps/server
-cp config.example.yaml config.yaml
-# Set tailscale.enabled: false in config.yaml for local dev
-
-docker compose up -d db
-cd web && npm ci && npm run build && cd ..
-go run ./cmd/freereps -config config.yaml -demo
-```
-
-This seeds the database with 90 days of realistic health data including heart rate, sleep, workouts, and activity rings. The data is deterministic and idempotent — restarting with `-demo` or `FREEREPS_DEMO=true` won't create duplicates.
-
-The server will be available at `http://localhost:8080`. To tear down:
-
-```bash
-docker compose down -v
-```
-
-### iOS App
-
-1. Open `app/FreeReps.xcodeproj` in Xcode
-2. Set your development team and bundle identifier in **Signing & Capabilities**
-3. Build and run on a physical device
-4. In Settings, enter your FreeReps server URL
-5. Grant HealthKit permissions and start syncing
-
-### Upload Tool (macOS)
-
-`freereps-upload` is a client-side CLI tool that reads `.hae` files from your iCloud Drive (exported by [Health Auto Export](https://healthyapps.dev)), converts them to REST API format, and uploads them to your FreeReps server over Tailscale.
-
-**Install:**
-
-```bash
-curl -sSL https://raw.githubusercontent.com/meltforce/FreeReps/main/server/scripts/install-upload.sh | bash
-```
-
-**Usage:**
-
-```bash
-# First run — upload all historical data
-freereps-upload \
-  -server https://freereps.your-tailnet.ts.net \
-  -path ~/Library/Mobile\ Documents/com~apple~CloudDocs/Health\ Auto\ Export/AutoSync
-
-# Subsequent runs — only new/changed files are uploaded (resumable)
-freereps-upload \
-  -server https://freereps.your-tailnet.ts.net \
-  -path ~/Library/Mobile\ Documents/com~apple~CloudDocs/Health\ Auto\ Export/AutoSync
-```
-
-**Flags:**
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `-server` | (required) | FreeReps server URL |
-| `-path` | (required) | Path to AutoSync directory (or parent) |
-| `-dry-run` | false | Parse and convert without sending |
-| `-batch-size` | 2000 | Data points per metric payload |
-| `-version` | | Print version and exit |
-
-**Requirements:** `lzfse` must be installed (`brew install lzfse`).
-
-**Update / Uninstall:**
-
-```bash
-# Update to latest version
-curl -sSL https://raw.githubusercontent.com/meltforce/FreeReps/main/server/scripts/install-upload.sh | bash -s -- --update
-
-# Uninstall
-curl -sSL https://raw.githubusercontent.com/meltforce/FreeReps/main/server/scripts/install-upload.sh | bash -s -- --uninstall
-```
-
-**State tracking:** Upload progress is tracked in `~/.freereps-upload/state.db` (SQLite). Files are identified by path + size + SHA-256 hash, so changed files are re-uploaded and the tool is fully resumable.
-
 ## Data Sources
 
-### FreeReps iOS App (recommended)
+### Health Auto Export (iOS, default)
 
-The companion app syncs HealthKit data directly to the server via HTTP POST. Supports full historical backfill and real-time incremental sync.
+[Health Auto Export](https://www.healthyapps.dev/apps/health-auto-export/) is the
+supported way to get Apple Health data into FreeReps. It reads HealthKit on the
+iPhone and delivers it over three paths, which can be combined:
+
+| Path | What it is | Used for |
+|---|---|---|
+| **REST automation** | The app posts JSON to a URL on a schedule | Ongoing delivery — this is the default |
+| **TCP server connection** | The app answers JSON-RPC queries on the local network | Historical backfill, via `freereps-upload -hae-host` |
+| **`.hae` file export** | The app writes compressed files to iCloud Drive | Historical backfill, via `freereps-upload -path` |
+
+**Setting up the REST automation:**
+
+1. Open **Settings → Ingest** in FreeReps and copy the server URL shown there
+   (`https://<your-host>/api/v1/ingest`).
+2. In Health Auto Export, create an automation of type **REST API**, paste that
+   URL, and set the format to **JSON**.
+3. Select the metrics and workouts to export. Aggregation and period are the
+   app's own settings; `sinceLastSync` keeps each delivery to what is new.
+4. Save it. **Settings → Ingest** lists the last 25 deliveries with the row
+   counts each one carried.
+
+The iPhone reaches the server over the tailnet, so the automation needs no API
+key of its own — Tailscale authenticates the request. The payload shape FreeReps
+accepts is written down in
+[`server/specs/hae-rest-api.md`](server/specs/hae-rest-api.md).
+
+**Backfilling history:** a REST automation delivers from the moment it is set
+up. For everything before that, use `freereps-upload` in TCP mode against the
+app's server connection, or in file mode against an iCloud export — see
+[Upload Tool](#upload-tool-macos).
+
+### FreeReps iOS app (legacy)
+
+The companion app posts HealthKit data to the same ingest endpoint and adds
+category samples, ECG, audiograms and workout routes. It **does not work on iOS
+27** and its development is likely to stop; [`app/README.md`](app/README.md)
+carries its documentation.
 
 ### Oura Ring
 
@@ -310,24 +265,139 @@ server:
 `FREEREPS_SERVER_BASE_URL` overrides the same value. A path in it is refused at
 startup rather than producing a URI the provider rejects at the end of a flow.
 
-### Health Auto Export (iOS, legacy)
+### Hevy
 
-The iOS app [Health Auto Export](https://healthyapps.dev) can export Apple Health data as `.hae` files to iCloud Drive, which can then be uploaded to FreeReps using the `freereps-upload` CLI tool.
+[Hevy](https://www.hevyapp.com/) is the strength training source. FreeReps polls
+`GET /v1/workouts/events?since=` every 30 minutes, which carries creations,
+updates *and* deletions, so a correction made in the app reaches the server on
+the next run. Hevy's webhook is not used —
+[`DECISIONS.md`](DECISIONS.md), 2026-08-04, has the reasoning.
 
-### Alpha Progression (iOS)
+**Data synced:** sessions with exercise, set, rep, weight and effort data. RPE
+and RIR are stored on their own scales rather than converted at ingest. The
+exercise catalog is pulled as well, which is what supplies the muscle group per
+exercise.
 
-[Alpha Progression](https://alphaprogression.com) CSV exports provide detailed strength training data (exercises, sets, reps, weight, RIR).
+**Derived from it:** volume per muscle group, tonnage (`SUM(weight_kg * reps)`,
+external load only) and estimated 1RM per exercise per session (Epley over reps
+plus reps in reserve). Tonnage is materialised into `health_metrics` as
+`strength_tonnage`, so it can be correlated against sleep, HRV or readiness like
+any other series.
 
-Upload via the dashboard, the iOS companion app (share sheet / file picker), or POST to `/api/v1/ingest/alpha`.
+#### Hevy Setup
 
-## Dashboard Features
+1. **Get an API key** from Hevy (Hevy Pro, developer settings).
+2. **Enter it in FreeReps**: Settings → Hevy, paste the key, set **Sync from**
+   to the first date to import, click save. The key is verified against Hevy
+   before it is stored.
+3. **Sync runs every 30 minutes.** Use "Sync now" for an immediate run;
+   Settings → Import Logs carries the outcome.
 
-- **Daily Overview** — Key metrics at a glance (sleep, HRV, RHR, activity)
-- **Correlation Explorer** — Plot any metric against any other (scatter + overlay, Pearson r)
-- **Sleep View** — Hypnogram, stages, HR/HRV/SpO2 during sleep
-- **Workout View** — HR zones, route map, Alpha Progression sets
-- **Metrics Deep Dive** — Time-series with moving average, normal range band
-- **Saved Views** — Store correlation configurations for quick recall
+The **Sync from** cutoff is what keeps a Hevy history and an imported Alpha
+Progression history from covering the same period twice — the training
+aggregates sum across sources without filtering on one.
+
+### Alpha Progression (CSV)
+
+[Alpha Progression](https://alphaprogression.com) was the strength logger before
+Hevy, and its CSV export is still the way to bring that history in: exercises,
+sets, reps, weight and RIR. Its exercise names are mapped onto Hevy's catalog at
+ingest, so one exercise keeps one identity across both sources.
+
+Upload it under Settings → Import, or POST it to `/api/v1/ingest/alpha`.
+
+The export carries a bare wall clock with no time zone, and the resulting
+instant is part of a row's natural key. `ingest.session_timezone` in
+`config.yaml` decides how that clock is read, and it has to be the same on every
+host that imports the same export — reading one export in two zones stores every
+session twice ([`INCIDENTS.md`](INCIDENTS.md), 2026-08-10).
+
+## Supported Metrics
+
+124 metric names are on the allowlist. `GET /api/v1/metrics/available` returns
+the list the running instance actually carries, with its display metadata; the
+table below names the groups.
+
+| Category | Metrics |
+|----------|---------|
+| Cardiovascular | `heart_rate`, `resting_heart_rate`, `heart_rate_variability`, `heart_rate_recovery_one_minute`, `blood_oxygen_saturation`, `respiratory_rate`, `vo2_max`, `blood_pressure_systolic`, `blood_pressure_diastolic`, `blood_pressure_heart_rate`, `atrial_fibrillation_burden` |
+| Sleep | `sleep_analysis`, `apple_sleeping_wrist_temperature` |
+| Body | `weight_body_mass`, `body_mass_index`, `body_fat_percentage`, `fat_mass`, `lean_body_mass`, `muscle_mass`, `bone_mass`, `body_water`, `height` |
+| Activity | `active_energy`, `basal_energy_burned`, `step_count`, `flights_climbed`, `apple_exercise_time`, `apple_stand_time`, `apple_move_time`, the four `distance_*` series |
+| Strength | `strength_tonnage` — external load per session, derived from Hevy and Alpha sets |
+| Oura | `oura_readiness_score`, `oura_sleep_score`, `oura_activity_score`, `oura_temperature_deviation`, `oura_stress_high`, `oura_recovery_high`, `oura_resilience`, `oura_cardiovascular_age` |
+| Nutrition | 40 `dietary_*` series — macros, minerals, vitamins, caffeine, water |
+| Clinical | `blood_glucose`, `blood_alcohol_content`, `forced_vital_capacity`, `forced_expiratory_volume_1`, `electrodermal_activity` |
+| Environment | `environmental_audio_exposure`, `headphone_audio_exposure` |
+| Cycling | `cycling_power`, `cycling_cadence`, `cycling_speed`, `cycling_functional_threshold_power` |
+| Workouts | All types, with heart rate, routes and sets, deduped across sources |
+
+Records that are not time series of a single number — ECG recordings,
+audiograms, medications, vision prescriptions, State of Mind entries and raw
+HealthKit category samples — are stored in their own tables and read through
+their own endpoints and MCP tools.
+
+## MCP Server
+
+FreeReps exposes health data to Claude (and other LLMs) via the Model Context Protocol.
+
+**Tools (20):**
+
+| Group | Tools |
+|---|---|
+| Metrics | `get_health_metrics`, `get_metric_stats`, `list_available_metrics`, `get_correlation`, `compare_periods` |
+| Sleep | `get_sleep_data`, `get_sleep_summary` |
+| Workouts | `get_workouts`, `get_workout_sets` |
+| Strength | `get_strength_summary`, `get_strength_volume`, `get_strength_intensity`, `get_strength_1rm` |
+| Clinical records | `get_ecg_recordings`, `get_audiograms`, `get_medications`, `get_vision_prescriptions` |
+| Other samples | `get_activity_summaries`, `get_state_of_mind`, `get_category_samples` |
+
+**Resources (3):** `daily_summary`, `recent_workouts`, `metric_catalog`
+
+The running server is the authority on this list — ask it rather than this
+table if the two disagree.
+
+### stdio (Claude Code)
+
+```bash
+freereps --mcp -config config.yaml
+```
+
+Add to your Claude Code MCP config:
+
+```json
+{
+  "mcpServers": {
+    "freereps": {
+      "command": "/path/to/freereps",
+      "args": ["--mcp", "-config", "/path/to/config.yaml"]
+    }
+  }
+}
+```
+
+### SSE (Remote via mcp-proxy)
+
+The MCP SSE endpoint is available at `/mcp/sse` when the server is running. To connect Claude Desktop (or other stdio-only clients) to a remote FreeReps instance, use [mcp-proxy](https://github.com/sparfenyuk/mcp-proxy) to bridge stdio↔SSE:
+
+```bash
+brew install mcp-proxy   # or: pip install mcp-proxy
+```
+
+Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "freereps": {
+      "command": "mcp-proxy",
+      "args": ["https://freereps.your-tailnet.ts.net/mcp/sse"]
+    }
+  }
+}
+```
+
+No local FreeReps binary needed — `mcp-proxy` handles the transport bridging, and Tailscale handles authentication.
 
 ## Alerts
 
@@ -405,96 +475,150 @@ Reading the topic back is the quickest way to tell "FreeReps did not send" from
 curl -s "https://ntfy.example.com/freereps-alerts/json?poll=1&since=10m"
 ```
 
-## MCP Server
+## Tools
 
-FreeReps exposes health data to Claude (and other LLMs) via the Model Context Protocol.
+A server seeded with generated data, for a first look, and the CLI that
+backfills Apple Health history into a running instance.
 
+### Test server (demo mode)
 
-**Tools:** `get_health_metrics`, `get_workouts`, `get_sleep_data`, `get_metric_stats`, `get_correlation`, `compare_periods`, `list_available_metrics`, `get_workout_sets`
+Run a FreeReps server with demo data, for a first look or for testing an ingest path against a database that carries no real measurements:
 
-**Resources:** `daily_summary`, `recent_workouts`, `metric_catalog`
-
-### stdio (Claude Code)
-
-```bash
-freereps --mcp -config config.yaml
-```
-
-Add to your Claude Code MCP config:
-
-```json
-{
-  "mcpServers": {
-    "freereps": {
-      "command": "/path/to/freereps",
-      "args": ["--mcp", "-config", "/path/to/config.yaml"]
-    }
-  }
-}
-```
-
-### SSE (Remote via mcp-proxy)
-
-The MCP SSE endpoint is available at `/mcp/sse` when the server is running. To connect Claude Desktop (or other stdio-only clients) to a remote FreeReps instance, use [mcp-proxy](https://github.com/sparfenyuk/mcp-proxy) to bridge stdio↔SSE:
+**Using Docker (recommended)**
 
 ```bash
-brew install mcp-proxy   # or: pip install mcp-proxy
+cd FreeReps/server
+cp config.example.yaml config.yaml
+# Set tailscale.enabled: false in config.yaml for local dev
+
+docker compose up -d db
+docker compose run --rm -e FREEREPS_DEMO=true app
 ```
 
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+**From source**
 
-```json
-{
-  "mcpServers": {
-    "freereps": {
-      "command": "mcp-proxy",
-      "args": ["https://freereps.your-tailnet.ts.net/mcp/sse"]
-    }
-  }
-}
+```bash
+cd FreeReps/server
+cp config.example.yaml config.yaml
+# Set tailscale.enabled: false in config.yaml for local dev
+
+docker compose up -d db
+cd web && npm ci && npm run build && cd ..
+go run ./cmd/freereps -config config.yaml -demo
 ```
 
-No local FreeReps binary needed — `mcp-proxy` handles the transport bridging, and Tailscale handles authentication.
+This seeds the database with 90 days of generated health data — heart rate, sleep, workouts, activity rings and strength sessions with sets, reps and effort ratings. The data is deterministic and idempotent — restarting with `-demo` or `FREEREPS_DEMO=true` won't create duplicates.
 
-## Supported Metrics
+The server will be available at `http://localhost:8080`. To tear down:
 
-| Category | Metrics |
-|----------|---------|
-| Cardiovascular | heart_rate, resting_heart_rate, heart_rate_variability, blood_oxygen_saturation, respiratory_rate, vo2_max, blood_pressure_systolic, blood_pressure_diastolic, blood_pressure_heart_rate |
-| Sleep | sleep_analysis, apple_sleeping_wrist_temperature |
-| Body | weight_body_mass, body_fat_percentage, fat_mass, lean_body_mass, muscle_mass, bone_mass, body_water |
-| Activity | active_energy, basal_energy_burned, step_count, flights_climbed, apple_exercise_time |
-| Oura | readiness_score, sleep_score, activity_score, temperature_deviation, stress, recovery, resilience, cardiovascular_age |
-| Workouts | All types (with HR data + routes, deduped across sources) |
+```bash
+docker compose down -v
+```
 
-## Design Principles
+### Upload tool (macOS)
 
-- **Privacy first** — All data stays local. No cloud uploads, no telemetry.
-- **Self-hosted** — Runs on your own server/homelab.
-- **Data over scores** — Raw data + visualization + LLM instead of proprietary algorithms.
-- **Flexible over opinionated** — Correlation explorer instead of hard-wired dashboards.
-- **Single binary** — Go binary with embedded web UI.
+`freereps-upload` is a client-side CLI tool that brings historical
+[Health Auto Export](https://www.healthyapps.dev/apps/health-auto-export/) data
+into FreeReps. It runs in two modes:
+
+- **File mode** (`-path`) reads the `.hae` files Health Auto Export writes to
+  iCloud Drive, converts them to the REST format and posts them to the server.
+- **TCP mode** (`-hae-host`) queries the app's own server connection over
+  JSON-RPC and walks a date range in chunks, so a backfill needs no file export
+  at all.
+
+**Install:**
+
+```bash
+curl -sSL https://raw.githubusercontent.com/meltforce/FreeReps/main/server/scripts/install-upload.sh | bash
+```
+
+**Usage:**
+
+```bash
+# First run — upload all historical data
+freereps-upload \
+  -server https://freereps.your-tailnet.ts.net \
+  -path ~/Library/Mobile\ Documents/com~apple~CloudDocs/Health\ Auto\ Export/AutoSync
+
+# Subsequent runs — only new/changed files are uploaded (resumable)
+freereps-upload \
+  -server https://freereps.your-tailnet.ts.net \
+  -path ~/Library/Mobile\ Documents/com~apple~CloudDocs/Health\ Auto\ Export/AutoSync
+```
+
+**Flags:**
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-server` | (required) | FreeReps server URL |
+| `-path` | | Path to AutoSync directory (or parent) — file mode |
+| `-batch-size` | 2000 | Data points per metric payload (file mode) |
+| `-hae-host` | | IP address of the Health Auto Export TCP server — TCP mode |
+| `-hae-port` | 9000 | Port of the Health Auto Export TCP server |
+| `-start` | 1 year ago | Start date of the backfill, `yyyy-MM-dd` (TCP mode) |
+| `-end` | today | End date of the backfill, `yyyy-MM-dd` (TCP mode) |
+| `-chunk-days` | 1 | Days per query chunk (TCP mode) |
+| `-dry-run` | false | Parse and convert without sending |
+| `-version` | | Print version and exit |
+
+**Requirements:** `lzfse` must be installed for file mode (`brew install lzfse`).
+
+**Update / Uninstall:**
+
+```bash
+# Update to latest version
+curl -sSL https://raw.githubusercontent.com/meltforce/FreeReps/main/server/scripts/install-upload.sh | bash -s -- --update
+
+# Uninstall
+curl -sSL https://raw.githubusercontent.com/meltforce/FreeReps/main/server/scripts/install-upload.sh | bash -s -- --uninstall
+```
+
+**State tracking (file mode):** Upload progress is tracked in `~/.freereps-upload/state.db` (SQLite). Files are identified by path + size + SHA-256 hash, so changed files are re-uploaded and the tool is fully resumable.
 
 ## API Reference
 
+Every route below sits behind the Tailscale identity middleware and answers for
+the calling user only. `/api/v1/version` is the exception — it answers without
+an identity, so a health check needs no credentials.
+
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/v1/ingest/` | POST | Ingest health data JSON |
+| `/api/v1/version` | GET | Build version (no identity required) |
+| `/api/v1/me` | GET | Current user identity |
+| `/api/v1/ingest/` | POST | Ingest health data JSON (Health Auto Export REST, iOS app) |
 | `/api/v1/ingest/alpha` | POST | Ingest Alpha Progression CSV |
-| `/api/v1/ingest/import` | POST | Unified import (auto-detects format) |
+| `/api/v1/import` | POST | Unified import (auto-detects format) |
+| `/api/v1/import/hae-tcp/check` | POST | Probe a Health Auto Export TCP server |
+| `/api/v1/import/hae-tcp` | POST/DELETE | Start or cancel a TCP backfill |
+| `/api/v1/import/hae-tcp/status` | GET | Progress of the running backfill |
+| `/api/v1/import/hae-tcp/events` | GET | Progress as a server-sent event stream |
 | `/api/v1/metrics/latest` | GET | Latest value per metric |
 | `/api/v1/metrics` | GET | Time-range metric query |
 | `/api/v1/metrics/stats` | GET | Metric statistics (avg, min, max, stddev) |
-| `/api/v1/timeseries` | GET | Time-bucketed metric data |
-| `/api/v1/correlation` | GET | Pearson r between two metrics |
-| `/api/v1/sleep` | GET | Sleep sessions + stages |
-| `/api/v1/workouts` | GET | Workout list with filters |
-| `/api/v1/workouts/{id}` | GET | Workout detail |
-| `/api/v1/workouts/{id}/sets` | GET | Alpha Progression sets |
-| `/api/v1/allowlist` | GET | Metric allowlist |
 | `/api/v1/metrics/available` | GET | Available metrics with display metadata |
 | `/api/v1/metrics/visibility` | PUT | Save per-user metric visibility |
+| `/api/v1/timeseries` | GET | Time-bucketed metric data |
+| `/api/v1/correlation` | GET | Pearson r between two metrics |
+| `/api/v1/allowlist` | GET | Metric allowlist |
+| `/api/v1/sleep` | GET | Sleep sessions + stages |
+| `/api/v1/workouts` | GET | Workout list with filters |
+| `/api/v1/workouts/zones` | GET | Heart rate zone distribution |
+| `/api/v1/workouts/{id}` | GET | Workout detail |
+| `/api/v1/workouts/{id}/sets` | GET | Strength sets of a session |
+| `/api/v1/training-metrics/rebuild` | POST | Recompute the derived training series |
+| `/api/v1/ecg` | GET | ECG recordings |
+| `/api/v1/audiograms` | GET | Audiograms |
+| `/api/v1/activity-summaries` | GET | Daily activity ring totals |
+| `/api/v1/medications` | GET | Medication records |
+| `/api/v1/vision-prescriptions` | GET | Vision prescriptions |
+| `/api/v1/state-of-mind` | GET | State of Mind entries |
+| `/api/v1/category-samples` | GET | HealthKit category samples |
+| `/api/v1/preferences/front-page-heroes` | PUT | The four numbers on the front page |
+| `/api/v1/preferences/max-heart-rate` | GET/PUT | Maximum heart rate for the zone split |
+| `/api/v1/preferences/birth-date` | GET/PUT | Date of birth, used to estimate the maximum when none is set |
 | `/api/v1/source-priority` | GET/PUT | Source priority configuration |
+| `/api/v1/source-priority/{category}` | DELETE | Remove one category's rule |
 | `/api/v1/oura/status` | GET | Oura connection status |
 | `/api/v1/oura/credentials` | PUT | Save Oura OAuth2 credentials |
 | `/api/v1/oura/authorize` | POST | Start Oura OAuth2 flow |
@@ -505,10 +629,15 @@ No local FreeReps binary needed — `mcp-proxy` handles the transport bridging, 
 | `/api/v1/withings/authorize` | POST | Start Withings OAuth2 flow |
 | `/api/v1/withings/sync` | POST | Trigger manual Withings sync |
 | `/api/v1/withings/disconnect` | DELETE | Remove Withings connection |
-| `/api/v1/alerts` | GET | Alert channel configuration and per-condition state |
-| `/api/v1/alerts` | PUT | Save the alert channel configuration |
+| `/api/v1/hevy/status` | GET | Hevy connection status |
+| `/api/v1/hevy/credentials` | PUT | Save the Hevy API key and sync cutoff |
+| `/api/v1/hevy/sync` | POST | Trigger manual Hevy sync |
+| `/api/v1/hevy/disconnect` | DELETE | Remove the Hevy API key |
+| `/api/v1/alerts` | GET/PUT | Alert channel configuration and per-condition state |
 | `/api/v1/alerts/test` | POST | Post a test message on `monitor_id` 9200 |
-| `/api/v1/me` | GET | Current user identity |
+| `/api/v1/stats` | GET | Row counts and coverage per source |
+| `/api/v1/import-logs` | GET | Recent ingest and sync runs |
+| `/mcp`, `/mcp/sse` | — | MCP over HTTP and server-sent events |
 
 ## Documents
 
@@ -519,7 +648,10 @@ No local FreeReps binary needed — `mcp-proxy` handles the transport bridging, 
 | [`DECISIONS.md`](DECISIONS.md) | Decisions taken, with reasoning. |
 | [`INCIDENTS.md`](INCIDENTS.md) | Postmortems. |
 | [`server/specs/`](server/specs/) | Wire formats and payload shapes of the ingest sources. |
+| [`app/README.md`](app/README.md) | The iOS companion app, which does not work on iOS 27. |
+| [`docs/mcp-server.md`](docs/mcp-server.md) | The MCP server in detail. |
 
 ## License
 
 [MIT](LICENSE)
+

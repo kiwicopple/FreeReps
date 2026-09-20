@@ -684,7 +684,8 @@ alongside sleep, HRV and readiness. The current plan exists only in Hevy, so
 reading and writing it belongs there.
 
 **Consequence for the MCP setup.** Both servers offer overlapping read tools —
-`hevy-mcp` ships `get-training-summary` next to the FreeReps `get_training_summary`.
+`hevy-mcp` ships `get-training-summary` next to the FreeReps `get_strength_summary`
+(named `get_training_summary` when this was decided).
 The planning project denies the Hevy analysis tools so evaluation cannot
 accidentally run on training data alone, without the recovery context.
 

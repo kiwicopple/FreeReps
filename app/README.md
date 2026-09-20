@@ -1,8 +1,25 @@
 # FreeReps iOS App
 
+> **Status: does not work on iOS 27, and development is likely to stop.**
+> The app stopped syncing with iOS 27; the cause has not been diagnosed and no
+> fix is planned. It is documented here for the installations that still run it
+> on an earlier iOS release. **For a new installation, use Health Auto Export
+> instead** — it is the supported Apple Health path and is described in the
+> [main README](../README.md#health-auto-export-ios-default).
+
 [![Download on the App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/us/app/freereps/id6760661354)
 
 FreeReps is an iOS companion app that syncs Apple HealthKit data to a FreeReps server via HTTP. Your health data flows from HealthKit on your phone to your self-hosted server — no cloud services, no third parties.
+
+## Screenshots
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| ![Main](../docs/screenshots/ios/framed-main.png) | ![Sync](../docs/screenshots/ios/framed-sync.png) | ![Settings](../docs/screenshots/ios/framed-settings.png) | ![Permissions](../docs/screenshots/ios/framed-permissions.png) |
+
+## Acknowledgements
+
+This app is based on [HealthBeat](https://github.com/kempu/HealthBeat) by kempu, an open-source iOS app for syncing Apple Health data. HealthBeat was adapted into the FreeReps companion app for the self-hosted FreeReps server. Licensed under the MIT License.
 
 ## What it syncs
 
@@ -39,7 +56,7 @@ The app uses `FreeRepsService` (a lightweight `URLSession` HTTP wrapper) to POST
 
 - iOS 16.2+
 - Physical device (HealthKit is not available in the Simulator)
-- A running FreeReps server (see the [server README](../server/README.md))
+- A running FreeReps server (see the [main README](../README.md))
 - Apple Developer account (for HealthKit entitlement and code signing)
 
 ## Developer setup
@@ -171,4 +188,4 @@ If your server is only reachable via Tailscale, be aware that iOS aggressively m
 
 ## License
 
-This project is released under the MIT License. See [LICENSE](LICENSE) for details.
+This project is released under the MIT License. See [LICENSE](../LICENSE) for details.

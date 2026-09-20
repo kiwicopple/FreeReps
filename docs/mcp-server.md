@@ -98,7 +98,7 @@ Workout summaries with optional type filter.
 
 ### get_workout_sets
 
-Strength training set data from Alpha Progression.
+Strength training set data from Hevy and from imported Alpha Progression exports.
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
@@ -125,6 +125,79 @@ Returns stats (avg/min/max/stddev/count) for each period.
 
 Lists all tracked metrics with category and enabled status. No parameters.
 
+### get_strength_summary
+
+Workout and strength volume aggregated per week or month, across every logging
+source: workout counts, duration and calories by type, plus set, rep and tonnage
+totals per period. In the strength block, `sessions` counts distinct session
+start times and is the denominator of `avg_sets_per_session`; `training_days`
+counts calendar days on which anything was logged.
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `start` | no | 6 months ago | Start date |
+| `end` | no | now | End date |
+
+### get_strength_volume
+
+Sets per muscle group per period, both as primary-target sets and as sets
+weighted with assisting muscles at 0.5, plus training frequency per muscle. It
+also reports how much of each figure rests on approximate exercise mapping, or
+on exercises with no muscle data at all.
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `start` | no | 12 weeks ago | Start date |
+| `end` | no | now | End date |
+
+### get_strength_intensity
+
+Effort distribution in reps-in-reserve bands, failure rate, per-exercise stats
+and optional per-session progression. Sets logged as RPE and as RIR are both
+covered.
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `start` | no | 90 days ago | Start date |
+| `end` | no | now | End date |
+
+### get_strength_1rm
+
+Estimated one-rep max per exercise per session, Epley over repetitions plus
+reps in reserve. Sets without an effort rating are excluded, and the estimate
+loses accuracy above roughly ten effective repetitions.
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `start` | no | 6 months ago | Start date |
+| `end` | no | now | End date |
+
+### get_sleep_summary
+
+Aggregated sleep statistics per period: duration, stage percentages,
+efficiency, and bedtime and waketime consistency.
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `start` | no | 90 days ago | Start date |
+| `end` | no | now | End date |
+
+### Record queries
+
+Six tools read the record tables that are not time series of a single number.
+Each takes an optional `start` (ISO 8601 or `YYYY-MM-DD`, default 7 days ago);
+`get_category_samples` also takes `end`.
+
+| Tool | Returns |
+|------|---------|
+| `get_ecg_recordings` | id, classification, average heart rate, start date, source |
+| `get_audiograms` | id, sensitivity points, start date, source |
+| `get_activity_summaries` | date, active energy, exercise time, stand hours, and their goals |
+| `get_medications` | id, name, dosage, log status, start date, source |
+| `get_vision_prescriptions` | every prescription field, including per-eye detail |
+| `get_state_of_mind` | id, kind, valence, labels, associations, start date |
+| `get_category_samples` | id, type, value, value label, start and end date |
+
 ## Available Resources
 
 | URI | Description |
@@ -135,12 +208,9 @@ Lists all tracked metrics with category and enabled status. No parameters.
 
 ## Metric Names Reference
 
-| Category | Metrics |
-|----------|---------|
-| Cardiovascular | `heart_rate`, `resting_heart_rate`, `heart_rate_variability`, `blood_oxygen_saturation`, `respiratory_rate`, `vo2_max` |
-| Sleep | `sleep_analysis`, `apple_sleeping_wrist_temperature` |
-| Body | `weight_body_mass`, `body_fat_percentage` |
-| Activity | `active_energy`, `basal_energy_burned`, `apple_exercise_time` |
+`list_available_metrics` returns the names the instance actually carries, with
+category and enabled status. The README's
+[Supported Metrics](../README.md#supported-metrics) table names the groups.
 
 ## Example Prompts
 

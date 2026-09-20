@@ -31,13 +31,13 @@ a:hover { text-decoration: underline; }
 <body>
 <a href="/" class="back">&larr; Back to FreeReps</a>
 <h1>Privacy Policy</h1>
-<p class="meta">Last updated: March 16, 2026</p>
+<p class="meta">Last updated: September 20, 2026</p>
 
 <h2>Overview</h2>
 <p>FreeReps is a self-hosted health data server. Your data stays on your own infrastructure &mdash; we never collect, store, or transmit your health data to any third-party service.</p>
 
 <h2>Data Collection</h2>
-<p>The FreeReps iOS app reads the following data from Apple Health:</p>
+<p>A FreeReps server receives the following data from Apple Health, sent by <a href="https://www.healthyapps.dev/apps/health-auto-export/">Health Auto Export</a> running on your iPhone:</p>
 <ul>
   <li>Quantity samples (heart rate, steps, blood pressure, etc.)</li>
   <li>Category samples (sleep analysis, menstrual cycles, etc.)</li>
@@ -49,14 +49,17 @@ a:hover { text-decoration: underline; }
 </ul>
 <p>This data is sent exclusively to your self-hosted FreeReps server. No data is sent to Meltforce, Apple (beyond HealthKit), or any other third party.</p>
 
+<h2>Connected Services</h2>
+<p>If you connect them, your server reads data from Oura, Withings and Hevy using credentials you register yourself. Those credentials and the resulting access tokens are stored in your own database. The requests go from your server to the provider directly; they do not pass through Meltforce.</p>
+
 <h2>Data Storage</h2>
 <p>All health data is stored in a PostgreSQL database on your own server. You are responsible for the security and backup of your data. FreeReps supports Tailscale for encrypted, authenticated access.</p>
 
 <h2>Tracking</h2>
-<p>FreeReps does not track you. The app contains no analytics, no advertising SDKs, and no telemetry. There are no third-party tracking domains.</p>
+<p>FreeReps does not track you. It contains no analytics, no advertising SDKs, and no telemetry. There are no third-party tracking domains.</p>
 
 <h2>Third-Party Services</h2>
-<p>FreeReps does not use any third-party services. The app communicates exclusively with your self-hosted server.</p>
+<p>FreeReps itself uses no third-party services. Your server talks to the data providers you connect, and to nothing else.</p>
 
 <h2>Data Deletion</h2>
 <p>Since all data is stored on your own server, you have full control over deletion. You can delete data directly from the database at any time. Uninstalling the app removes all local configuration from your device.</p>
