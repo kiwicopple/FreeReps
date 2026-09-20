@@ -49,6 +49,7 @@ var defaultVisibleMetrics = map[string]bool{
 	"step_count":              true,
 	"flights_climbed":         true,
 	"sleep_analysis":          true,
+	"blood_glucose":           true,
 	// Oura (visible by default if user has data)
 	"oura_readiness_score": true,
 	"oura_sleep_score":     true,

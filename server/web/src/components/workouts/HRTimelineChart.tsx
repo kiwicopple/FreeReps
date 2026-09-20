@@ -3,6 +3,7 @@ import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import type { WorkoutHR } from "../../api";
 import AutoSizeUplot from "../AutoSizeUplot";
+import { axisValues24h } from "../../utils/chartFormat";
 import { useTheme } from "../../theme";
 import { ZONE_BOUNDS } from "../../utils/stageColors";
 import { tokenColor, tokenColorAlpha } from "../../utils/tokenColor";
@@ -52,11 +53,7 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
           grid: { stroke: grid, width: 1 },
           ticks: { stroke: grid },
           font: "11px Archivo Variable, Archivo, system-ui, sans-serif",
-          values: (_u: uPlot, vals: number[]) =>
-            vals.map((v) => {
-              const d = new Date(v * 1000);
-              return `${d.getHours()}:${d.getMinutes().toString().padStart(2, "0")}`;
-            }),
+          values: axisValues24h,
         },
         {
           stroke: axis,
@@ -65,7 +62,7 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
           font: "11px Archivo Variable, Archivo, system-ui, sans-serif",
         },
       ],
-      scales: { x: { time: false } },
+      scales: { x: { time: true } },
       cursor: { drag: { x: true, y: false } },
       hooks: {
         draw: [

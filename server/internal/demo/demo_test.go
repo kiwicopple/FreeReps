@@ -62,6 +62,29 @@ func TestGenerateHealthMetrics(t *testing.T) {
 	}
 }
 
+// TestBloodOxygenIsStoredAsFraction covers the demo data showing 9650% for a
+// reading of 96.5: the allowlist carries display_multiplier = 100 because Apple
+// Health writes a fraction, and the generator wrote a percentage.
+func TestBloodOxygenIsStoredAsFraction(t *testing.T) {
+	rng := rand.New(rand.NewSource(randSeed))
+	end := time.Date(2025, 6, 1, 0, 0, 0, 0, time.UTC)
+	rows := generateHealthMetrics(rng, end.AddDate(0, 0, -daysBack), end)
+
+	seen := 0
+	for _, r := range rows {
+		if r.MetricName != "blood_oxygen_saturation" || r.Qty == nil {
+			continue
+		}
+		seen++
+		if *r.Qty < 0.5 || *r.Qty > 1 {
+			t.Fatalf("blood_oxygen_saturation = %v, want a fraction between 0.5 and 1", *r.Qty)
+		}
+	}
+	if seen == 0 {
+		t.Fatal("no blood_oxygen_saturation rows generated")
+	}
+}
+
 // TestGenerateSleep verifies that sleep generation produces one session per
 // night with valid stage breakdowns.
 func TestGenerateSleep(t *testing.T) {
