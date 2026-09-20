@@ -25,17 +25,20 @@ for LLMs.
 
 ## Screenshots
 
+Each pair below is served in the colour scheme your client asks for. The MCP
+capture is a screenshot of Claude Desktop, so it has one version only.
+
 | Dashboard | Sleep |
 |:-:|:-:|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Sleep](docs/screenshots/sleep.png) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/dashboard-dark.png"><img alt="Dashboard" src="docs/screenshots/dashboard.png"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/sleep-dark.png"><img alt="Sleep" src="docs/screenshots/sleep.png"></picture> |
 
 | Workouts | Metrics |
 |:-:|:-:|
-| ![Workouts](docs/screenshots/workouts.png) | ![Metrics](docs/screenshots/metrics.png) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/workouts-dark.png"><img alt="Workouts" src="docs/screenshots/workouts.png"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/metrics-dark.png"><img alt="Metrics" src="docs/screenshots/metrics.png"></picture> |
 
 | Correlations | Trends |
 |:-:|:-:|
-| ![Correlations](docs/screenshots/correlations.png) | ![Trends](docs/screenshots/trends.png) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/correlations-dark.png"><img alt="Correlations" src="docs/screenshots/correlations.png"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/trends-dark.png"><img alt="Trends" src="docs/screenshots/trends.png"></picture> |
 
 | MCP |
 |:-:|
