@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	userID    = 1
-	source    = "demo"
-	daysBack  = 90
-	randSeed  = 42
+	userID   = 1
+	source   = "demo"
+	daysBack = 90
+	randSeed = 42
 )
 
 // Seed populates the database with 90 days of realistic health data for
@@ -81,6 +81,20 @@ func Seed(ctx context.Context, db *storage.DB, log *slog.Logger) error {
 		hrInserted += n
 	}
 	log.Info("demo: workouts", "count", len(workouts), "hr_samples", hrInserted)
+
+	// Strength sets, plus the catalog rows they reference — volume per muscle
+	// group resolves the muscle from exercise_templates, not from the set.
+	templates := demoExerciseTemplates()
+	tmplWritten, err := db.UpsertExerciseTemplates(ctx, templates)
+	if err != nil {
+		return fmt.Errorf("demo: upsert exercise templates: %w", err)
+	}
+	sets := generateWorkoutSets(rng, start, now)
+	setsInserted, err := db.InsertWorkoutSets(ctx, sets)
+	if err != nil {
+		return fmt.Errorf("demo: insert workout sets: %w", err)
+	}
+	log.Info("demo: strength", "templates", tmplWritten, "sets_generated", len(sets), "sets_inserted", setsInserted)
 
 	// Activity summaries
 	activities := generateActivitySummaries(rng, start, now)
@@ -355,7 +369,7 @@ type workoutTemplate struct {
 	maxDuration float64
 	minHR       float64
 	maxHR       float64
-	hasDistance  bool
+	hasDistance bool
 	minDist     float64 // km
 	maxDist     float64
 	indoor      bool

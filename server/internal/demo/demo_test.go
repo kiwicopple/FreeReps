@@ -188,3 +188,78 @@ func TestGenerateActivitySummaries(t *testing.T) {
 		t.Errorf("stand hours = %v, want 5-16", r.StandHours)
 	}
 }
+
+// TestStrengthSessionsCarryOneExternalID pins the shape QuerySetSessions
+// depends on: it selects DISTINCT over source, external_id, session_name,
+// session_date, session_end and session_duration, so an id that varies per set
+// turns one session into as many entries as it has sets in the workout list.
+// The generator did exactly that at first, and a 19-set session appeared 19
+// times.
+func TestStrengthSessionsCarryOneExternalID(t *testing.T) {
+	rng := rand.New(rand.NewSource(randSeed))
+	end := time.Date(2025, 6, 1, 0, 0, 0, 0, time.UTC)
+	sets := generateWorkoutSets(rng, end.AddDate(0, 0, -daysBack), end)
+
+	if len(sets) == 0 {
+		t.Fatal("no strength sets generated")
+	}
+
+	idsPerSession := map[time.Time]map[string]bool{}
+	for _, s := range sets {
+		if idsPerSession[s.SessionDate] == nil {
+			idsPerSession[s.SessionDate] = map[string]bool{}
+		}
+		idsPerSession[s.SessionDate][s.ExternalID] = true
+	}
+	for date, ids := range idsPerSession {
+		if len(ids) != 1 {
+			t.Errorf("session %s carries %d external ids, want 1", date.Format(time.RFC3339), len(ids))
+		}
+	}
+}
+
+// TestStrengthSetsAreAddressableByTheNaturalKey covers the unique index on
+// (user_id, source, session_date, exercise_number, set_number, is_warmup): a
+// generator that repeats a key makes the whole seed fail on insert.
+func TestStrengthSetsAreAddressableByTheNaturalKey(t *testing.T) {
+	rng := rand.New(rand.NewSource(randSeed))
+	end := time.Date(2025, 6, 1, 0, 0, 0, 0, time.UTC)
+	sets := generateWorkoutSets(rng, end.AddDate(0, 0, -daysBack), end)
+
+	type key struct {
+		date     time.Time
+		exercise int
+		set      int
+		warmup   bool
+	}
+	seen := map[key]bool{}
+	for _, s := range sets {
+		k := key{s.SessionDate, s.ExerciseNumber, s.SetNumber, s.IsWarmup}
+		if seen[k] {
+			t.Fatalf("duplicate natural key: %+v", k)
+		}
+		seen[k] = true
+	}
+}
+
+// TestStrengthExercisesResolveToTheCatalog keeps the sets and the templates in
+// step: volume per muscle group reads the muscle from exercise_templates via
+// exercise_template_id, and a set pointing at nothing contributes to no group.
+func TestStrengthExercisesResolveToTheCatalog(t *testing.T) {
+	rng := rand.New(rand.NewSource(randSeed))
+	end := time.Date(2025, 6, 1, 0, 0, 0, 0, time.UTC)
+	sets := generateWorkoutSets(rng, end.AddDate(0, 0, -daysBack), end)
+
+	catalog := map[string]bool{}
+	for _, tmpl := range demoExerciseTemplates() {
+		if tmpl.PrimaryMuscleGroup == "" {
+			t.Errorf("template %s has no primary muscle group", tmpl.ID)
+		}
+		catalog[tmpl.ID] = true
+	}
+	for _, s := range sets {
+		if !catalog[s.ExerciseTemplateID] {
+			t.Fatalf("set references template %q, which the catalog does not carry", s.ExerciseTemplateID)
+		}
+	}
+}
