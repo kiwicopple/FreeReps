@@ -25,6 +25,8 @@ export default function Hypnogram({ stages, compact = false }: Props) {
     );
   }
 
+  // The axis still spans everything the night carries, "In Bed" included, so
+  // the plot starts at bedtime and ends at wake-up the way the ring reports it.
   const startMs = Math.min(
     ...stages.map((s) => new Date(s.StartTime).getTime()),
   );
@@ -32,22 +34,30 @@ export default function Hypnogram({ stages, compact = false }: Props) {
   const totalMs = endMs - startMs;
   if (totalMs <= 0) return null;
 
-  const blocks = stages.map((s, i) => {
+  // Only the four sleep stages get drawn. Apple Health also reports an "In Bed"
+  // sample covering the whole night, and the lane index used to fall back to 0
+  // for anything it did not recognise — so that one block was painted across
+  // the Awake lane, on top of every awakening recorded before it. The first
+  // one, at bedtime, disappeared underneath it.
+  const blocks = stages.flatMap((s, i) => {
+    const laneIndex = STAGE_LANES.indexOf(
+      s.Stage as (typeof STAGE_LANES)[number],
+    );
+    if (laneIndex < 0) return [];
+
     const from = new Date(s.StartTime).getTime();
     const to = new Date(s.EndTime).getTime();
-    const laneIndex = Math.max(
-      0,
-      STAGE_LANES.indexOf(s.Stage as (typeof STAGE_LANES)[number]),
-    );
-    return {
-      key: `${s.StartTime}-${i}`,
-      left: ((from - startMs) / totalMs) * 100,
-      // A two-minute awakening still has to render.
-      width: Math.max(((to - from) / totalMs) * 100, 0.45),
-      laneIndex,
-      color: stageColor(s.Stage),
-      title: s.Stage,
-    };
+    return [
+      {
+        key: `${s.StartTime}-${i}`,
+        left: ((from - startMs) / totalMs) * 100,
+        // A two-minute awakening still has to render.
+        width: Math.max(((to - from) / totalMs) * 100, 0.45),
+        laneIndex,
+        color: stageColor(s.Stage),
+        title: s.Stage,
+      },
+    ];
   });
 
   if (compact) {
