@@ -5,7 +5,11 @@ FreeReps exposes your health data via the [Model Context Protocol](https://model
 Two transports are available:
 
 - **stdio** — for local Claude Code integration (pipe JSON-RPC over stdin/stdout)
-- **SSE** — served on the existing HTTP server at `/mcp`, inherits Tailscale authentication
+- **Streamable HTTP** — served at `/mcp` by the same HTTP server as the
+  dashboard, behind the same Tailscale identity middleware
+
+There is no SSE endpoint. `/mcp/sse` matches no route, so the request reaches
+the dashboard handler and the response is HTML.
 
 ## Setup
 
@@ -26,15 +30,29 @@ Add to your Claude Code MCP config (`~/.claude/claude_code_config.json` or proje
 
 stdio mode always runs as user_id=1 (the local/default user).
 
-### Claude Desktop or remote clients (SSE)
+### Claude Desktop or remote clients (Streamable HTTP)
 
 Connect your MCP client to:
 
 ```
-https://freereps.<your-tailnet>/mcp/sse
+https://freereps.<your-tailnet>/mcp
 ```
 
-SSE runs through the same Tailscale-authenticated HTTP server, so each user sees only their own data.
+A client that speaks only stdio reaches it through
+[mcp-proxy](https://github.com/sparfenyuk/mcp-proxy):
+
+```json
+{
+  "mcpServers": {
+    "freereps": {
+      "command": "mcp-proxy",
+      "args": ["--transport", "streamablehttp", "https://freereps.<your-tailnet>/mcp"]
+    }
+  }
+}
+```
+
+The endpoint runs through the same Tailscale-authenticated HTTP server, so each user sees only their own data.
 
 ## Available Tools
 

@@ -79,13 +79,14 @@ Other apps compute scores but are closed-source, subscription-based, and opaque.
                                              │   source-priority dedup at   │
                                              │   query time, per category   │
                                              │              │               │
-                                             │  ┌───────────┼────────────┐  │
-                                             │  ▼           ▼            ▼  │
-                                             │ Web        MCP         Alert │
-                                             │ dashboard  stdio/SSE   watcher│
-                                             └──┼──────────┼────────────┼───┘
-                                                ▼          ▼            ▼
-                                            browser     Claude       ntfy topic
+                                             │  ┌───────────┼───────────┐   │
+                                             │  ▼           ▼           ▼   │
+                                             │ Web         MCP        Alert │
+                                             │dashboard  stdio +     watcher│
+                                             │          HTTP /mcp           │
+                                             └──┼───────────┼───────────┼───┘
+                                                ▼           ▼           ▼
+                                             browser     Claude   ntfy topic
 ```
 
 Every inbound channel writes into one store, and overlapping measurements are
@@ -111,7 +112,7 @@ resolved when a query runs rather than at ingest — see
 | Charts | uPlot (time series, sparklines, hypnogram), Leaflet (workout routes) |
 | Database | PostgreSQL + TimescaleDB (hypertable on `health_metrics`) |
 | Auth & Networking | [Tailscale](https://tailscale.com/) (tsnet) — zero-config TLS + identity |
-| MCP | [mcp-go](https://github.com/mark3labs/mcp-go), stdio + SSE |
+| MCP | [mcp-go](https://github.com/mark3labs/mcp-go), stdio + Streamable HTTP |
 | Migrations | [golang-migrate](https://github.com/golang-migrate/migrate), applied at startup |
 | Config | YAML, with `FREEREPS_*` environment overrides |
 | Deployment | Docker Compose |
@@ -124,7 +125,7 @@ frontend dependency versions in
 
 - **[Tailscale](https://tailscale.com/)** — FreeReps uses Tailscale for authentication and TLS natively (via [tsnet](https://tailscale.com/kb/1244/tsnet)). There are no passwords or API keys — access is controlled by your tailnet. Tailscale must be set up before running FreeReps.
 - **[Health Auto Export](https://www.healthyapps.dev/apps/health-auto-export/)** (iOS) — the supported way to get Apple Health data into FreeReps. Its REST automation posts to the ingest endpoint directly; see [Health Auto Export](#health-auto-export-ios-default).
-- **[mcp-proxy](https://github.com/sparfenyuk/mcp-proxy)** (optional) — Required for connecting Claude Desktop to a remote FreeReps instance. Bridges stdio↔SSE transports. Install with `brew install mcp-proxy` or `pip install mcp-proxy`.
+- **[mcp-proxy](https://github.com/sparfenyuk/mcp-proxy)** (optional) — Needed only by an MCP client that speaks stdio alone; it bridges stdio to the HTTP endpoint. Install with `brew install mcp-proxy` or `pip install mcp-proxy`.
 - **`lzfse`** (optional, macOS) — Required by `freereps-upload` for reading `.hae` files. `brew install lzfse`.
 
 ## Quick Start
@@ -339,7 +340,17 @@ their own endpoints and MCP tools.
 
 ## MCP Server
 
-FreeReps exposes health data to Claude (and other LLMs) via the Model Context Protocol.
+FreeReps exposes health data to Claude (and other LLMs) via the Model Context
+Protocol, over two transports:
+
+- **stdio**, for a client that starts the binary itself.
+- **Streamable HTTP** at `/mcp`, served by the same HTTP server as the
+  dashboard and behind the same Tailscale identity middleware, so each user
+  sees only their own data.
+
+There is no SSE endpoint. `/mcp/sse` matches no route, so the request reaches
+the dashboard handler and the response is HTML — which a client reports as a
+protocol error rather than as a wrong URL.
 
 **Tools (20):**
 
@@ -376,28 +387,32 @@ Add to your Claude Code MCP config:
 }
 ```
 
-### SSE (Remote via mcp-proxy)
+### Streamable HTTP (remote clients)
 
-The MCP SSE endpoint is available at `/mcp/sse` when the server is running. To connect Claude Desktop (or other stdio-only clients) to a remote FreeReps instance, use [mcp-proxy](https://github.com/sparfenyuk/mcp-proxy) to bridge stdio↔SSE:
+`/mcp` speaks Streamable HTTP as soon as the server is running. A client that
+can address an HTTP MCP endpoint needs nothing else — the URL is
+`https://freereps.your-tailnet.ts.net/mcp`, and Tailscale authenticates the
+request.
+
+For a client that only speaks stdio, [mcp-proxy](https://github.com/sparfenyuk/mcp-proxy)
+bridges the two:
 
 ```bash
 brew install mcp-proxy   # or: pip install mcp-proxy
 ```
-
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
 ```json
 {
   "mcpServers": {
     "freereps": {
       "command": "mcp-proxy",
-      "args": ["https://freereps.your-tailnet.ts.net/mcp/sse"]
+      "args": ["--transport", "streamablehttp", "https://freereps.your-tailnet.ts.net/mcp"]
     }
   }
 }
 ```
 
-No local FreeReps binary needed — `mcp-proxy` handles the transport bridging, and Tailscale handles authentication.
+No local FreeReps binary and no database access are needed on the client side.
 
 ## Alerts
 
@@ -637,7 +652,7 @@ an identity, so a health check needs no credentials.
 | `/api/v1/alerts/test` | POST | Post a test message on `monitor_id` 9200 |
 | `/api/v1/stats` | GET | Row counts and coverage per source |
 | `/api/v1/import-logs` | GET | Recent ingest and sync runs |
-| `/mcp`, `/mcp/sse` | — | MCP over HTTP and server-sent events |
+| `/mcp` | POST/GET/DELETE | MCP over Streamable HTTP |
 
 ## Documents
 
