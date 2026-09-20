@@ -104,6 +104,14 @@ func Seed(ctx context.Context, db *storage.DB, log *slog.Logger) error {
 	}
 	log.Info("demo: activity summaries", "generated", len(activities), "inserted", actInserted)
 
+	// The default hero selection leads with oura_readiness_score, which this
+	// seed does not write — the dashboard then shows three values and an empty
+	// fourth cell. Point it at metrics the demo actually carries.
+	heroes := []string{"sleep_analysis", "heart_rate_variability", "resting_heart_rate", "step_count"}
+	if err := db.SetPreference(ctx, userID, storage.PrefFrontPageHeroes, heroes); err != nil {
+		return fmt.Errorf("demo: set front page heroes: %w", err)
+	}
+
 	log.Info("demo: seeding complete")
 	return nil
 }

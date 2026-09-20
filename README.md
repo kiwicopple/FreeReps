@@ -16,9 +16,13 @@ The FreeReps iOS companion app is based on [HealthBeat](https://github.com/kempu
 |:-:|:-:|
 | ![Dashboard](docs/screenshots/dashboard.png) | ![Sleep](docs/screenshots/sleep.png) |
 
-| Metrics | Trends |
+| Workouts | Metrics |
 |:-:|:-:|
-| ![Metrics](docs/screenshots/metrics.png) | ![Trends](docs/screenshots/trends.png) |
+| ![Workouts](docs/screenshots/workouts.png) | ![Metrics](docs/screenshots/metrics.png) |
+
+| Correlations | Trends |
+|:-:|:-:|
+| ![Correlations](docs/screenshots/correlations.png) | ![Trends](docs/screenshots/trends.png) |
 
 | MCP |
 |:-:|
