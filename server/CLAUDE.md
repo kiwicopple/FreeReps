@@ -10,19 +10,29 @@
 `go test ./...` skips them. They need a PostgreSQL server in `FREEREPS_TEST_DSN`
 and run with `-tags integration`. CI does not run them.
 
-There is no Docker daemon on the development Mac, and the deployed database
-publishes no port outside its compose network, so the DSN comes from a scratch
-container on the homelab host plus a tunnel:
+The deployed database publishes no port outside its compose network, so the DSN
+points at a scratch container. Docker Desktop is installed on the development
+Mac — its CLI is not on the PATH a tool call inherits, so call it by path:
+
+```bash
+export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
+docker run -d --name freereps-scratch \
+  -e POSTGRES_DB=freereps_scratch -e POSTGRES_USER=freereps \
+  -e POSTGRES_PASSWORD=scratch -p 55432:5432 \
+  timescale/timescaledb:latest-pg16
+
+FREEREPS_TEST_DSN='postgres://freereps:scratch@localhost:55432/freereps_scratch?sslmode=disable' \
+  go test -tags integration ./...
+```
+
+Where Docker is unavailable, the same container runs on the homelab host behind
+a tunnel:
 
 ```bash
 ssh root@freereps-lxc 'docker run -d --name freereps-idem \
   -e POSTGRES_PASSWORD=scratch -e POSTGRES_USER=freereps -e POSTGRES_DB=freereps_idem \
   -p 127.0.0.1:15432:5432 timescale/timescaledb:latest-pg16'
 ssh -f -N -L 15432:127.0.0.1:15432 root@freereps-lxc
-
-FREEREPS_TEST_DSN='postgres://freereps:scratch@127.0.0.1:15432/freereps_idem?sslmode=disable' \
-  go test -tags integration ./...
-
 ssh root@freereps-lxc 'docker rm -f freereps-idem'   # and kill the tunnel
 ```
 
