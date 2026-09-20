@@ -19,6 +19,62 @@ is as recorded there; where the record named no alternative, none is claimed.
 
 ---
 
+## 2026-09-20 — Source selection and sample reduction are separate steps
+
+**Decided:** 2026-09-20
+
+**Decision.** Reading a metric resolves the source first and aggregates second,
+and the two no longer share one window function.
+
+- The dedup CTE marks every row of the winning source with `rn = 1` through
+  `FIRST_VALUE(source)`. Callers keep their `WHERE rn = 1`, which now removes
+  competing sources and no longer removes samples of the source that won.
+- A cumulative metric resolves its source **per day**, every other metric **per
+  5-minute window**.
+- A cumulative metric is aggregated as the sum over all rows of the winning
+  source. Every other metric is averaged within each 5-minute window and then
+  across those windows, with `MIN` and `MAX` taken over the rows.
+- A query spanning several metrics resolves each metric with the priority of
+  its own category, not with `_default`.
+
+**Reasoning.** The interval a source states a quantity over differs per source:
+Oura writes a day's steps as one row, Apple Health writes hourly blocks, and
+Health Auto Export can be configured to write per-second samples. Any rule
+fixed to one window is therefore wrong for some pairing, which produced 32,361
+steps for a day of 16,652 (`INCIDENTS.md`, 2026-09-20).
+
+Resolving per day is right for a counter because the two candidate figures cover
+the same day and adding them doubles it. Resolving per day is wrong for a
+sampled value because the leading source is not obliged to cover the whole day:
+on 2026-09-18 Apple Health held 54 heart rate windows in which Oura had no row,
+and a daily choice would have deleted the morning training session from the
+day's figure.
+
+Averaging the rows of a sampled metric directly was rejected for the same reason
+it looks correct. On 2026-09-18 six workouts covered 16% of the day and held 77%
+of the heart rate rows, because a workout samples per second and a quiet hour
+does not. An average over rows is an average of the sampling rate as much as of
+the heart rate, so the windows are averaged first and weigh alike.
+
+The alternatives considered and rejected:
+
+- **Keep one row per window** (the previous behaviour). Correct for neither
+  class: a counter loses every sample but one, and a sampled value is
+  represented by whichever row sorted first.
+- **Skip the dedup entirely for cumulative metrics**, as proposed in
+  `meltforce/FreeReps#1`. It repairs the sample loss and reintroduces the
+  double count, because two sources reporting the same day then both contribute.
+
+**Trigger to re-open.** A source that reports a cumulative metric more than once
+per day with overlapping coverage, which the daily choice cannot resolve. Also:
+Apple Health devices are stored under one empty source name because the HAE
+ingest discards the device name from `sources[]`, so iPhone and Watch cannot be
+told apart by priority. A user whose export carries both devices separately
+would have their steps counted twice; storing the device name is the fix and is
+tracked in `ROADMAP.md`.
+
+---
+
 ## 2026-09-20 — The OAuth redirect URIs are derived from the request, not configured
 
 **Decided:** 2026-09-20

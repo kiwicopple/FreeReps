@@ -40,8 +40,9 @@ type DashboardMetric struct {
 }
 
 // GetDailySeries returns per-day aggregated values for several metrics in one
-// query. Cumulative metrics are summed per day, the rest averaged, matching
-// GetTimeSeries. Source priority deduplication is applied first.
+// query. Cumulative metrics are summed per day, the rest averaged over their
+// 5-minute window averages, matching GetTimeSeries. Each metric resolves its
+// source with its own category priority first.
 func (db *DB) GetDailySeries(ctx context.Context, userID int, metricNames []string, start, end time.Time) (map[string][]DailyPoint, error) {
 	if len(metricNames) == 0 {
 		return map[string][]DailyPoint{}, nil
@@ -60,35 +61,47 @@ func (db *DB) GetDailySeries(ctx context.Context, userID int, metricNames []stri
 	endParam := sqlTimestamp(end)
 
 	inClause := strings.Join(params, ",")
-	// The set spans categories, so the user's _default priority applies.
-	priorities := db.ResolveSourcePriority(ctx, userID, "_default")
 	// The range belongs inside the CTE: outside it, the window function runs
 	// over the user's whole history before the filter applies.
-	cte := dedupCTEMultiMetricRange(priorities, "$1", inClause, startParam, endParam)
+	cte := dedupCTEMultiMetricRange(
+		db.resolvePrioritiesFor(ctx, userID, metricNames), metricNames,
+		"$1", inClause, startParam, endParam)
 
 	// One CASE covers both aggregations: metric_name is in the GROUP BY, so the
-	// branch is decided per group rather than per row.
+	// branch is decided per group rather than per row. The inner stage computes
+	// both candidates per 5-minute window; summing the window sums is the range
+	// total, averaging the window averages weighs every window alike.
 	cumulative := make([]string, 0, len(metricNames))
 	for _, name := range metricNames {
 		if cumulativeMetrics[name] {
-			cumulative = append(cumulative, "'"+strings.ReplaceAll(name, "'", "''")+"'")
+			cumulative = append(cumulative, quoteLiteral(name))
 		}
 	}
-	aggExpr := "AVG(COALESCE(qty, avg_val))"
+	sort.Strings(cumulative)
+	aggExpr := "AVG(mean)"
 	if len(cumulative) > 0 {
 		aggExpr = fmt.Sprintf(
-			"CASE WHEN metric_name IN (%s) THEN SUM(COALESCE(qty, avg_val)) ELSE AVG(COALESCE(qty, avg_val)) END",
+			"CASE WHEN metric_name IN (%s) THEN SUM(total) ELSE AVG(mean) END",
 			strings.Join(cumulative, ","))
 	}
 
 	query := fmt.Sprintf(
-		`%sSELECT metric_name, time_bucket('1 day', time) AS day, %s AS val
-		 FROM deduped
-		 WHERE rn = 1
+		`%s, windowed AS (
+			SELECT metric_name,
+			       time_bucket('1 day', time) AS day,
+			       %s AS sub,
+			       SUM(COALESCE(qty, avg_val)) AS total,
+			       AVG(COALESCE(qty, avg_val)) AS mean
+			FROM deduped
+			WHERE rn = 1
+			GROUP BY metric_name, day, sub
+		)
+		SELECT metric_name, day, %s AS val
+		 FROM windowed
 		 GROUP BY metric_name, day
 		 HAVING %s IS NOT NULL
 		 ORDER BY metric_name, day ASC`,
-		cte, aggExpr, aggExpr)
+		cte, dedupBucket, aggExpr, aggExpr)
 
 	rows, err := db.Pool.Query(ctx, query, args...)
 	if err != nil {

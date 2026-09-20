@@ -48,6 +48,10 @@ export default function MetricsPage() {
 
   const selected = lookup.get(metric);
   const multiplier = selected?.multiplier ?? 1;
+  // A counter's headline figure is the range total, not a per-sample average.
+  // The API field is called avg for both classes because the MCP tools ship the
+  // same struct, so the label is decided here.
+  const isCumulative = selected?.isCumulative ?? false;
   const agg = range === "1d" ? "hourly" : "daily";
 
   const seriesQuery = useQuery({
@@ -169,7 +173,10 @@ export default function MetricsPage() {
             }}
           >
             <Stat label="Latest" value={scale(latest, multiplier)} />
-            <Stat label="Mean" value={scale(stats?.avg ?? null, multiplier)} />
+            <Stat
+              label={isCumulative ? "Total" : "Mean"}
+              value={scale(stats?.avg ?? null, multiplier)}
+            />
             <Stat label="Min" value={scale(stats?.min ?? null, multiplier)} />
             <Stat label="Max" value={scale(stats?.max ?? null, multiplier)} />
             <Stat

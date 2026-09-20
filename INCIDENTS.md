@@ -16,6 +16,59 @@ the fix was verified, this file does not claim it was.
 
 ---
 
+## 2026-09-20 — The front page reported 32,361 steps for a day of 16,652
+
+**Symptoms.** The front page and the metric page disagreed about the same day.
+Measured against the deployed instance on 2026-09-20 for 2026-09-18:
+`/api/v1/metrics/latest` returned 32,361.5 steps, `/api/v1/timeseries` with a
+daily bucket returned 16,651.5. The front page series carried the same
+inflation on every day with Oura data: 31,154 on 09-07, 32,575 on 09-08,
+38,036 on 09-09. `/api/v1/metrics/stats` reported a third figure, an average of
+925.1 over `count: 18`, which the metric page showed under the label "Mean".
+
+**Root cause.** Two defects in `server/internal/storage`, both in the reduction
+that runs before every aggregate.
+
+`dedupCTE` numbered rows with `ROW_NUMBER() OVER (PARTITION BY
+time_bucket('5 minutes', time) ORDER BY <source priority>)` and every caller
+kept `rn = 1`. That expression decided two things at once: which source wins,
+and that exactly one row per window survives. For a counter the second half
+destroys the quantity — a sum over per-second samples becomes a sum over one of
+them.
+
+The source half failed where two sources use different reporting intervals.
+Oura writes a day's steps as a single row at 12:00 while Apple Health writes
+hourly blocks. Choosing per window kept the Oura total in its own window and
+summed the Apple blocks around it: 16,651.5 − 176 + 15,886 = 32,361.5. The
+metric page escaped this because `GetTimeSeries` resolves the `activity`
+priority, where Apple Health leads; `GetDailySeries` resolved `_default`, where
+Oura leads.
+
+`GetMetricStats` used `AVG` for every metric, including counters, so its
+headline figure answered what the average block of steps was.
+
+Rows in the deployed database for 2026-09-18, which show both halves: 19
+`step_count` rows, 18 hourly Apple blocks summing to 16,651.5 and one Oura row
+of 15,886 at 12:00.
+
+**Fix.** Source selection and row reduction were separated. The CTE now marks
+every row of the winning source with `rn = 1` via `FIRST_VALUE(source)`, so the
+predicate removes competing sources rather than competing samples. Cumulative
+metrics resolve the source per day, everything else per 5-minute window, because
+a daily choice would discard the windows the leading source missed — on the same
+day Apple Health held 54 heart rate windows in which Oura had no row, covering
+the morning strength session. Non-cumulative metrics average within the window
+first and then across windows; `GetMetricStats` sums for cumulative metrics; and
+multi-metric queries resolve each metric with its own category priority. See
+`DECISIONS.md`, 2026-09-20.
+
+**Lesson.** A reduction that both picks a source and drops rows will be correct
+for one of the two jobs at a time. Where two sources report the same quantity at
+different intervals, the choice belongs on the interval the quantity is stated
+over, not on a fixed window.
+
+---
+
 ## 2026-09-20 — The Withings integration delivered no measurement for 46 days
 
 **Symptoms.** `import_logs` carried one `withings_sync` row every 30 minutes with
