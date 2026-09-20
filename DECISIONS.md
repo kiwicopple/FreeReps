@@ -19,6 +19,68 @@ is as recorded there; where the record named no alternative, none is claimed.
 
 ---
 
+## 2026-09-20 — Data has its own ramp, and the nav bar has its own surface
+
+**Decided:** 2026-09-20
+
+**Decision.** Sleep stages and heart rate zones read `--color-data-1` through
+`--color-data-5` instead of the neutral ramp and the brand token. One hue,
+OKLCH 196 at chroma .044–.074, on the same lightness scale as `neutral-500`
+through `-900`; the dark variant mirrors it as the neutral ramp does. Zones take
+the steps by index, stages by absolute lightness — Deep at the dark end, Awake
+at the light one — through four `--color-stage-*` aliases that hold the
+theme-dependent reversal in CSS, so `stageColors.ts` stays a static map.
+
+The nav bar takes `--color-surface` and a hairline rule in place of the 2px one;
+the mobile tab bar follows. The page header stays on `--color-bg`.
+
+**Reasoning.** With data on the brand token, an awakening in the hypnogram was
+drawn in the same blue as the nav marker and the selected range button, and the
+neutral ramp coloured table rules and sparklines at the same time, so data and
+frame were not separable. This is the piece the role split of the same day named
+as unfinished.
+
+The order lives in lightness rather than hue, at about .09 L per step: petrol
+collapses to grey under protanopia and deuteranopia, so the hue identifies the
+series for viewers without a deficiency while the order holds for everyone. The
+hue sits 58° from the brand blue and 128° from the negative amber at about half
+their chroma, which keeps a data area from reading as selected or as judged, and
+the brand blue keeps its blueness in the same simulations. Chroma is pulled back
+at both ends of the ramp, away from the sRGB gamut wall, where a 4px hypnogram
+lane shifts in tone with the display profile.
+
+The scale carries no `color-mix()` and no alpha: `tokenColor()` resolves these
+for the uPlot canvas, and a transparent step shifts its lightness against the
+ground, which breaks the order the ramp exists to carry.
+
+**Alternatives rejected.** A separate tone for the top step — today's accent
+role for Awake and zone 5 — would break the ramp as an ordered series and add a
+third special colour next to brand and negative. The step out comes from the
+lightness jump instead: zone 5 is the ramp's strongest contrast, and between REM
+and Awake sits a skipped step, so `data-2` on light ground stays unused. Hue 176
+(jade) was measured as safer against confusion at 78° from the brand, and read
+as a foreign green family next to `#1d5fa8`.
+
+Two scales, one per series, were rejected because stages and zones carry the
+same semantics and never share a screen; the shared lightness ladder is what
+holds a REM swatch and a zone 3 swatch at the same visual weight.
+
+**In-bar labels.** `--color-neutral-100` on `--color-data-2` reaches 3.4:1 and
+`--color-text` on it 3.8:1, both under the 4.5:1 that 12.5px text needs, so only
+`data-4` and `data-5` can carry a label inside the fill. The composition and
+zone bars already put their labels outside it, so no component changed.
+
+**Trigger to re-open.** A thin `data-1` lane — the step reaches 2.4:1 on light
+ground and 2.0:1 on dark, which carries a wide block and not a 4px lane. The fix
+would lower that step by about .04 L rather than raise its chroma. A sixth
+series with more classes interpolates in the lightness space at hue 196 rather
+than adding a second hue.
+
+**Design handoff:** `design_handoff_datenfarben`, which supersedes
+`design_handoff_farbsystem` on this point.
+
+---
+
 ## 2026-09-20 — The front page keeps the per-metric latest-value lookup
 
 **Decided:** 2026-09-20
