@@ -16,6 +16,86 @@ the fix was verified, this file does not claim it was.
 
 ---
 
+## 2026-09-20 — The Withings integration delivered no measurement for 46 days
+
+**Symptoms.** `import_logs` carried one `withings_sync` row every 30 minutes with
+`status = error` and the message `getting token: refreshing token: decoding token
+body: json: cannot unmarshal number into Go struct field tokenBody.userid of type
+string`. Measured against the deployed instance on 2026-09-20 over the last
+40,000 log rows: 2,204 `withings_sync` runs, of which 7 succeeded — all on
+2026-08-05, the day the integration was deployed, each with
+`metrics_inserted = 0`. The first failure is 2026-08-05 18:48Z, 30 minutes after
+the last success. `GET /api/v1/metrics?metric=weight_body_mass` returned no row
+for 2026-07-01 to 2026-09-21, so no weight, body composition or blood pressure
+value ever reached the database through this path.
+
+The dashboard showed no error. The metrics stayed registered in
+`metric_allowlist` and simply carried no data, which reads the same as "not
+measured yet".
+
+**Root cause.** `tokenBody.UserID` in `server/internal/withings/models.go` was
+declared `string` with tag `json:"userid"`, matching the quoted form the Public
+API guide documents. Withings sends the field as a bare number. `json.Unmarshal`
+fails the whole struct on a type mismatch in one field, so `postToken` returned
+an error instead of the token pair, and `GetValidToken` never reached the store.
+
+Two properties turned one wrong field type into a 46-day outage:
+
+- **The access token lives 3 hours**, so almost every sync cycle refreshes first.
+  A refresh that cannot be decoded fails every subsequent sync, not only one.
+- **The refresh token rotates.** Withings issued a new pair on each of the 2,197
+  failed refreshes while FreeReps discarded the response, so the stored refresh
+  token is long dead and the fix alone does not restore the connection — the
+  consent flow has to run again.
+
+**Fix.** `flexString` reads the field from either encoding, mirroring the
+existing `flexBool` for `more` (commit in this change). `postToken` keeps
+returning an error when the token pair is empty, so a genuinely malformed body
+still fails loudly. `server/specs/withings-api.md` records both encodings and the
+date the change was observed. `token_test.go` covers the numeric and the quoted
+form, because a fix that swaps one for the other breaks the other direction.
+
+**Lesson.** A vendor field typed from the vendor's example is a single point of
+failure for the whole response; read scalars that carry an identifier through a
+decoder that accepts both encodings. The second lesson is about visibility: an
+integration whose only failure signal is a row in `import_logs` can be down for
+six weeks while every screen looks merely empty.
+
+---
+
+## 2026-09-20 — One sport carried two workout names after the first Health Auto Export REST payload
+
+**Symptoms.** After the first HAE REST export (25 workouts, 2026-09-12 to
+2026-09-20), the workout list showed `Radfahren` and `Cycling` as separate types
+for two rides on the same day. Filtering by type returned one of them; the
+per-type grouping counted them apart.
+
+An audit of all 2,851 stored workouts on 2026-09-20 found three names that are
+not canonical: `Radfahren` (1 row), `Dance` (2), `yardwork` (1). `Tennis` (1) and
+`Underwater Diving` (68) are their own canonical form and stay unchanged.
+
+**Root cause.** `workoutNameMap` in `server/internal/ingest/workouts.go` held the
+location-prefixed German names `Outdoor Radfahren` and `Innenräume Radfahren`,
+but not the unprefixed `Radfahren` that HAE delivered. `NormalizeWorkoutName`
+returns an unmapped name unchanged, by design — the map cannot know every
+activity type — so the gap surfaces as a second name for a sport that already had
+276 rows, not as an error.
+
+`Dance` and `yardwork` are the same class: the canonical values `Dancing` and a
+Yard Work entry existed only for the Oura spelling, or not at all.
+
+**Fix.** Three map entries (`Radfahren` → `Cycling`, `Dance` → `Dancing`,
+`yardwork` → `Yard Work`) plus migration
+`000029_normalize_workout_names_round_two`, which renames the four stored rows.
+`workouts_test.go` covers the three names and, as the counter-case, `Tennis` and
+`Underwater Diving`, which must pass through unchanged.
+
+**Lesson.** A source change that keeps the payload format can still change the
+vocabulary inside it; after switching an ingest path, audit the distinct values of
+every normalized column against the map rather than reading the first rows.
+
+---
+
 ## 2026-08-10 — The Alpha Progression history was stored twice, offset by the Berlin UTC offset
 
 **Symptoms.** `get_strength_summary` reported 378 working sets and 171,869 kg of

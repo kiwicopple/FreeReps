@@ -44,3 +44,8 @@ server/internal/ingest/workouts.go%%"Innenräume Radfahren"
 server/internal/ingest/workouts.go%%"Innenräume Spaziergang"
 server/internal/ingest/workouts.go%%"Outdoor Ausführen"
 server/internal/ingest/workouts_test.go%%"Innenräume Radfahren"
+
+# The 2026-09-20 postmortem names the workoutNameMap keys it is about. These are
+# verbatim Apple Health workout names, the same strings the map holds; writing
+# them in English would describe a key that does not exist.
+INCIDENTS.md%%Innenräume Radfahren

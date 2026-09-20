@@ -139,3 +139,52 @@ func TestPostTokenRefreshSendsRefreshToken(t *testing.T) {
 		t.Errorf("refresh_token = %q, want the rotated value new-refresh", tok.RefreshToken)
 	}
 }
+
+// TestPostTokenAcceptsNumericUserID covers the encoding change that stopped the
+// integration: Withings began sending `userid` as a bare number on 2026-08-05,
+// and against the previous string field the whole token body failed to decode.
+// Every refresh then returned an error, so no measurement arrived for 46 days
+// while the sync kept reporting a token problem (INCIDENTS.md, 2026-09-20).
+func TestPostTokenAcceptsNumericUserID(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = fmt.Fprint(w, `{"status":0,"body":{"userid":33445566,"access_token":"access-tok",
+			"refresh_token":"refresh-tok","token_type":"Bearer","expires_in":10800}}`)
+	}))
+	defer srv.Close()
+
+	tm := &TokenManager{httpClient: srv.Client(), tokenURL: srv.URL}
+	tok, err := tm.postToken(context.Background(), "cid", "csecret", url.Values{
+		"grant_type":    {"refresh_token"},
+		"refresh_token": {"old-refresh"},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if tok.UserID != "33445566" {
+		t.Errorf("userid = %q, want 33445566", tok.UserID)
+	}
+	if tok.AccessToken != "access-tok" || tok.RefreshToken != "refresh-tok" {
+		t.Errorf("token pair = %q/%q, want access-tok/refresh-tok", tok.AccessToken, tok.RefreshToken)
+	}
+}
+
+// TestPostTokenAcceptsQuotedUserID keeps the earlier encoding covered, because
+// the fix has to read both forms rather than replace one with the other.
+func TestPostTokenAcceptsQuotedUserID(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = fmt.Fprint(w, `{"status":0,"body":{"userid":"42","access_token":"access-tok",
+			"refresh_token":"refresh-tok","token_type":"Bearer","expires_in":10800}}`)
+	}))
+	defer srv.Close()
+
+	tm := &TokenManager{httpClient: srv.Client(), tokenURL: srv.URL}
+	tok, err := tm.postToken(context.Background(), "cid", "csecret", url.Values{
+		"grant_type": {"refresh_token"},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if tok.UserID != "42" {
+		t.Errorf("userid = %q, want 42", tok.UserID)
+	}
+}

@@ -104,6 +104,13 @@ Success body:
   anything.
 - `userid` identifies the Withings account. FreeReps stores it; it is the key
   webhook notifications would arrive under if push is added later.
+- **`userid` arrives quoted or as a bare number**, and the encoding changed on
+  2026-08-05 from the string shown above to `"userid": 12345`. The field is read
+  through `flexString` (`internal/withings/models.go`), which accepts both.
+  *Why it matters:* a type mismatch in one field fails the decode of the whole
+  token body, and the refresh then returns an error instead of a token pair —
+  the failure mode that kept the integration from delivering a single
+  measurement for 46 days ([`INCIDENTS.md`](../../INCIDENTS.md), 2026-09-20).
 
 Some Withings integration types (dropship, cellular) require a `nonce` obtained
 from `action=getnonce` plus an HMAC-SHA256 signature on token requests. The

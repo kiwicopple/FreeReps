@@ -144,7 +144,7 @@ func (tm *TokenManager) storeToken(ctx context.Context, userID int, tok *tokenBo
 		RefreshToken:   tok.RefreshToken,
 		TokenType:      tokenType,
 		ExpiresAt:      time.Now().Add(time.Duration(tok.ExpiresIn) * time.Second),
-		WithingsUserID: tok.UserID,
+		WithingsUserID: string(tok.UserID),
 	})
 }
 

@@ -1,0 +1,2 @@
+-- Cannot reliably reverse name normalization: the renamed rows are no longer
+-- distinguishable from the rows that already carried the canonical name.

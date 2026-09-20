@@ -1,6 +1,10 @@
 package withings
 
-import "encoding/json"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+)
 
 // Response is the envelope every Withings endpoint returns. The HTTP status is
 // 200 even for errors; Status carries the outcome. See specs/withings-api.md.
@@ -58,12 +62,41 @@ func (b *flexBool) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// flexString accepts a field that arrives either quoted or as a bare number.
+// Withings sent `userid` as a string in the token body until 2026-08-05 and as a
+// number from that day on. Decoding into a plain string field fails the whole
+// token body, so every refresh returned an error and the integration delivered
+// no measurement for 46 days (see INCIDENTS.md, 2026-09-20).
+type flexString string
+
+func (s *flexString) UnmarshalJSON(data []byte) error {
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 || string(trimmed) == "null" {
+		*s = ""
+		return nil
+	}
+	if trimmed[0] == '"' {
+		var str string
+		if err := json.Unmarshal(trimmed, &str); err != nil {
+			return err
+		}
+		*s = flexString(str)
+		return nil
+	}
+	var num json.Number
+	if err := json.Unmarshal(trimmed, &num); err != nil {
+		return fmt.Errorf("decoding %s as string or number: %w", trimmed, err)
+	}
+	*s = flexString(num.String())
+	return nil
+}
+
 // tokenBody is the body of a requesttoken response.
 type tokenBody struct {
-	UserID       string `json:"userid"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	Scope        string `json:"scope"`
-	ExpiresIn    int    `json:"expires_in"`
-	TokenType    string `json:"token_type"`
+	UserID       flexString `json:"userid"`
+	AccessToken  string     `json:"access_token"`
+	RefreshToken string     `json:"refresh_token"`
+	Scope        string     `json:"scope"`
+	ExpiresIn    int        `json:"expires_in"`
+	TokenType    string     `json:"token_type"`
 }
