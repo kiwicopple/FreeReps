@@ -81,17 +81,23 @@ func main() {
 	db.SetSourcePriority(cfg.SourcePriority)
 	log.Info("database connected")
 
-	// Backfill sleep sessions from stages (idempotent — ON CONFLICT DO NOTHING)
-	if err := db.BackfillSleepSessions(ctx, log); err != nil {
-		log.Warn("sleep session backfill failed", "error", err)
-	}
-
 	// Seed demo data if requested (via -demo flag or FREEREPS_DEMO=true env var)
 	if *demoMode || os.Getenv("FREEREPS_DEMO") == "true" {
 		if err := demo.Seed(ctx, db, log); err != nil {
 			log.Error("demo seed failed", "error", err)
 			os.Exit(1)
 		}
+	}
+
+	// Backfill sleep sessions from stages (idempotent — ON CONFLICT DO NOTHING).
+	//
+	// After the seed, not before it: the seed writes sleep stages, and a
+	// backfill that ran first leaves a fresh demo database without the
+	// sleep_analysis metric until the next start. The front page then shows
+	// three hero numbers and an empty fourth cell. For a real deployment the
+	// order makes no difference, because nothing seeds.
+	if err := db.BackfillSleepSessions(ctx, log); err != nil {
+		log.Warn("sleep session backfill failed", "error", err)
 	}
 
 	// MCP stdio mode: serve MCP protocol over stdin/stdout, then exit
