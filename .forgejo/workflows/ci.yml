@@ -14,10 +14,14 @@ jobs:
       run:
         working-directory: server
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: server/go.mod
+          # The module checksums sit under server/, and the action looks for
+          # them at the repository root. Without this the module cache is never
+          # restored and every run downloads the dependencies again.
+          cache-dependency-path: server/go.sum
       # The web UI is embedded via go:embed web/dist — without the directory
       # the backend does not compile. The real assets come from the `frontend`
       # job / the Dockerfile's frontend stage; here a stub is enough.
@@ -26,7 +30,7 @@ jobs:
       - run: go build ./...
       - run: go vet ./...
       - run: go test ./...
-      - uses: golangci/golangci-lint-action@v7
+      - uses: golangci/golangci-lint-action@v9
         with:
           version: v2.10.1
           working-directory: server
@@ -37,8 +41,8 @@ jobs:
       run:
         working-directory: server/web
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: npm
@@ -50,7 +54,7 @@ jobs:
   documents:
     runs-on: docker
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # check-docs.sh reads the module selection from
       # .claude/project-standards.json with python3. Without python3, has_module
       # returns false, the language sweep prints "skipped" and this job goes

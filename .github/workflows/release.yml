@@ -54,6 +54,10 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: server/go.mod
+          # Without this the action looks for the checksums at the repository
+          # root, reports "Dependencies file is not found" and skips the module
+          # cache, so every run downloads the dependencies again.
+          cache-dependency-path: server/go.sum
 
       - name: Build freereps-upload
         env:
