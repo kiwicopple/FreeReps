@@ -30,6 +30,12 @@ jobs:
       - uses: docker/build-push-action@v7
         with:
           context: server
+          # arm64 is here so a self-hosted install on a Pi or an Apple Silicon
+          # machine can pull the release; through 1.2.0 the manifest carried
+          # amd64 alone and `docker pull` on arm64 failed with "no matching
+          # manifest". The Dockerfile cross-compiles rather than emulating, so
+          # the second platform costs a Go build, not a QEMU run.
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'push' }}
           tags: |
             meltforce/freereps:latest

@@ -1,7 +1,11 @@
 # syntax=docker/dockerfile:1
 
 # Stage 1: Build frontend
-FROM node:24-alpine AS frontend
+#
+# Pinned to the build host's architecture: the output is JavaScript, identical
+# for every target, so building it once per target platform would only cost
+# time.
+FROM --platform=$BUILDPLATFORM node:24-alpine AS frontend
 WORKDIR /build
 COPY web/package.json web/package-lock.json ./
 # The cache mount survives between builds on a persistent builder, so a
@@ -11,8 +15,14 @@ COPY web/ ./
 RUN npm run build
 
 # Stage 2: Build Go binary
-FROM golang:1.27-alpine AS backend
+#
+# Also pinned to the build host, with GOARCH taken from the target instead. Go
+# cross-compiles, so a linux/arm64 image is built at native speed; leaving this
+# unpinned would run the whole compile under QEMU emulation.
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS backend
 ARG VERSION=dev
+ARG TARGETOS
+ARG TARGETARCH
 WORKDIR /build
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod go mod download
@@ -30,7 +40,8 @@ COPY --from=frontend /build/dist ./web/dist
 # recompiles every dependency, tailscale.com included, on every run.
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 go build -ldflags "-X main.Version=${VERSION}" -o freereps ./cmd/freereps
+    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    go build -ldflags "-X main.Version=${VERSION}" -o freereps ./cmd/freereps
 
 # Stage 3: Runtime
 FROM alpine:3.24
