@@ -17,7 +17,7 @@ COPY --from=frontend /build/dist ./web/dist
 RUN CGO_ENABLED=0 go build -ldflags "-X main.Version=${VERSION}" -o freereps ./cmd/freereps
 
 # Stage 3: Runtime
-FROM alpine:3.20
+FROM alpine:3.24
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 COPY --from=backend /build/freereps .

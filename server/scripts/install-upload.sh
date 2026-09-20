@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # FreeReps Upload Tool Installer
-# Install:   curl -sSL https://raw.githubusercontent.com/meltforce/FreeReps/main/scripts/install-upload.sh | bash
+# Install:   curl -sSL https://raw.githubusercontent.com/meltforce/FreeReps/main/server/scripts/install-upload.sh | bash
 # Update:    curl -sSL ... | bash -s -- --update
 # Uninstall: curl -sSL ... | bash -s -- --uninstall
 
