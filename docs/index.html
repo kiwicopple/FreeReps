@@ -224,7 +224,10 @@ footer nav { display: flex; gap: 1.5rem; justify-content: center; margin-bottom:
   var lbImg = lb.querySelector('img');
   document.querySelectorAll('.screenshots img').forEach(function(img) {
     img.addEventListener('click', function() {
-      lbImg.src = this.src;
+      // currentSrc, not src: inside a <picture> the src attribute always names
+      // the light file, while currentSrc is the variant the browser resolved
+      // for the active colour scheme.
+      lbImg.src = this.currentSrc || this.src;
       lbImg.alt = this.alt;
       lb.classList.add('active');
     });
