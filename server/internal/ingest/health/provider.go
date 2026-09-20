@@ -25,6 +25,39 @@ func NewProvider(db *storage.DB, log *slog.Logger) *Provider {
 	return &Provider{db: db, log: log}
 }
 
+// sleepSyncSources are the providers that deliver sleep through a channel of
+// their own. Their nights reach this endpoint a second time because the
+// provider's app writes them into HealthKit and the FreeReps iOS app forwards
+// every category type it finds.
+var sleepSyncSources = []string{"Oura", "Withings"}
+
+// sleepClaimedBySync reports the source that owns this user's sleep, if that
+// source runs its own sync.
+//
+// The two deliveries describe the same night but not identically: the Oura API
+// cuts sleep_phase_5_min into segments on a 5-minute grid, while HealthKit
+// carries second-precision bounds and an "In Bed" sample the API never sends.
+// The unique index on (start_time, end_time, stage, user_id) therefore lets
+// both through, and the stage composition counted the night twice — measured on
+// 2026-09-20 at 17.27 hours of stages against 8.6 hours in bed.
+//
+// Both also carry the same source name, so no priority can separate them after
+// the fact. The decision is made here instead, on the category priority the
+// user configured: when sleep belongs to a syncing provider, this endpoint
+// leaves sleep alone. Everything else in the payload is unaffected.
+func (p *Provider) sleepClaimedBySync(ctx context.Context, userID int) (string, bool) {
+	priorities := p.db.ResolveSourcePriority(ctx, userID, "sleep")
+	if len(priorities) == 0 {
+		return "", false
+	}
+	for _, s := range sleepSyncSources {
+		if strings.EqualFold(priorities[0], s) {
+			return priorities[0], true
+		}
+	}
+	return "", false
+}
+
 // Ingest processes a health data JSON payload and stores accepted data.
 func (p *Provider) Ingest(ctx context.Context, payload *models.HealthPayload, userID int) (*ingest.Result, error) {
 	result := &ingest.Result{}
@@ -223,6 +256,14 @@ func convertMetricDataPoint(name, units string, raw json.RawMessage, userID int)
 }
 
 func (p *Provider) processSleep(ctx context.Context, m models.HealthMetric, userID int, result *ingest.Result) error {
+	// Sessions and stages both, so the night does not arrive twice in either
+	// shape. See sleepClaimedBySync.
+	if owner, claimed := p.sleepClaimedBySync(ctx, userID); claimed {
+		p.log.Debug("skipping sleep payload",
+			"owner", owner, "reason", "sleep is resolved to a source with its own sync")
+		return nil
+	}
+
 	for _, raw := range m.Data {
 		result.MetricsReceived++
 
@@ -669,6 +710,12 @@ func (p *Provider) processCategorySamples(ctx context.Context, samples []models.
 	}
 
 	// Extract sleep stages from sleep category samples.
+	if owner, claimed := p.sleepClaimedBySync(ctx, userID); claimed {
+		p.log.Debug("skipping sleep stages from category samples",
+			"owner", owner, "reason", "sleep is resolved to a source with its own sync")
+		return nil
+	}
+
 	var sleepStages []models.SleepStageRow
 	for _, cs := range samples {
 		if !strings.EqualFold(cs.Type, "HKCategoryTypeIdentifierSleepAnalysis") &&
@@ -711,4 +758,3 @@ func (p *Provider) processCategorySamples(ctx context.Context, samples []models.
 
 	return nil
 }
-

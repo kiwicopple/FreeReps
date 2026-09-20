@@ -16,6 +16,62 @@ the fix was verified, this file does not claim it was.
 
 ---
 
+## 2026-09-20 — Every night's sleep stages were stored twice
+
+**Symptoms.** The hypnogram drew a grey bar across the whole Awake lane, and
+the night's first awakening was missing from it. The stage composition did not
+add up: Deep 3:21 plus Core 8:16 plus REM 2:47 plus Awake 2:54 is 17:18, against
+8:36 reported as time in bed, and the plot claimed 40 awakenings where the ring
+reports about half. The figures above the composition — 7:13 asleep, 8:36 in
+bed — were right, which is what kept this unnoticed.
+
+Measured against the deployed instance on 2026-09-20 for the night of the 19th:
+135 stage rows, 59 overlapping pairs, 17.27 hours of stages.
+
+**Root cause.** Two defects, one visible only because of the other.
+
+The ring reaches FreeReps twice. `internal/oura/sync.go` fetches the night from
+the Oura API, where `parseSleepPhases` cuts `sleep_phase_5_min` into segments on
+a 5-minute grid from `bedtime_start`. The Oura app also writes the same night
+into HealthKit, from where the FreeReps iOS app forwards it:
+`SyncService.swift:1293` iterates `HealthDataTypes.allCategoryTypes` with no way
+to deselect one, and `internal/ingest/health/provider.go` turned those
+`HKCategoryTypeIdentifierSleepAnalysis` samples into a second set of
+`sleep_stages`. For that night, 38 rows on the Oura grid against 96 beside it.
+
+Neither guard applied. The unique index on
+`(start_time, end_time, stage, user_id)` compares interval bounds, and the two
+deliveries differ by seconds to minutes. A source priority could not separate
+them either, because both carry `source = 'Oura'` — the mapper sets the
+constant, the iOS app passes `sourceDisplayName`, which for those samples is the
+Oura app.
+
+The grey bar is the second defect. HealthKit also reports an `In Bed` sample
+spanning the night, which the Oura API never sends. `Hypnogram.tsx` computed its
+lane as `Math.max(0, STAGE_LANES.indexOf(stage))`, so an unrecognised stage fell
+into lane 0 — the Awake lane. Blocks render in array order and that sample sorts
+directly after the night's first two awakenings, so it covered exactly those and
+nothing after them.
+
+**Fix.** Three changes. `Hypnogram.tsx` draws only stages that have a lane, so
+an unrecognised one renders nowhere rather than across the first. The ingest
+endpoint leaves sleep alone when the user's sleep resolves to a provider that
+syncs on its own (`sleepClaimedBySync`); the category samples are still stored,
+only the second extraction into `sleep_stages` is refused. Migration
+`000032_dedupe_sleep_stages` removes the rows already written, identifying them
+by the category sample with the same user and the same bounds, and only for
+users whose priority names such a provider — a user without one keeps every row,
+because for them this path is the only one. Rehearsed against the real night in
+a scratch database: 248 rows to 64, `In Bed` gone, and 248 unchanged when the
+priority names Apple Health.
+
+**Lesson.** One provider is not one path. Oura arrives twice because its app
+writes into HealthKit and a second client forwards that, and both deliveries
+carry the provider's name — so the question "which source wins" cannot be
+answered downstream. It has to be decided where the data enters.
+
+---
+
 ## 2026-09-20 — The front page reported 32,361 steps for a day of 16,652
 
 **Symptoms.** The front page and the metric page disagreed about the same day.

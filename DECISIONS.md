@@ -19,6 +19,47 @@ is as recorded there; where the record named no alternative, none is claimed.
 
 ---
 
+## 2026-09-20 — Sleep belongs to one channel, decided at the entrance
+
+**Decided:** 2026-09-20
+
+**Decision.** The ingest endpoint (`POST /api/v1/ingest`) does not write sleep —
+neither sessions nor stages — when the user's source priority for the `sleep`
+category resolves to a provider that synchronises through its own channel.
+`sleepSyncSources` names those providers: Oura and Withings. Everything else in
+the same payload is stored as before, the sleep category samples included; only
+their extraction into `sleep_stages` is refused.
+
+**Reasoning.** A provider is not a path. Oura's nights arrive twice: once from
+its API, once from HealthKit, where the Oura app writes them and the FreeReps
+iOS app forwards every category type it finds. Both deliveries carry
+`source = 'Oura'`, so nothing downstream can tell them apart — not the unique
+index, whose interval bounds differ by seconds between the two, and not a source
+priority, which would compare a name against itself. Every night was therefore
+stored twice (`INCIDENTS.md`, 2026-09-20).
+
+Resolving it at read time, the way cumulative metrics are resolved since the
+same day, is not available here for that reason: the two candidates are
+indistinguishable once stored. The decision moves to the entrance, where the
+channel is still known.
+
+The rule reads the priority the user already configures rather than a flag of
+its own, so the setting that says "Oura owns my sleep" is the setting that stops
+the second copy. A category rule outranks `_default`, exactly as
+`ResolveSourcePriority` reads it: naming Apple Health for sleep while Oura leads
+everywhere else keeps sleep flowing through the endpoint.
+
+**Alternatives rejected.** Dropping sleep from the iOS app's sync would decide
+for every user from one user's setup, and the app cannot know what the server
+already has. Refusing sleep from the endpoint unconditionally would lose it for
+anyone without a syncing provider, for whom this is the only route.
+
+**Trigger to re-open.** A provider that syncs sleep but leaves gaps the
+HealthKit path would fill. The rule takes the whole category from one channel;
+it does not merge them.
+
+---
+
 ## 2026-09-20 — Colour carries four roles, not one
 
 **Decided:** 2026-09-20
