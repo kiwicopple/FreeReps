@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/claude/freereps/internal/alerts"
 	"github.com/claude/freereps/internal/hevy"
 	"github.com/claude/freereps/internal/ingest/alpha"
 	"github.com/claude/freereps/internal/ingest/health"
@@ -40,6 +41,11 @@ type Server struct {
 	withingsTokenMgr *withings.TokenManager
 	withingsSyncer   *withings.Syncer
 
+	// Alert channel into juno (nil if not wired up). The handler needs it for
+	// the Settings screen's test message; the periodic checks run in the
+	// watcher's own goroutine.
+	alerts *alerts.Watcher
+
 	// HAE TCP import state (only one import at a time)
 	importMu     sync.Mutex
 	activeImport *haeImportState
@@ -56,6 +62,12 @@ func (s *Server) SetOura(tm *oura.TokenManager, syncer *oura.Syncer) {
 // Must be called before the server starts handling requests.
 func (s *Server) SetHevy(syncer *hevy.Syncer) {
 	s.hevySyncer = syncer
+}
+
+// SetAlerts configures the alert watcher.
+// Must be called before the server starts handling requests.
+func (s *Server) SetAlerts(w *alerts.Watcher) {
+	s.alerts = w
 }
 
 // SetWithings configures the Withings integration components.
@@ -175,6 +187,11 @@ func (s *Server) routes() {
 		r.Get("/api/v1/vision-prescriptions", s.handleGetVisionPrescriptions)
 		r.Get("/api/v1/state-of-mind", s.handleGetStateOfMind)
 		r.Get("/api/v1/category-samples", s.handleGetCategorySamples)
+
+		// Alert channel into juno — configuration, state and a manual test
+		r.Get("/api/v1/alerts", s.handleAlertSettings)
+		r.Put("/api/v1/alerts", s.handleSaveAlertSettings)
+		r.Post("/api/v1/alerts/test", s.handleTestAlert)
 
 		// Settings / admin endpoints
 		r.Post("/api/v1/training-metrics/rebuild", s.handleRebuildTrainingMetrics)

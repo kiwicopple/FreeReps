@@ -19,6 +19,57 @@ is as recorded there; where the record named no alternative, none is claimed.
 
 ---
 
+## 2026-09-20 — A failing data source reports itself into the homelab alert channel
+
+**Decided:** 2026-09-20
+
+**Decision.** FreeReps posts its own alerts into the ntfy topic `kuma-json`,
+which the `homelab-alert` adapter on juno reads. The payload contract, the topic
+and the `monitor_id` ranges are the homelab's, written down in that repo's
+`STANDARDS.md` § *Machine-readable alerts into juno*; this project owns the block
+9200–9299 and the rules behind each id (`server/internal/alerts/watcher.go`):
+
+| id | Condition |
+|---|---|
+| 9200 | the manual channel test from Settings → Alerts |
+| 9201 / 9202 / 9203 | the Withings, Oura and Hevy sync failing repeatedly |
+| 9204 | no Health Auto Export delivery for longer than the silence threshold |
+
+Four sub-decisions that are not obvious from the code:
+
+- **The rules read `import_logs`, they do not hook into the sync loops.** A
+  syncer that stopped running writes no row at all, and a rule that fires on a
+  failed run would stay silent for exactly that case. The same query then also
+  covers the Apple Health path, which this server does not poll — there the
+  condition is silence.
+- **The configuration is a database row, edited in the Settings UI**
+  (`alert_settings`, one row, seeded once from `config.yaml`). Every other
+  integration in this project is configured in that screen, and a value that
+  lives only in the deployed config file needs an Ansible run to change. The seed
+  is one-directional so a redeploy cannot overwrite what was entered.
+- **Three consecutive failed runs for one user, not one.** The Withings sync
+  produced isolated DNS failures (`server misbehaving`) among the 2,197 real
+  ones; at a 30-minute interval the threshold reports a defect within two hours
+  while a single timeout stays out of the session.
+- **The state is stored and the message sent on the transition only.** juno
+  threads one dispatch per `monitor_id`, so repeating `status: 0` every cycle
+  appends to the same thread without adding information. The state is written
+  after the send succeeded, so an ntfy outage delays an alert instead of
+  swallowing it.
+
+**Reasoning.** The Withings integration failed every 30 minutes for 46 days and
+nothing said so ([`INCIDENTS.md`](INCIDENTS.md), 2026-09-20); the only signal was
+a row in `import_logs` that nothing reads on a schedule. Uptime Kuma cannot close
+that gap from outside: the container is healthy and the HTTP endpoint answers
+while a source silently delivers nothing, which is what its monitors check.
+
+**Trigger to re-open.** A second consumer of the channel that needs a different
+payload shape; a condition whose firing rate makes the channel noisy enough to be
+muted; or the homelab moving off ntfy, which would change the transport but not
+the per-condition id.
+
+---
+
 ## 2026-08-10 — The Alpha session timezone is configuration, and the natural key stays at the instant
 
 **Decided:** 2026-08-10

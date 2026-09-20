@@ -14,12 +14,14 @@ import (
 	"time"
 
 	freereps "github.com/claude/freereps"
+	"github.com/claude/freereps/internal/alerts"
 	"github.com/claude/freereps/internal/config"
 	"github.com/claude/freereps/internal/demo"
 	"github.com/claude/freereps/internal/hevy"
 	"github.com/claude/freereps/internal/ingest/alpha"
 	"github.com/claude/freereps/internal/ingest/health"
 	freerepsmcp "github.com/claude/freereps/internal/mcp"
+	"github.com/claude/freereps/internal/notify"
 	"github.com/claude/freereps/internal/oura"
 	"github.com/claude/freereps/internal/server"
 	"github.com/claude/freereps/internal/storage"
@@ -144,6 +146,35 @@ func main() {
 
 	srv.SetWithings(withingsTokenMgr, withingsSyncer)
 	log.Info("withings sync started", "interval", cfg.Withings.SyncInterval)
+
+	// Start the alert watcher. It reads import_logs rather than hooking into the
+	// syncers above, so a syncer that stopped running is also covered
+	// (internal/alerts), and it reads its configuration from the database on
+	// every cycle, so an edit in the Settings UI takes effect without a restart.
+	//
+	// config.yaml only seeds the row: a redeploy must not overwrite what was
+	// entered in the UI, and a fresh database must not come up silent.
+	seeded, err := db.SeedAlertSettings(ctx, storage.AlertSettings{
+		Enabled:          cfg.Alerts.Enabled,
+		NtfyURL:          cfg.Alerts.NtfyURL,
+		Hostname:         cfg.Alerts.Hostname,
+		CheckInterval:    cfg.Alerts.CheckInterval,
+		FailureThreshold: cfg.Alerts.FailureThreshold,
+		AppleSilence:     cfg.Alerts.AppleSilence,
+	})
+	if err != nil {
+		log.Error("seeding alert settings failed", "error", err)
+		os.Exit(1)
+	}
+	if seeded {
+		log.Info("alert settings seeded from config",
+			"enabled", cfg.Alerts.Enabled, "target", cfg.Alerts.NtfyURL)
+	}
+
+	alertWatcher := alerts.NewWatcher(db, notify.New(log), log)
+	go alertWatcher.Run(syncCtx)
+	srv.SetAlerts(alertWatcher)
+	log.Info("alert watcher started")
 
 	// Mount MCP SSE server
 	mcpSrv := freerepsmcp.New(db, Version, log)

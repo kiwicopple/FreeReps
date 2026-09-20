@@ -38,5 +38,4 @@ each becomes its own `[open]` row before the entry is moved out.
 
 | Status | Item | Where | Trigger | Notes |
 |---|---|---|---|---|
-| `[open]` | A failing source sync raises no notification | `server/internal/server/handlers_settings.go`, or the homelab ntfy path | | `logImport` writes the failure to `import_logs` and nothing reads that table on a schedule. The Withings refresh failed every 30 minutes for 46 days while the dashboard showed empty metrics rather than an error ([`INCIDENTS.md`](INCIDENTS.md), 2026-09-20). What the alert has to distinguish is a source that fails from a source that legitimately returns nothing. Where the alert is sent is governed by the homelab monitoring conventions (`STANDARDS.md`), not by this repo. |
 | `[open]` | Tear down the App Store review test server | `https://freereps-test.meltforce.net/` | App Store approval received | Public-facing instance without Tailscale, deployed for review only. It carries demo data, not real health data, but it is the one FreeReps endpoint reachable outside the tailnet. |

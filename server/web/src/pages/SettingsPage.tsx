@@ -1,5 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
+import AlertsTab from "../components/settings/AlertsTab";
 import FrontPageTab from "../components/settings/FrontPageTab";
 import HevyTab from "../components/settings/HevyTab";
 import IdentityTab from "../components/settings/IdentityTab";
@@ -22,6 +23,7 @@ const TABS = [
   { id: "front-page", label: "Front page", render: () => <FrontPageTab /> },
   { id: "ingest", label: "Ingest", render: () => <IngestTab /> },
   { id: "import", label: "Import", render: () => <ImportTab /> },
+  { id: "alerts", label: "Alerts", render: () => <AlertsTab /> },
 ] as const;
 
 type TabID = (typeof TABS)[number]["id"];

@@ -34,6 +34,21 @@ withings:
   sync_interval: "30m"   # how often to poll Withings (per-user creds configured in Settings UI)
   backfill_days: 90      # days of history to fetch on first sync
 
+# Machine-readable alerts into the homelab channel the session on juno reads.
+# The payload contract, the ntfy topic and the monitor_id range 9200-9299 belong
+# to the homelab repo, STANDARDS.md § "Machine-readable alerts into juno".
+#
+# These values seed the `alert_settings` row on first start only. After that the
+# Settings screen (Settings → Alerts) owns them, and this block is ignored — a
+# redeploy must not overwrite what was entered there.
+alerts:
+  enabled: false
+  ntfy_url: "https://ntfy.coydog-fence.ts.net/kuma-json"
+  hostname: "freereps"
+  check_interval: "5m"
+  failure_threshold: 3   # consecutive failed runs of one source for one user
+  apple_silence: "36h"   # no Health Auto Export delivery for this long
+
 # Which source wins when two of them cover the same measurement. Named entries
 # match by prefix; "" is the empty source Health Auto Export writes.
 source_priority:

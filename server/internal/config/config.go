@@ -25,6 +25,7 @@ type Config struct {
 	Oura           OuraConfig      `yaml:"oura"`
 	Hevy           HevyConfig      `yaml:"hevy"`
 	Withings       WithingsConfig  `yaml:"withings"`
+	Alerts         AlertsConfig    `yaml:"alerts"`
 	SourcePriority []string        `yaml:"source_priority"`
 }
 
@@ -95,6 +96,34 @@ type WithingsConfig struct {
 	RawSyncInterval string `yaml:"sync_interval"`
 }
 
+// AlertsConfig holds the machine-readable alert channel into juno. The payload
+// contract, the ntfy topic and the monitor_id ranges belong to the homelab repo,
+// STANDARDS.md § "Machine-readable alerts into juno" — the URL is configuration
+// here rather than a constant because the tailnet name is not a property of this
+// project (it changed once already, from leo-royal to coydog-fence).
+//
+// Disabled by default: a deployment without the homelab's ntfy would otherwise
+// post into nothing every check interval.
+type AlertsConfig struct {
+	Enabled bool `yaml:"enabled"`
+
+	// NtfyURL is the full topic URL, e.g.
+	// https://ntfy.coydog-fence.ts.net/kuma-json
+	NtfyURL string `yaml:"ntfy_url"`
+
+	// Hostname is the `hostname` field of every payload, so the juno side can
+	// name the deployment the alert came from.
+	Hostname string `yaml:"hostname"`
+
+	CheckInterval    time.Duration `yaml:"-"`
+	AppleSilence     time.Duration `yaml:"-"`
+	FailureThreshold int           `yaml:"failure_threshold"`
+
+	// Raw forms are the YAML representation; parsed by Load.
+	RawCheckInterval string `yaml:"check_interval"`
+	RawAppleSilence  string `yaml:"apple_silence"`
+}
+
 // DSN returns a PostgreSQL connection string.
 func (d DatabaseConfig) DSN() string {
 	sslmode := d.SSLMode
@@ -112,7 +141,8 @@ func (d DatabaseConfig) DSN() string {
 //	FREEREPS_DB_HOST, FREEREPS_DB_PORT, FREEREPS_DB_NAME,
 //	FREEREPS_DB_USER, FREEREPS_DB_PASSWORD, FREEREPS_DB_SSLMODE,
 //	FREEREPS_TS_ENABLED, FREEREPS_TS_HOSTNAME, FREEREPS_TS_STATE_DIR,
-//	FREEREPS_INGEST_TIMEZONE
+//	FREEREPS_INGEST_TIMEZONE,
+//	FREEREPS_ALERTS_ENABLED, FREEREPS_ALERTS_NTFY_URL
 func Load(path string) (*Config, error) {
 	cfg := &Config{
 		Tailscale: TailscaleConfig{
@@ -136,6 +166,16 @@ func Load(path string) (*Config, error) {
 		Withings: WithingsConfig{
 			RawSyncInterval: "30m",
 			BackfillDays:    90,
+		},
+		// Thresholds decided on 2026-09-20, see DECISIONS.md: three failed runs
+		// at a 30-minute sync interval keep the transient DNS failures out of
+		// the channel, and 36 hours of silence on the Apple Health path means
+		// two missed automation days rather than one quiet evening.
+		Alerts: AlertsConfig{
+			Hostname:         "freereps",
+			RawCheckInterval: "5m",
+			RawAppleSilence:  "36h",
+			FailureThreshold: 3,
 		},
 		// Withings first: the same weight and blood pressure values also reach
 		// FreeReps through Apple Health, where they arrive only when the Health
@@ -202,6 +242,29 @@ func Load(path string) (*Config, error) {
 		cfg.Withings.SyncInterval = d
 	}
 
+	// Parse the alert durations.
+	if cfg.Alerts.RawCheckInterval != "" {
+		d, err := time.ParseDuration(cfg.Alerts.RawCheckInterval)
+		if err != nil {
+			return nil, fmt.Errorf("parsing alerts.check_interval: %w", err)
+		}
+		cfg.Alerts.CheckInterval = d
+	}
+	if cfg.Alerts.RawAppleSilence != "" {
+		d, err := time.ParseDuration(cfg.Alerts.RawAppleSilence)
+		if err != nil {
+			return nil, fmt.Errorf("parsing alerts.apple_silence: %w", err)
+		}
+		cfg.Alerts.AppleSilence = d
+	}
+
+	// An enabled channel without a target is a configuration error rather than
+	// a silent no-op: the whole point of the channel is that a failure is not
+	// silent.
+	if cfg.Alerts.Enabled && cfg.Alerts.NtfyURL == "" {
+		return nil, fmt.Errorf("alerts.enabled is set but alerts.ntfy_url is empty")
+	}
+
 	if err := cfg.validate(); err != nil {
 		return nil, fmt.Errorf("config validation: %w", err)
 	}
@@ -217,6 +280,14 @@ func applyEnvOverrides(cfg *Config) {
 		if port, err := strconv.Atoi(v); err == nil {
 			cfg.Server.Port = port
 		}
+	}
+	if v := os.Getenv("FREEREPS_ALERTS_ENABLED"); v != "" {
+		if b, err := strconv.ParseBool(v); err == nil {
+			cfg.Alerts.Enabled = b
+		}
+	}
+	if v := os.Getenv("FREEREPS_ALERTS_NTFY_URL"); v != "" {
+		cfg.Alerts.NtfyURL = v
 	}
 	if v := os.Getenv("FREEREPS_DB_HOST"); v != "" {
 		cfg.Database.Host = v

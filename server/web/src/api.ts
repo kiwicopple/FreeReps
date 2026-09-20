@@ -669,3 +669,60 @@ export async function disconnectHevy(): Promise<void> {
   const res = await fetch(`${BASE}/hevy/disconnect`, { method: "DELETE" });
   if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
 }
+
+/* ── Alerts ──────────────────────────────────────────────────────────────── */
+
+/** The channel configuration as stored in the database, not in config.yaml. */
+export interface AlertSettings {
+  enabled: boolean;
+  ntfy_url: string;
+  hostname: string;
+  check_interval_sec: number;
+  failure_threshold: number;
+  /** 0 turns the Apple Health silence rule off. */
+  apple_silence_sec: number;
+}
+
+/** One alert condition and what the last check made of it. */
+export interface AlertCondition {
+  monitor_id: number;
+  service: string;
+  firing: boolean;
+  since?: string;
+  last_msg?: string;
+  checked_at?: string;
+}
+
+export interface AlertsResponse {
+  /** False while no settings row exists — the watcher then reports nothing. */
+  configured: boolean;
+  settings: AlertSettings;
+  updated_at?: string;
+  conditions: AlertCondition[];
+}
+
+export async function fetchAlerts(): Promise<AlertsResponse> {
+  const res = await fetch(`${BASE}/alerts`);
+  if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
+  return res.json();
+}
+
+export async function saveAlertSettings(settings: AlertSettings): Promise<void> {
+  const res = await fetch(`${BASE}/alerts`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(settings),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `${res.status}: ${res.statusText}`);
+  }
+}
+
+/** Posts one message on the channel-test id, using the stored settings. */
+export async function sendTestAlert(): Promise<{ monitor_id: number; target: string }> {
+  const res = await fetch(`${BASE}/alerts/test`, { method: "POST" });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || `${res.status}: ${res.statusText}`);
+  return body;
+}
