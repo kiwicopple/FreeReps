@@ -1,5 +1,5 @@
-// Package alerts turns the contents of `import_logs` into the two alert
-// conditions FreeReps reports to juno, and owns the `monitor_id` for each.
+// Package alerts turns the contents of `import_logs` into the alert conditions
+// FreeReps reports, and owns the `monitor_id` for each.
 //
 // The rules read the log table rather than hooking into the sync loops. Two
 // reasons, and the second is the one that matters: a syncer that stopped running
@@ -19,10 +19,13 @@ import (
 	"github.com/claude/freereps/internal/storage"
 )
 
-// monitor_id block 9200 to 9299 belongs to FreeReps. The blocks are registered
-// in the homelab repo, STANDARDS.md § "Machine-readable alerts into juno"; an id
-// here stands for one condition permanently, because the adapter on juno threads
-// one dispatch per id.
+// The ids FreeReps sends under. They sit in the block 9200 to 9299 so they cannot
+// collide with the monitor ids of an Uptime Kuma instance writing to the same
+// topic, which numbers its monitors from 1 upwards.
+//
+// An id stands for one condition permanently, never for one firing: a consumer
+// groups messages by it, so reusing an id merges two conditions into one row or
+// thread there.
 const (
 	// MonitorChannelTest is the id the Settings screen's "Send test message"
 	// button uses. It is a real id in the block rather than a reused one, so a
@@ -34,7 +37,7 @@ const (
 	MonitorAppleIngest  = 9204
 )
 
-// maxMsgLen keeps a message readable in the juno thread. The upstream error
+// maxMsgLen keeps a message readable wherever it is displayed. The upstream error
 // strings carry full URLs and struct paths.
 const maxMsgLen = 300
 
@@ -66,7 +69,7 @@ type Store interface {
 }
 
 // ServiceNames maps a monitor id to the `service` field the payload carries, so
-// the Settings screen can label a condition with the same name juno sees.
+// the Settings screen labels a condition with the same name the consumer sees.
 var ServiceNames = map[int]string{
 	MonitorChannelTest:  "freereps - channel test",
 	MonitorWithingsSync: "freereps - withings sync",
@@ -146,7 +149,7 @@ func (w *Watcher) interval(st storage.AlertSettings) time.Duration {
 
 // SendTest posts one message on MonitorChannelTest so the Settings screen can
 // prove the path end to end. It carries `status: 1`, because a test must not
-// leave an open problem in juno's session.
+// leave an open problem on the consumer's side.
 func (w *Watcher) SendTest(ctx context.Context, st storage.AlertSettings, msg string) error {
 	return w.sender.Send(ctx, notify.Target{URL: st.NtfyURL, Hostname: st.Hostname}, notify.Payload{
 		MonitorID: MonitorChannelTest,
@@ -232,7 +235,8 @@ func (w *Watcher) checkAppleIngest(ctx context.Context, st storage.AlertSettings
 }
 
 // report sends a message only on a transition — entering the problem state or
-// leaving it — and stores the new state afterwards.
+// leaving it — and stores the new state afterwards. Repeating status 0 on every
+// cycle adds nothing for a consumer that groups by monitor_id.
 //
 // The order matters: the state is written after the send succeeded, so a failed
 // send leaves the previous state and the next check retries instead of dropping

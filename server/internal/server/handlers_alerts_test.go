@@ -3,13 +3,13 @@ package server
 import "testing"
 
 // TestValidateAlertSettings covers the inputs the Settings form can produce. The
-// topic path is the case worth a test: juno subscribes to one topic, so a URL
-// saved without it (`https://ntfy…/`) posts into a topic nobody reads, and the
+// topic path is the case worth a test: a subscriber listens on one topic, so a
+// URL saved without it (`https://ntfy…/`) posts where nobody listens, and the
 // channel then looks configured while reporting nowhere.
 func TestValidateAlertSettings(t *testing.T) {
 	valid := alertSettingsBody{
 		Enabled:          true,
-		NtfyURL:          "https://ntfy.coydog-fence.ts.net/kuma-json",
+		NtfyURL:          "https://ntfy.example.com/freereps-alerts",
 		Hostname:         "freereps",
 		CheckIntervalSec: 300,
 		FailureThreshold: 3,

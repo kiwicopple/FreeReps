@@ -28,7 +28,7 @@ func newFakeStore() *fakeStore {
 	return &fakeStore{
 		settings: storage.AlertSettings{
 			Enabled:          true,
-			NtfyURL:          "https://ntfy.example.ts.net/kuma-json",
+			NtfyURL:          "https://ntfy.example.com/freereps-alerts",
 			Hostname:         "freereps",
 			CheckInterval:    5 * time.Minute,
 			FailureThreshold: 3,
@@ -106,7 +106,7 @@ func failedRuns(n int, msg string) []storage.SourceRun {
 // TestSourceBelowThresholdStaysSilent is the rule that keeps the channel usable.
 // The Withings sync failed twice on transient DNS errors ("server misbehaving")
 // in the runs preceding the 2026-09-20 outage; alerting on the first failure puts
-// those into juno's session as an incident.
+// those into the channel as incidents.
 func TestSourceBelowThresholdStaysSilent(t *testing.T) {
 	store := newFakeStore()
 	store.runs["withings_sync"] = map[int][]storage.SourceRun{2: failedRuns(2, "dial tcp: lookup failed")}
@@ -121,8 +121,8 @@ func TestSourceBelowThresholdStaysSilent(t *testing.T) {
 	}
 }
 
-// TestSourceAtThresholdFiresOnce covers the contract the juno adapter enforces
-// and the deduplication: a message on the transition into the problem state, and
+// TestSourceAtThresholdFiresOnce covers the required payload fields and the
+// deduplication: a message on the transition into the problem state, and
 // nothing on the checks that follow while the state holds.
 func TestSourceAtThresholdFiresOnce(t *testing.T) {
 	store := newFakeStore()
@@ -156,7 +156,7 @@ func TestSourceAtThresholdFiresOnce(t *testing.T) {
 }
 
 // TestSourceRecovers verifies the resolution path. A condition that only ever
-// sends status 0 leaves a stale alert in juno's session.
+// sends status 0 leaves a stale alert on the consumer's side.
 func TestSourceRecovers(t *testing.T) {
 	store := newFakeStore()
 	store.runs["withings_sync"] = map[int][]storage.SourceRun{2: failedRuns(3, "boom")}
@@ -307,7 +307,7 @@ func TestEnabledWithoutURLSendsNothing(t *testing.T) {
 // restart.
 func TestCheckUsesTheStoredTarget(t *testing.T) {
 	store := newFakeStore()
-	store.settings.NtfyURL = "https://ntfy.elsewhere.ts.net/kuma-json"
+	store.settings.NtfyURL = "https://ntfy.elsewhere.example.com/freereps-alerts"
 	store.settings.Hostname = "freereps-test"
 	store.runs["hevy_sync"] = map[int][]storage.SourceRun{2: failedRuns(3, "boom")}
 	rec := &recorder{}
@@ -317,7 +317,7 @@ func TestCheckUsesTheStoredTarget(t *testing.T) {
 	if len(rec.targets) != 1 {
 		t.Fatalf("sent %d messages, want 1", len(rec.targets))
 	}
-	if rec.targets[0].URL != "https://ntfy.elsewhere.ts.net/kuma-json" {
+	if rec.targets[0].URL != "https://ntfy.elsewhere.example.com/freereps-alerts" {
 		t.Errorf("target = %q, want the stored url", rec.targets[0].URL)
 	}
 	if rec.targets[0].Hostname != "freereps-test" {
@@ -358,7 +358,7 @@ func TestCheckReturnsTheConfiguredInterval(t *testing.T) {
 }
 
 // TestSendTestUsesTheResolvedStatus exists because a test message with status 0
-// would leave an open problem in juno's session for a condition that is fine.
+// would leave an open problem on the consumer's side for a condition that is fine.
 func TestSendTestUsesTheResolvedStatus(t *testing.T) {
 	store := newFakeStore()
 	rec := &recorder{}

@@ -41,9 +41,9 @@ type Server struct {
 	withingsTokenMgr *withings.TokenManager
 	withingsSyncer   *withings.Syncer
 
-	// Alert channel into juno (nil if not wired up). The handler needs it for
-	// the Settings screen's test message; the periodic checks run in the
-	// watcher's own goroutine.
+	// Alert watcher (nil if not wired up). The handler needs it for the Settings
+	// screen's test message; the periodic checks run in the watcher's own
+	// goroutine.
 	alerts *alerts.Watcher
 
 	// HAE TCP import state (only one import at a time)
@@ -188,7 +188,7 @@ func (s *Server) routes() {
 		r.Get("/api/v1/state-of-mind", s.handleGetStateOfMind)
 		r.Get("/api/v1/category-samples", s.handleGetCategorySamples)
 
-		// Alert channel into juno — configuration, state and a manual test
+		// Alert channel — configuration, state and a manual test
 		r.Get("/api/v1/alerts", s.handleAlertSettings)
 		r.Put("/api/v1/alerts", s.handleSaveAlertSettings)
 		r.Post("/api/v1/alerts/test", s.handleTestAlert)

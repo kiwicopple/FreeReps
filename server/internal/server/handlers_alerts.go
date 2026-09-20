@@ -177,7 +177,7 @@ func validateAlertSettings(b alertSettingsBody) string {
 		return "ntfy_url names no host"
 	}
 	if u.Path == "" || u.Path == "/" {
-		return "ntfy_url must include the topic, e.g. https://ntfy.example.ts.net/kuma-json"
+		return "ntfy_url must include the topic, e.g. https://ntfy.example.com/freereps-alerts"
 	}
 	return ""
 }

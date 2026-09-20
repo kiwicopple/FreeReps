@@ -34,16 +34,15 @@ withings:
   sync_interval: "30m"   # how often to poll Withings (per-user creds configured in Settings UI)
   backfill_days: 90      # days of history to fetch on first sync
 
-# Machine-readable alerts into the homelab channel the session on juno reads.
-# The payload contract, the ntfy topic and the monitor_id range 9200-9299 belong
-# to the homelab repo, STANDARDS.md § "Machine-readable alerts into juno".
+# Machine-readable alerts: a JSON POST to an ntfy topic in Uptime Kuma's webhook
+# shape, one monitor id per condition. See the Alerts section of README.md.
 #
 # These values seed the `alert_settings` row on first start only. After that the
-# Settings screen (Settings → Alerts) owns them, and this block is ignored — a
-# redeploy must not overwrite what was entered there.
+# Settings screen (Settings -> Alerts) owns them and this block is ignored, so a
+# redeploy cannot overwrite what was entered there.
 alerts:
   enabled: false
-  ntfy_url: "https://ntfy.coydog-fence.ts.net/kuma-json"
+  ntfy_url: "https://ntfy.example.com/freereps-alerts"
   hostname: "freereps"
   check_interval: "5m"
   failure_threshold: 3   # consecutive failed runs of one source for one user

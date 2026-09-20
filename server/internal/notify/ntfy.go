@@ -1,18 +1,22 @@
-// Package notify posts machine-readable alerts into the homelab's ntfy topic
-// `kuma-json`, which the `homelab-alert` adapter on juno subscribes to and
-// delivers into its long-lived session.
+// Package notify posts machine-readable alerts to an ntfy topic, in the shape
+// Uptime Kuma's webhook notification produces. A consumer that already parses
+// Kuma's webhooks therefore needs no second parser, which is the reason for
+// following someone else's field names rather than inventing better ones.
 //
-// The payload contract belongs to the homelab, not to this project: `schema`
-// (the number 1), `monitor_id` (a number), `service` (a non-empty string) and
-// `status` (0 = problem, 1 = resolved) are required, and the adapter drops a
-// message missing any of them with a reason that never reaches the session.
-// `hostname`, `monitor_type`, `since` and `msg` are optional. The contract, the
-// topic and the `monitor_id` ranges are documented in the homelab repo,
-// `STANDARDS.md` § "Machine-readable alerts into juno"; this file follows that
-// document rather than restating why the fields are what they are.
+// The four required fields — `schema` (the number 1), `monitor_id` (a number),
+// `service` (a non-empty string) and `status` (0 = problem, 1 = resolved) — are
+// required because a consumer that filters on them drops a message missing one
+// of them, and it drops it on its own side: the sender sees a 200 from ntfy and
+// nothing else. Send therefore rejects such a payload here, where the reason is
+// visible. `hostname`, `monitor_type`, `since` and `msg` are optional.
 //
-// The adapter threads one dispatch per `monitor_id`, so an id stands for one
-// condition for its whole lifetime — never one per firing.
+// `monitor_id` identifies the condition, not the firing. A consumer is free to
+// group messages by it — an alerting UI shows one row per id, a chat bot one
+// thread — and two conditions sharing an id become indistinguishable there.
+//
+// The deployment this was built for documents its receiving side in its own
+// infrastructure repository; nothing in this package depends on that document.
+
 package notify
 
 import (
@@ -47,7 +51,7 @@ type Payload struct {
 // Notifier because the channel is configured in the Settings UI: an edit has to
 // take effect on the next check, without a restart.
 type Target struct {
-	// URL is the full topic URL, e.g. https://ntfy.coydog-fence.ts.net/kuma-json
+	// URL is the full topic URL, e.g. https://ntfy.example.com/freereps-alerts
 	URL string
 	// Hostname fills the payload's `hostname`, naming the deployment the alert
 	// came from.
@@ -78,9 +82,9 @@ func New(log *slog.Logger) *Notifier {
 // package owns — `schema`, `hostname`, `monitor_type` and, when the caller left
 // it empty, `since`.
 //
-// A message the adapter would drop is rejected here instead of being sent, so
-// the failure names the missing field rather than surfacing as a silently
-// absent alert on the juno side.
+// A payload a consumer would drop is rejected here instead of being sent, so the
+// failure names the missing field rather than surfacing as an alert that was
+// never delivered.
 func (n *Notifier) Send(ctx context.Context, target Target, p Payload) error {
 	if target.URL == "" {
 		return fmt.Errorf("no ntfy url configured")

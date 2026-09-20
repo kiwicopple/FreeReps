@@ -19,15 +19,20 @@ is as recorded there; where the record named no alternative, none is claimed.
 
 ---
 
-## 2026-09-20 — A failing data source reports itself into the homelab alert channel
+## 2026-09-20 — A failing data source reports itself to an ntfy topic
 
 **Decided:** 2026-09-20
 
-**Decision.** FreeReps posts its own alerts into the ntfy topic `kuma-json`,
-which the `homelab-alert` adapter on juno reads. The payload contract, the topic
-and the `monitor_id` ranges are the homelab's, written down in that repo's
-`STANDARDS.md` § *Machine-readable alerts into juno*; this project owns the block
-9200–9299 and the rules behind each id (`server/internal/alerts/watcher.go`):
+**Decision.** FreeReps posts its own alerts as a JSON object to a configured ntfy
+topic, in the shape Uptime Kuma's webhook notification produces: `schema` (the
+number 1), `monitor_id`, `service` and `status` (0 = problem, 1 = resolved), plus
+`hostname`, `monitor_type`, `since` and `msg`. Following Kuma's field names rather
+than inventing better ones means a consumer that already parses Kuma's webhooks
+needs no second parser.
+
+The ids sit in the block 9200–9299, clear of the monitor ids a Kuma instance on
+the same topic hands out from 1 upwards
+(`server/internal/alerts/watcher.go`):
 
 | id | Condition |
 |---|---|
@@ -51,11 +56,12 @@ Four sub-decisions that are not obvious from the code:
   produced isolated DNS failures (`server misbehaving`) among the 2,197 real
   ones; at a 30-minute interval the threshold reports a defect within two hours
   while a single timeout stays out of the session.
-- **The state is stored and the message sent on the transition only.** juno
-  threads one dispatch per `monitor_id`, so repeating `status: 0` every cycle
-  appends to the same thread without adding information. The state is written
-  after the send succeeded, so an ntfy outage delays an alert instead of
-  swallowing it.
+- **The state is stored and the message sent on the transition only.** A consumer
+  groups messages by `monitor_id`, so repeating `status: 0` every cycle adds
+  nothing to what it already shows. The state is written after the send
+  succeeded, so an unreachable topic delays an alert instead of swallowing it.
+  For the same reason an id stands for one condition permanently: two conditions
+  sharing one id become indistinguishable on the receiving side.
 
 **Reasoning.** The Withings integration failed every 30 minutes for 46 days and
 nothing said so ([`INCIDENTS.md`](INCIDENTS.md), 2026-09-20); the only signal was
@@ -65,8 +71,14 @@ while a source silently delivers nothing, which is what its monitors check.
 
 **Trigger to re-open.** A second consumer of the channel that needs a different
 payload shape; a condition whose firing rate makes the channel noisy enough to be
-muted; or the homelab moving off ntfy, which would change the transport but not
-the per-condition id.
+muted; or a move off ntfy, which would change the transport but not the
+per-condition id.
+
+**Where the receiving side is documented.** The deployment this was built for
+runs the consumer in its own infrastructure repository, which registers the id
+blocks of every sender writing to that topic — including this project's
+9200–9299. That document is the place to look when an id has to be added; nothing
+in FreeReps depends on it.
 
 ---
 

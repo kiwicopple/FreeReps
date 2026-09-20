@@ -18,10 +18,10 @@ func testTarget(url string) Target {
 	return Target{URL: url, Hostname: "freereps"}
 }
 
-// TestSendFillsTheRequiredContract covers the four fields the homelab-alert
-// adapter on juno requires (STANDARDS.md § "Machine-readable alerts into juno").
-// A message missing one of them is dropped on the juno side with a reason that
-// never reaches the session, so the absence would look like a working channel.
+// TestSendFillsTheRequiredContract covers the four fields a consumer filters on.
+// A message missing one of them is dropped on the receiving side, where the
+// reason stays — the sender sees a 200 from ntfy, so the absence looks like a
+// working channel.
 func TestSendFillsTheRequiredContract(t *testing.T) {
 	var got map[string]any
 	var contentType string

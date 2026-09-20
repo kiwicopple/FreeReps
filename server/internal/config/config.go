@@ -96,23 +96,21 @@ type WithingsConfig struct {
 	RawSyncInterval string `yaml:"sync_interval"`
 }
 
-// AlertsConfig holds the machine-readable alert channel into juno. The payload
-// contract, the ntfy topic and the monitor_id ranges belong to the homelab repo,
-// STANDARDS.md § "Machine-readable alerts into juno" — the URL is configuration
-// here rather than a constant because the tailnet name is not a property of this
-// project (it changed once already, from leo-royal to coydog-fence).
+// AlertsConfig seeds the alert channel on first start. The values then live in
+// the database and are edited in the Settings UI (internal/alerts), so this block
+// is read once per fresh database and ignored afterwards — a redeploy must not
+// overwrite what the operator entered.
 //
-// Disabled by default: a deployment without the homelab's ntfy would otherwise
-// post into nothing every check interval.
+// Disabled by default: an instance whose operator has not named a topic would
+// otherwise post into nothing on every check interval.
 type AlertsConfig struct {
 	Enabled bool `yaml:"enabled"`
 
-	// NtfyURL is the full topic URL, e.g.
-	// https://ntfy.coydog-fence.ts.net/kuma-json
+	// NtfyURL is the full topic URL, e.g. https://ntfy.example.com/freereps-alerts
 	NtfyURL string `yaml:"ntfy_url"`
 
-	// Hostname is the `hostname` field of every payload, so the juno side can
-	// name the deployment the alert came from.
+	// Hostname is the `hostname` field of every payload, so a consumer can name
+	// the instance an alert came from — a test instance beside a production one.
 	Hostname string `yaml:"hostname"`
 
 	CheckInterval    time.Duration `yaml:"-"`
@@ -168,9 +166,9 @@ func Load(path string) (*Config, error) {
 			BackfillDays:    90,
 		},
 		// Thresholds decided on 2026-09-20, see DECISIONS.md: three failed runs
-		// at a 30-minute sync interval keep the transient DNS failures out of
-		// the channel, and 36 hours of silence on the Apple Health path means
-		// two missed automation days rather than one quiet evening.
+		// at a 30-minute sync interval keep transient DNS failures out of the
+		// channel, and 36 hours of silence on the Apple Health path means two
+		// missed automation days rather than one quiet evening.
 		Alerts: AlertsConfig{
 			Hostname:         "freereps",
 			RawCheckInterval: "5m",
