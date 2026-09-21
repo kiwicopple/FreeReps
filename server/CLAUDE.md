@@ -4,6 +4,20 @@
 - Test: `cd server && go test ./...`
 - Frontend stub for Go build: `mkdir -p server/web/dist && touch server/web/dist/.gitkeep`
 - Frontend build: `cd server/web && npm ci && npm run build`
+- Daily review regression checks: `cd server/web && npm test` (Node 24 in the
+  container, or a local Node with TypeScript stripping). These protect Singapore
+  day boundaries, missing-data handling and sleep wake-date assignment.
+
+## Daily review
+
+The home route is a focused daily review; the configurable all-metrics dashboard
+remains at `/overview`. The daily review uses explicit `Asia/Singapore` dates,
+hourly API buckets regrouped into days, and completed-day activity comparisons.
+Sleep is assigned to the local wake date and includes completed sleep ending
+today. Keep this distinction: UTC session labels can put a night on the previous
+calendar date. Do not replace absent measurements with zero or join sparse
+weight points into a continuous trend. Per-panel request failures must remain
+visible rather than looking like missing measurements.
 
 ## Integration tests
 
