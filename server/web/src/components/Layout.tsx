@@ -6,6 +6,7 @@ import { useIsDesktop } from "../hooks/useMediaQuery";
 
 const NAV_ITEMS = [
   { to: "/", label: "Today", end: true },
+  { to: "/nutrition", label: "Nutrition" },
   { to: "/sleep", label: "Sleep" },
   { to: "/workouts", label: "Workouts" },
   { to: "/metrics", label: "Metrics" },
@@ -19,7 +20,7 @@ const TAB_ITEMS = [
   { to: "/", label: "Today", end: true },
   { to: "/sleep", label: "Sleep" },
   { to: "/workouts", label: "Train" },
-  { to: "/trends", label: "Trends" },
+  { to: "/nutrition", label: "Nutrition" },
   { to: "/settings", label: "More" },
 ];
 

@@ -47,6 +47,7 @@ func TestFoodPersistence(t *testing.T) {
 		defer func(id int) {
 			_, _ = db.Pool.Exec(ctx, `DELETE FROM food_entry_revisions WHERE user_id=$1`, id)
 			_, _ = db.Pool.Exec(ctx, `DELETE FROM food_entries WHERE user_id=$1`, id)
+			_, _ = db.Pool.Exec(ctx, `DELETE FROM nutrition_days WHERE user_id=$1`, id)
 			_, _ = db.Pool.Exec(ctx, `DELETE FROM users WHERE id=$1`, id)
 		}(uid)
 	}

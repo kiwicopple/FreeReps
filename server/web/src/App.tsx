@@ -5,6 +5,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import DashboardPage from "./pages/DashboardPage";
 
 // Lazy-load heavier pages for code splitting
+const NutritionPage = lazy(() => import("./pages/NutritionPage"));
 const SleepPage = lazy(() => import("./pages/SleepPage"));
 const WorkoutsPage = lazy(() => import("./pages/WorkoutsPage"));
 const WorkoutDetailPage = lazy(() => import("./pages/WorkoutDetailPage"));
@@ -35,6 +36,14 @@ export default function App() {
   return (
     <Layout>
       <Routes>
+        <Route
+          path="/nutrition"
+          element={
+            <Page>
+              <NutritionPage />
+            </Page>
+          }
+        />
         <Route
           path="/"
           element={

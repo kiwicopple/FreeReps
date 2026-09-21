@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import AlertsTab from "../components/settings/AlertsTab";
 import FrontPageTab from "../components/settings/FrontPageTab";
@@ -48,6 +48,9 @@ export default function SettingsPage() {
     return (
       <>
         <PageHeader kicker="FreeReps" title="Settings" />
+        <div className="page-x" style={{ paddingBottom: 16 }}>
+          <Link to="/trends">View trends →</Link>
+        </div>
         <div style={{ borderTop: "2px solid var(--color-text)" }}>
           {TABS.map((tab) => (
             <section

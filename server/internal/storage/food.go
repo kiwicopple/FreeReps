@@ -43,6 +43,10 @@ func (db *DB) SaveFoodEntry(ctx context.Context, userID int, req models.SaveFood
 		return record, err
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
+	// Serialize food edits and completion toggles for this user.
+	if _, err = tx.Exec(ctx, `SELECT pg_advisory_xact_lock(734,$1)`, userID); err != nil {
+		return record, err
+	}
 	created := false
 	if req.ExpectedVersion == 0 {
 		tag, insertErr := tx.Exec(ctx, `INSERT INTO food_entries (user_id,id,local_date,status,payload)
@@ -75,6 +79,22 @@ func (db *DB) SaveFoodEntry(ctx context.Context, userID int, req models.SaveFood
 		}
 	}
 	if created || !equal {
+		var old models.FoodEntry
+		if err = json.Unmarshal(existing, &old); err != nil {
+			return record, err
+		}
+		dates := []string{req.Entry.LocalDate}
+		if old.LocalDate != req.Entry.LocalDate {
+			dates = append(dates, old.LocalDate)
+		}
+		for _, date := range dates {
+			_, err = tx.Exec(ctx, `INSERT INTO nutrition_days(user_id,local_date,complete) VALUES($1,$2,false)
+              ON CONFLICT(user_id,local_date) DO UPDATE SET complete=false,version=nutrition_days.version+1,updated_at=now()`, userID, date)
+			if err != nil {
+				return record, err
+			}
+		}
+
 		_, err = tx.Exec(ctx, `INSERT INTO food_entry_revisions(user_id,entry_id,version,payload,reason)
    VALUES($1,$2,$3,$4,$5)`, userID, req.Entry.ID, record.Version, payload, req.Reason)
 		if err != nil {

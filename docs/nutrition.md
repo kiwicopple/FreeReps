@@ -6,8 +6,9 @@ available nutrition, and saves a structured record in FreeReps. Photos are not
 saved by FreeReps. Images attached to a chat remain subject to that chat service's
 own retention; this feature does not delete them there.
 
-The original dashboard is unchanged. Nutrition is available through the local
-client and the FreeReps MCP/API. A separate ChatGPT conversation needs access to
+The original dashboard remains available. A separate Nutrition tab displays
+logged intake, effective-dated targets and daily completion. Nutrition is also
+available through the local client and the FreeReps MCP/API. A separate ChatGPT conversation needs access to
 these tools; creating the database alone does not connect an unrelated chat.
 
 ## Logging workflow for the assistant
@@ -130,3 +131,53 @@ Unit tests cover validation, missing values, ranges, image-field rejection, and
 summary semantics. Storage integration tests cover concurrent duplicate saves,
 conflicting corrections, preserved history, void/restore and user isolation on
 `freereps_scratch`. Use `skills/verify/SKILL.md` for the broader checks.
+
+## Nutrition dashboard and protocol
+
+The `/nutrition` tab shows a selected local date or a 7-/30-day window ending on
+that date. The default date zone is Asia/Singapore. It refreshes on focus and every
+60 seconds while visible. Mobile navigation links Trends from More.
+
+`GET /api/v1/nutrition/protocol` returns immutable revisions in version order.
+`PUT` at the same path accepts `{expected_version, reason, protocol}`. The
+protocol contains `effective_date`, `timezone`, a private `profile` (age, sex,
+height_cm, weight_kg, activity, goal, preferences), `notes` and `targets`. A target
+contains `value`, canonical `unit`, `kind` (`goal`, `range`, `maximum`, `reference`),
+`label`, and `source`. Range targets require `low` and `high`. Optional `upper`
+means a total-intake upper limit and is accepted only for supported nutrients
+whose forms can be compared safely. It is not a goal. See the model validation
+for the allowlist; retinol, supplemental magnesium and folic-acid limits cannot
+be applied to undifferentiated nutrient totals.
+
+For each date use the greatest effective date not after that date, breaking ties
+by greatest version. Use the latest overall version as the next save's conflict
+token. Identical retries return the latest record; stale changes return HTTP 409.
+Changing profile inputs does not silently recalculate targets. Personal profiles
+and protocol values are saved through the authenticated API, never migrations.
+
+`GET /api/v1/nutrition/days?start=YYYY-MM-DD&end=YYYY-MM-DD` returns saved completion
+states; absent dates are incomplete at version 0. `GET /api/v1/nutrition/days/{date}`
+returns that default explicitly. `PUT` there accepts `{complete, expected_version}`.
+Food creation, correction, voiding or moving reopens affected dates in the same
+transaction and increments the day version. Identical food retries do not reopen
+completed dates. Completion writes and food changes share a per-user transaction
+lock to reject stale completion attempts.
+
+Chat tools: `get_nutrition_protocol`, `save_nutrition_protocol`,
+`get_nutrition_days`, `save_nutrition_day`. Mark a day complete only when the user
+reports that the day's intake is fully logged. A complete day may still lack
+nutrient composition. Missing days are chart gaps and averages exclude missing
+values, disclose their denominator, and include partial days. Potential shortfalls
+are shown only for completed days with values for every logged item. This is not
+a nutrient-deficiency diagnosis. Upper-limit comparisons use known intake only;
+values already above a limit can be flagged even when other values are missing.
+
+Creatine is a catalog nutrient in grams. Record the actual dose separately from
+powder weight. EPA and DHA are components of omega-3; never sum them into it twice.
+Water's reference includes food moisture, and is not a plain-water drinking goal.
+The dashboard neither prescribes supplements nor changes targets from exercise
+calories. Blood results, recommendations and scheduled reports are separate work.
+
+Frontend calculation checks: `node --experimental-strip-types --test
+server/web/tests/nutrition.test.ts`. Storage integration tests cover history,
+conflicts, reopening both dates after a move, retry safety and user isolation.

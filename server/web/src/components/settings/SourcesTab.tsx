@@ -28,8 +28,10 @@ export default function SourcesTab() {
 
   useEffect(() => {
     if (!config.data) return;
-    const rule = config.data.rules.find((r) => r.category === DEFAULT_CATEGORY);
-    setOrder(rule?.sources ?? config.data.default ?? config.data.sources);
+    const rule = config.data.rules?.find(
+      (r) => r.category === DEFAULT_CATEGORY,
+    );
+    setOrder(rule?.sources ?? config.data.default ?? config.data.sources ?? []);
   }, [config.data]);
 
   // Keyed by the source value itself, so the lookup cannot silently miss the
@@ -60,7 +62,7 @@ export default function SourcesTab() {
   }
 
   const saved =
-    config.data?.rules.find((r) => r.category === DEFAULT_CATEGORY)?.sources ??
+    config.data?.rules?.find((r) => r.category === DEFAULT_CATEGORY)?.sources ??
     config.data?.default ??
     [];
   const changed = order.join("|") !== saved.join("|");
@@ -170,7 +172,13 @@ export default function SourcesTab() {
       </div>
 
       {error ? (
-        <p style={{ color: "var(--color-accent-700)", fontSize: 13, marginTop: 14 }}>
+        <p
+          style={{
+            color: "var(--color-accent-700)",
+            fontSize: 13,
+            marginTop: 14,
+          }}
+        >
           {error}
         </p>
       ) : null}
@@ -216,7 +224,11 @@ export default function SourcesTab() {
               >
                 <span
                   className="kick"
-                  style={{ width: 140, flex: "none", color: "var(--color-text)" }}
+                  style={{
+                    width: 140,
+                    flex: "none",
+                    color: "var(--color-text)",
+                  }}
                 >
                   {rule.category}
                 </span>

@@ -26,7 +26,7 @@ var NutrientUnits = map[string]string{
 	"vitamin_k": "ug", "thiamin_b1": "mg", "riboflavin_b2": "mg", "niacin_b3": "mg",
 	"pantothenic_acid_b5": "mg", "vitamin_b6": "mg", "biotin_b7": "ug", "folate_dfe": "ug",
 	"folate_total": "ug", "folic_acid": "ug", "vitamin_b12": "ug", "choline": "mg",
-	"caffeine": "mg", "water": "ml",
+	"caffeine": "mg", "water": "ml", "creatine": "g",
 }
 
 type FoodNutrient struct {

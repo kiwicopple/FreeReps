@@ -38,6 +38,10 @@ func New(ds *storage.DB, version string, log *slog.Logger) *server.MCPServer {
 
 	// Tools
 	s.AddTools(
+		server.ServerTool{Tool: toolGetNutrition, Handler: h.getNutrition},
+		server.ServerTool{Tool: toolSaveNutrition, Handler: h.saveNutrition},
+		server.ServerTool{Tool: toolGetNutritionDays, Handler: h.getNutritionDays},
+		server.ServerTool{Tool: toolSaveNutritionDay, Handler: h.saveNutritionDay},
 		server.ServerTool{Tool: toolSaveFood, Handler: h.saveFood},
 		server.ServerTool{Tool: toolGetFood, Handler: h.getFood},
 		server.ServerTool{Tool: toolFoodHistory, Handler: h.foodHistory},
