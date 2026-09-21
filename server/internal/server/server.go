@@ -210,6 +210,12 @@ func (s *Server) routes() {
 		// User identity
 		r.Get("/api/v1/me", s.handleMe)
 
+		// Food records use the same authenticated user scope as health measurements.
+		r.Post("/api/v1/food", s.handleSaveFood)
+		r.Get("/api/v1/food", s.handleFoodEntries)
+		r.Get("/api/v1/food/catalog", s.handleFoodCatalog)
+		r.Get("/api/v1/food/{id}/history", s.handleFoodHistory)
+
 		// Dashboard API endpoints
 		r.Get("/api/v1/metrics/latest", s.handleLatestMetrics)
 		r.Get("/api/v1/metrics", s.handleQueryMetrics)

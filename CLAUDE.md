@@ -194,3 +194,12 @@ in. Never edit anything there — edit the source.
 Before committing, run the checks in the `verify` skill
 ([`skills/verify/SKILL.md`](skills/verify/SKILL.md)) — it covers the Go, frontend
 and document checks and which of them CI repeats.
+
+## Food logging from chat
+
+When the user sends food/drink/supplement photos or descriptions to log intake,
+follow [`docs/nutrition.md`](docs/nutrition.md). Use the FreeReps food tools or
+`python3 tools/food-log.py`; save structured consumed portions and sourced nutrient
+estimates, never photos. Unknown vitamins remain unknown, not zero. This workflow
+exists so estimates, corrections and daily totals remain reproducible. Keep real
+food records out of Git and confirm successful storage by reading back the log.

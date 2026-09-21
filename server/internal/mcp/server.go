@@ -31,13 +31,17 @@ func New(ds *storage.DB, version string, log *slog.Logger) *server.MCPServer {
 	s := server.NewMCPServer("FreeReps", version,
 		server.WithToolCapabilities(false),
 		server.WithResourceCapabilities(false, false),
-		server.WithInstructions("FreeReps health data server. Query health metrics, workouts, sleep data, and correlations. All data is scoped to the authenticated user."),
+		server.WithInstructions("FreeReps health data server. Query health metrics, workouts, sleep data, and correlations. Log user-reported food intake with save_food_entry; read get_nutrient_catalog first. All data is scoped to the authenticated user."),
 	)
 
 	h := &handlers{ds: ds, log: log}
 
 	// Tools
 	s.AddTools(
+		server.ServerTool{Tool: toolSaveFood, Handler: h.saveFood},
+		server.ServerTool{Tool: toolGetFood, Handler: h.getFood},
+		server.ServerTool{Tool: toolFoodHistory, Handler: h.foodHistory},
+		server.ServerTool{Tool: toolFoodCatalog, Handler: h.foodCatalog},
 		server.ServerTool{Tool: toolGetHealthMetrics, Handler: h.getHealthMetrics},
 		server.ServerTool{Tool: toolGetMetricStats, Handler: h.getMetricStats},
 		server.ServerTool{Tool: toolGetCorrelation, Handler: h.getCorrelation},
