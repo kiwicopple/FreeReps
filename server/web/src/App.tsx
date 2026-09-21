@@ -3,7 +3,6 @@ import { lazy, Suspense } from "react";
 import Layout from "./components/Layout";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DashboardPage from "./pages/DashboardPage";
-import DailyReviewPage from "./pages/DailyReviewPage";
 
 // Lazy-load heavier pages for code splitting
 const SleepPage = lazy(() => import("./pages/SleepPage"));
@@ -38,10 +37,6 @@ export default function App() {
       <Routes>
         <Route
           path="/"
-          element={<ErrorBoundary><DailyReviewPage /></ErrorBoundary>}
-        />
-        <Route
-          path="/overview"
           element={
             <ErrorBoundary>
               <DashboardPage />
