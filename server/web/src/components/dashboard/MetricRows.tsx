@@ -5,7 +5,11 @@ import Sparkline from "../Sparkline";
 import { deltaColor } from "../../utils/metricDirection";
 import { formatTimeAgo } from "../../utils/format";
 import { sourceLabel } from "../../utils/sourceLabel";
-import { displayDelta, displayValue, type MetricGroupSection } from "./metricDisplay";
+import {
+  displayDelta,
+  displayValue,
+  type MetricGroupSection,
+} from "./metricDisplay";
 
 interface Props {
   groups: MetricGroupSection[];
@@ -24,9 +28,9 @@ export default function MetricRows({ groups, loading }: Props) {
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="row">
             <div className="flex-1">
-              <Skeleton  style={{ width: 120, height: 14 }} />
+              <Skeleton style={{ width: 120, height: 14 }} />
             </div>
-            <Skeleton  style={{ width: 60, height: 14 }} />
+            <Skeleton style={{ width: 60, height: 14 }} />
           </div>
         ))}
       </div>

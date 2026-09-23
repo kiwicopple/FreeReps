@@ -1,5 +1,7 @@
+import { Label } from "@/components/ui/label";
+import { useIsDesktop } from "../../hooks/useMediaQuery";
 import { Input } from "@/components/ui/input";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 /** The shared row: label column, value, both on one baseline. */
 export function Row({
@@ -11,20 +13,25 @@ export function Row({
   labelWidth?: number;
   children: ReactNode;
 }) {
+  const desktop = useIsDesktop();
   return (
     <div
+      data-slot="setting-row"
       style={{
-        display: "flex",
+        display: "grid",
+        gridTemplateColumns: desktop
+          ? `${labelWidth}px minmax(0,1fr)`
+          : "minmax(0,1fr)",
         alignItems: "baseline",
-        gap: 24,
+        gap: desktop ? 24 : 10,
         padding: "15px 0",
         borderBottom: "1px solid var(--border)",
       }}
     >
-      <span className="kick" style={{ width: labelWidth, flex: "none" }}>
+      <Label render={<span />} className="kick">
         {label}
-      </span>
-      <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+      </Label>
+      <div className="w-full min-w-0">{children}</div>
     </div>
   );
 }
@@ -75,13 +82,14 @@ export const MONO: React.CSSProperties = {
  * rather than when it is entered.
  */
 export function RedirectURIRow({ uri }: { uri: string }) {
+  const inputId = useId();
   return (
     <div style={{ paddingTop: 18, maxWidth: 560 }}>
-      <label className="kick" htmlFor="redirect-uri">
+      <Label className="kick" htmlFor={inputId}>
         Redirect URI
-      </label>
+      </Label>
       <Input
-        id="redirect-uri"
+        id={inputId}
 
         style={{ ...MONO, width: "100%", marginTop: 8 }}
         readOnly

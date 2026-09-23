@@ -18,7 +18,7 @@ export default function PageHeader({ kicker, title, actions }: Props) {
 
   return (
     <div
-      className="flex items-end justify-between gap-6 page-x"
+      className="flex flex-wrap items-end justify-between gap-6 page-x"
       style={{
         paddingTop: isDesktop ? 22 : 16,
         paddingBottom: isDesktop ? 18 : 14,
@@ -38,7 +38,9 @@ export default function PageHeader({ kicker, title, actions }: Props) {
         </h1>
       </div>
       {actions ? (
-        <div className="flex items-baseline gap-3.5 shrink-0">{actions}</div>
+        <div className="flex min-w-0 flex-wrap items-baseline gap-3.5">
+          {actions}
+        </div>
       ) : null}
     </div>
   );

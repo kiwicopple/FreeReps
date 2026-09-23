@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Empty } from "@/components/ui/empty";
 import type { TimeSeriesPoint } from "../../api";
 import { formatDayMonth, formatNumber } from "../../utils/format";
 
@@ -29,11 +30,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
   );
 
   if (!model) {
-    return (
-      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
-        No samples in this window.
-      </p>
-    );
+    return <Empty>No samples in this window.</Empty>;
   }
 
   return (
@@ -190,9 +187,7 @@ function buildModel(
   points: TimeSeriesPoint[],
   multiplier: number,
 ): ChartModel | null {
-  const values = points.map((p) =>
-    p.avg == null ? null : p.avg * multiplier,
-  );
+  const values = points.map((p) => (p.avg == null ? null : p.avg * multiplier));
   const present = values.filter((v): v is number => v != null);
   if (present.length === 0) return null;
 
@@ -213,9 +208,7 @@ function buildModel(
   const p25 = quantile(sorted, 0.25);
   const p75 = quantile(sorted, 0.75);
   const band =
-    p75 > p25
-      ? { top: yFor(p75), height: yFor(p25) - yFor(p75) }
-      : null;
+    p75 > p25 ? { top: yFor(p75), height: yFor(p25) - yFor(p75) } : null;
 
   const yTicks = Array.from({ length: 5 }, (_, i) => {
     const v = lo + ((hi - lo) * i) / 4;
@@ -225,7 +218,10 @@ function buildModel(
   const step = Math.max(1, Math.floor(points.length / 6));
   const xTicks: { x: number; label: string }[] = [];
   for (let i = 0; i < points.length; i += step) {
-    xTicks.push({ x: xFor(i), label: formatDayMonth(new Date(points[i].time)) });
+    xTicks.push({
+      x: xFor(i),
+      label: formatDayMonth(new Date(points[i].time)),
+    });
   }
 
   const rolling = rollingMean(values, 7);
@@ -245,7 +241,9 @@ function toPolyline(
   yFor: (v: number) => number,
 ): string | null {
   const pts = values
-    .map((v, i) => (v == null ? null : `${xFor(i).toFixed(1)},${yFor(v).toFixed(1)}`))
+    .map((v, i) =>
+      v == null ? null : `${xFor(i).toFixed(1)},${yFor(v).toFixed(1)}`,
+    )
     .filter((p): p is string => p != null);
   return pts.length >= 2 ? pts.join(" ") : null;
 }

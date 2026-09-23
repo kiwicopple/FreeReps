@@ -68,6 +68,15 @@ export default function ImportTab() {
       </TabHeader>
 
       <div
+        role="button"
+        tabIndex={0}
+        aria-label="Choose CSV file"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileRef.current?.click();
+          }
+        }}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -85,9 +94,11 @@ export default function ImportTab() {
           maxWidth: 620,
         }}
       >
-        <Input nativeInput
+        <Input
+          nativeInput
           ref={fileRef}
           type="file"
+          aria-label="CSV file"
           accept=".csv,text/csv"
           style={{ display: "none" }}
           onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
@@ -104,7 +115,8 @@ export default function ImportTab() {
             <span style={{ font: "500 13.5px var(--font-body)" }}>
               {selectedFile.name}
             </span>
-            <Button variant="ghost"
+            <Button
+              variant="ghost"
               type="button"
 
               style={{ fontSize: 12 }}
@@ -131,7 +143,8 @@ export default function ImportTab() {
       </div>
 
       {selectedFile ? (
-        <Button variant="default"
+        <Button
+          variant="default"
           type="button"
 
           style={{ marginTop: 16 }}
@@ -143,9 +156,9 @@ export default function ImportTab() {
       ) : null}
 
       {error ? (
-        <Alert variant="error"
+        <Alert
+          variant="error"
           style={{
-            color: "var(--success-foreground)",
             fontSize: 13,
             marginTop: 16,
           }}
@@ -155,7 +168,7 @@ export default function ImportTab() {
       ) : null}
 
       {result ? (
-        <div style={{ marginTop: 16 }}>
+        <Alert variant="success" role="status" style={{ marginTop: 16 }}>
           <p style={{ font: "600 13.5px var(--font-body)", margin: 0 }}>
             Upload complete
           </p>
@@ -169,10 +182,10 @@ export default function ImportTab() {
           >
             {formatNumber(result.sets_received)} sets parsed ·{" "}
             {formatNumber(result.sets_inserted)} new ·{" "}
-            {formatNumber(result.sets_received - result.sets_inserted)}{" "}
-            already stored
+            {formatNumber(result.sets_received - result.sets_inserted)} already
+            stored
           </p>
-        </div>
+        </Alert>
       ) : null}
     </>
   );

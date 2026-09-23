@@ -1,6 +1,9 @@
+import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import { Empty } from "@/components/ui/empty";
+import { Spinner } from "@/components/ui/spinner";
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { fetchFrontPage, type FrontPageMetric } from "../api";
@@ -10,7 +13,12 @@ import { useIsDesktop } from "../hooks/useMediaQuery";
 import { displayValue } from "../components/dashboard/metricDisplay";
 import { formatDayMonth, MINUS } from "../utils/format";
 import { directionOf } from "../utils/metricDirection";
-import { fitTrend, VERDICT_COLOR, type Fit, type Verdict } from "../utils/trend";
+import {
+  fitTrend,
+  VERDICT_COLOR,
+  type Fit,
+  type Verdict,
+} from "../utils/trend";
 import { queryMessage, queryState } from "../utils/queryState";
 
 const RANGES = ["30d", "90d", "6m", "1y"] as const;
@@ -128,7 +136,8 @@ export default function TrendsPage() {
       </div>
 
       {message ? (
-        <Alert variant="error"
+        <Alert
+          variant="error"
           className="page-x"
           style={{
             color: "var(--muted-foreground)",
@@ -137,22 +146,16 @@ export default function TrendsPage() {
           }}
         >
           {message}
+          <Button variant="outline" onClick={() => query.refetch()}>
+            Retry
+          </Button>
         </Alert>
+      ) : state === "loading" ? (
+        <Spinner className="mx-auto my-6 size-6" aria-label="Fitting trends" />
       ) : items.length === 0 ? (
-        <p
-          className="page-x"
-          style={{
-            color: "var(--muted-foreground)",
-            fontSize: 13,
-            paddingTop: 16,
-          }}
-        >
-          {state === "loading"
-            ? "Fitting trends…"
-            : "Not enough samples in this window to fit a trend."}
-        </p>
+        <Empty>Not enough samples in this window to fit a trend.</Empty>
       ) : isDesktop ? (
-        <SmallMultiples items={items} start={start} end={end} />
+        <SmallMultiples items={items} start={start} end={end} range={range} />
       ) : (
         <TrendRows items={items} />
       )}
@@ -183,10 +186,12 @@ function SmallMultiples({
   items,
   start,
   end,
+  range,
 }: {
   items: TrendItem[];
   start: Date;
   end: Date;
+  range: string;
 }) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)" }}>
@@ -204,7 +209,12 @@ function SmallMultiples({
             borderBottom: "1px solid var(--border)",
           }}
         >
-          <div className="kick">{metric.label || metric.metric_name}</div>
+          <Link
+            className="kick underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+            to={`/metrics?metric=${encodeURIComponent(metric.metric_name)}&range=${range}`}
+          >
+            {metric.label || metric.metric_name}
+          </Link>
           <div
             className="num"
             style={{
@@ -251,7 +261,12 @@ function SmallMultiples({
             </span>
           </div>
 
-          <TrendChart series={metric.series} fit={fit} width={240} height={74} />
+          <TrendChart
+            series={metric.series}
+            fit={fit}
+            width={240}
+            height={74}
+          />
 
           <div
             style={{
@@ -281,7 +296,10 @@ function TrendRows({ items }: { items: TrendItem[] }) {
         if (group.length === 0) return null;
         return (
           <div key={verdict}>
-            <div className="kick row-group" style={{ textTransform: "capitalize" }}>
+            <div
+              className="kick row-group"
+              style={{ textTransform: "capitalize" }}
+            >
               {verdict}
             </div>
             {group.map(({ metric, fit }) => (

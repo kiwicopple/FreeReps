@@ -1,3 +1,8 @@
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import { Label } from "@/components/ui/label";
+import { Field } from "@/components/ui/field";
+import ConfirmAction from "../ConfirmAction";
 import DateControl from "@/components/DateControl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,13 +71,6 @@ export default function HevyTab() {
   }
 
   async function handleDisconnect() {
-    if (
-      !confirm(
-        "Disconnect Hevy? The API key is removed. Sets already imported stay in the database.",
-      )
-    ) {
-      return;
-    }
     try {
       await disconnectHevy();
       setApiKey("");
@@ -90,34 +88,22 @@ export default function HevyTab() {
       </TabHeader>
 
       {error ? (
-        <p
-          style={{
-            color: "var(--success-foreground)",
-            fontSize: 13,
-            paddingTop: 16,
-          }}
-        >
+        <Alert variant="error" className="mt-4">
           {error}{" "}
-          <Button variant="ghost" type="button"  onClick={load}>
+          <Button variant="ghost" type="button" onClick={load}>
             Retry
           </Button>
-        </p>
+        </Alert>
       ) : null}
 
       {!status ? (
-        <p
-          style={{
-            color: "var(--muted-foreground)",
-            fontSize: 13,
-            paddingTop: 16,
-          }}
-        >
-          Loading…
-        </p>
+        error ? null : (
+          <Spinner className="mt-4 size-5" />
+        )
       ) : !status.configured ? (
         <div style={{ paddingTop: 20, maxWidth: 520 }}>
-          <div className="field" style={{ marginBottom: 14 }}>
-            <label htmlFor="hevy-key">API key</label>
+          <Field style={{ marginBottom: 14 }}>
+            <Label htmlFor="hevy-key">API key</Label>
             <Input
               id="hevy-key"
 
@@ -127,12 +113,12 @@ export default function HevyTab() {
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="Hevy API key"
             />
-          </div>
-          <div className="field" style={{ marginBottom: 16 }}>
-            <label htmlFor="hevy-from">Import from</label>
+          </Field>
+          <Field style={{ marginBottom: 16 }}>
+            <Label htmlFor="hevy-from">Import from</Label>
             <DateControl
               id="hevy-from"
-              className=""
+              aria-label="Import from"
               style={MONO}
 
               value={syncFrom}
@@ -149,8 +135,9 @@ export default function HevyTab() {
               switchover date so an Alpha Progression history later uploaded to
               Hevy cannot be counted a second time.
             </p>
-          </div>
-          <Button variant="default"
+          </Field>
+          <Button
+            variant="default"
             type="button"
 
             onClick={handleSave}
@@ -168,7 +155,14 @@ export default function HevyTab() {
               marginTop: 20,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
               <span
                 style={{
                   width: 11,
@@ -176,9 +170,19 @@ export default function HevyTab() {
                   background: "var(--primary)",
                 }}
               />
-              <span style={{ font: "600 14px var(--font-body)" }}>Connected</span>
-              <span style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-                <Button variant="outline"
+              <span style={{ font: "600 14px var(--font-body)" }}>
+                Connected
+              </span>
+              <span
+                style={{
+                  marginLeft: "auto",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 8,
+                }}
+              >
+                <Button
+                  variant="outline"
                   type="button"
 
                   style={{ fontSize: 12 }}
@@ -187,14 +191,11 @@ export default function HevyTab() {
                 >
                   {syncing ? "Syncing…" : "Sync now"}
                 </Button>
-                <Button variant="ghost"
-                  type="button"
-
-                  style={{ fontSize: 12 }}
-                  onClick={handleDisconnect}
-                >
-                  Disconnect
-                </Button>
+                <ConfirmAction
+                  title="Disconnect Hevy?"
+                  description="The API key is removed. Previously imported sets remain available."
+                  onConfirm={handleDisconnect}
+                />
               </span>
             </div>
             <div
@@ -212,9 +213,9 @@ export default function HevyTab() {
           </div>
 
           <div style={{ paddingTop: 24, maxWidth: 520 }}>
-            <label className="kick" htmlFor="hevy-replace">
+            <Label className="kick" htmlFor="hevy-replace">
               Replace API key
-            </label>
+            </Label>
             <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
               <Input
                 id="hevy-replace"
@@ -225,7 +226,8 @@ export default function HevyTab() {
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="New Hevy API key"
               />
-              <Button variant="outline"
+              <Button
+                variant="outline"
                 type="button"
 
                 onClick={handleSave}

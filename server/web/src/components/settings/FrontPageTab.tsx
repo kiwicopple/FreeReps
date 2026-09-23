@@ -1,4 +1,6 @@
 import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import { Empty } from "@/components/ui/empty";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -23,7 +25,8 @@ const HERO_COUNT = 4;
 export default function FrontPageTab() {
   const isDesktop = useIsDesktop();
   const queryClient = useQueryClient();
-  const { options, isLoading } = useAvailableMetrics();
+  const metrics = useAvailableMetrics();
+  const { options, isLoading } = metrics;
   const frontPage = useQuery({
     queryKey: ["front-page", "30d"],
     queryFn: () => fetchFrontPage("30d"),
@@ -82,13 +85,30 @@ export default function FrontPageTab() {
     setHeroes(frontPage.data?.heroes.slice(0, HERO_COUNT) ?? []);
   }
 
-  if (isLoading || !loaded) {
+  if (!loaded && (metrics.error || frontPage.error))
     return (
-      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
-        Loading metrics…
-      </p>
+      <Alert variant="error">
+        {metrics.error?.message || frontPage.error?.message}
+        <Button
+          variant="ghost"
+          onClick={() => {
+            void metrics.refetch();
+            void frontPage.refetch();
+          }}
+        >
+          Retry
+        </Button>
+      </Alert>
     );
-  }
+  if (metrics.isSuccess && options.length === 0)
+    return (
+      <Empty>
+        No metrics available yet. Import health data to configure the front
+        page.
+      </Empty>
+    );
+  if (isLoading || !loaded)
+    return <Spinner className="my-4 size-5" aria-label="Loading metrics" />;
 
   const visibleCount = Object.values(visible).filter(Boolean).length;
 
@@ -112,9 +132,10 @@ export default function FrontPageTab() {
           {heroes.length !== HERO_COUNT ? " — pick exactly four to save" : ""}
         </p>
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {heroes.map((name) => (
-            <Button variant="outline"
+            <Button
+              variant="outline"
               key={name}
               type="button"
               onClick={() => toggleHero(name)}
@@ -167,6 +188,7 @@ export default function FrontPageTab() {
                 key={m.value}
                 style={{
                   display: "flex",
+                  flexWrap: "wrap",
                   alignItems: "center",
                   gap: 14,
                   padding: "11px 0",
@@ -198,7 +220,8 @@ export default function FrontPageTab() {
                 <span className="kick" style={{ width: 120, flex: "none" }}>
                   {m.category}
                 </span>
-                <Button variant="ghost"
+                <Button
+                  variant="ghost"
                   type="button"
                   onClick={() => toggleHero(m.value)}
                   disabled={!isHero && heroes.length >= HERO_COUNT}
@@ -214,13 +237,16 @@ export default function FrontPageTab() {
       </div>
 
       {error ? (
-        <Alert variant="error" style={{ color: "var(--success-foreground)", fontSize: 13, marginTop: 14 }}>
+        <Alert variant="error" style={{ fontSize: 13, marginTop: 14 }}>
           {error}
         </Alert>
       ) : null}
 
-      <div style={{ display: "flex", gap: 12, paddingTop: 20 }}>
-        <Button variant="default"
+      <div
+        style={{ display: "flex", flexWrap: "wrap", gap: 12, paddingTop: 20 }}
+      >
+        <Button
+          variant="default"
           type="button"
 
           onClick={save}
@@ -228,7 +254,7 @@ export default function FrontPageTab() {
         >
           {saving ? "Saving…" : "Save"}
         </Button>
-        <Button variant="ghost" type="button"  onClick={reset}>
+        <Button variant="ghost" type="button" onClick={reset}>
           Reset to defaults
         </Button>
       </div>

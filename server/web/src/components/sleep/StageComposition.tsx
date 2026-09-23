@@ -1,3 +1,4 @@
+import { Empty } from "@/components/ui/empty";
 import { formatHoursMinutes } from "../../utils/format";
 import { STAGE_COMPOSITION_ORDER, stageColor } from "../../utils/stageColors";
 
@@ -22,9 +23,9 @@ export default function StageComposition({ totals, compact = false }: Props) {
   const sum = STAGE_COMPOSITION_ORDER.reduce((a, s) => a + (totals[s] || 0), 0);
   if (sum <= 0) {
     return (
-      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+      <Empty style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         No stage breakdown for this night.
-      </p>
+      </Empty>
     );
   }
 

@@ -1,4 +1,7 @@
 import SegmentedControl from "../SegmentedControl";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMe, fetchStats, fetchVersion } from "../../api";
 import { useTheme, type ThemePreference } from "../../theme";
@@ -32,6 +35,25 @@ export default function IdentityTab() {
         proxy, so there is nothing to log into.
       </TabHeader>
 
+      {(me.isPending || version.isPending || stats.isPending) && (
+        <Spinner className="my-4 size-5" />
+      )}
+      {(me.error || version.error || stats.error) && (
+        <Alert variant="error">
+          {(me.error || version.error || stats.error)?.message}
+          <Button
+            variant="ghost"
+            onClick={() => {
+              void me.refetch();
+              void version.refetch();
+              void stats.refetch();
+            }}
+          >
+            Retry
+          </Button>
+        </Alert>
+      )}
+
       <Row label="Display name">
         {me.data?.display_name || me.data?.login || "—"}
       </Row>
@@ -52,7 +74,13 @@ export default function IdentityTab() {
       <MaxHeartRateRow />
 
       <Row label="Appearance">
-        <SegmentedControl label="Appearance" name="theme" options={THEMES} value={theme} onChange={setTheme} />
+        <SegmentedControl
+          label="Appearance"
+          name="theme"
+          options={THEMES}
+          value={theme}
+          onChange={setTheme}
+        />
         <p
           style={{
             font: "400 12px var(--font-body)",

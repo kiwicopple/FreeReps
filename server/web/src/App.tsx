@@ -20,7 +20,7 @@ const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 function PageFallback() {
   return (
     <div className="page-x" style={{ paddingTop: 22 }}>
-      <Skeleton  style={{ width: 180, height: 34 }} />
+      <Skeleton style={{ width: 180, height: 34 }} />
     </div>
   );
 }

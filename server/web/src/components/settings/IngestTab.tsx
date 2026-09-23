@@ -1,3 +1,9 @@
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Empty } from "@/components/ui/empty";
+import { Spinner } from "@/components/ui/spinner";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { fetchImportLogs, type ImportLog } from "../../api";
@@ -11,7 +17,9 @@ export default function IngestTab() {
   });
 
   const serverURL =
-    typeof window === "undefined" ? "" : `${window.location.origin}/api/v1/ingest`;
+    typeof window === "undefined"
+      ? ""
+      : `${window.location.origin}/api/v1/ingest`;
 
   return (
     <>
@@ -21,9 +29,9 @@ export default function IngestTab() {
       </TabHeader>
 
       <div style={{ paddingTop: 20 }}>
-        <label className="kick" htmlFor="ingest-url">
+        <Label className="kick" htmlFor="ingest-url">
           Server URL
-        </label>
+        </Label>
         <Input
           id="ingest-url"
 
@@ -42,19 +50,20 @@ export default function IngestTab() {
             marginTop: 12,
           }}
         >
+          {logs.isPending && <Spinner className="my-4 size-5" />}
+          {logs.error && (
+            <Alert variant="error">
+              {logs.error.message}
+              <Button variant="ghost" onClick={() => void logs.refetch()}>
+                Retry
+              </Button>
+            </Alert>
+          )}
           {logs.data && logs.data.length > 0 ? (
             logs.data.map((log) => <IngestRow key={log.id} log={log} />)
-          ) : (
-            <p
-              style={{
-                color: "var(--muted-foreground)",
-                fontSize: 13,
-                paddingTop: 14,
-              }}
-            >
-              No ingests recorded yet.
-            </p>
-          )}
+          ) : logs.isSuccess ? (
+            <Empty>No ingests recorded yet.</Empty>
+          ) : null}
         </div>
       </div>
     </>
@@ -79,6 +88,7 @@ function IngestRow({ log }: { log: ImportLog }) {
     <div
       style={{
         display: "flex",
+        flexWrap: "wrap",
         alignItems: "baseline",
         gap: 16,
         padding: "12px 0",
@@ -108,7 +118,7 @@ function IngestRow({ log }: { log: ImportLog }) {
       </span>
       <span
         style={{
-          flex: 1,
+          flex: "1 1 180px",
           minWidth: 0,
           font: "400 12.5px var(--font-body)",
           color: "var(--muted-foreground)",
@@ -116,12 +126,12 @@ function IngestRow({ log }: { log: ImportLog }) {
       >
         {log.error_message || summary || "nothing new"}
       </span>
-      <span
-        className={`tag ${log.status === "success" ? "tag-accent" : "tag-neutral"}`}
+      <Badge
+        variant={log.status === "success" ? "success" : "secondary"}
         style={{ flex: "none" }}
       >
         {log.status === "success" ? "OK" : log.status}
-      </span>
+      </Badge>
     </div>
   );
 }

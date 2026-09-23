@@ -24,7 +24,8 @@ interface Props {
  */
 export default function HeroStrip({ metrics, loading }: Props) {
   const isDesktop = useIsDesktop();
-  const cells = loading && metrics.length === 0 ? [null, null, null, null] : metrics;
+  const cells =
+    loading && metrics.length === 0 ? [null, null, null, null] : metrics;
 
   return (
     <div
@@ -87,7 +88,6 @@ function HeroCell({
           </>
         ) : (
           <Skeleton
-
             style={{ width: isDesktop ? 120 : 90, height: isDesktop ? 48 : 34 }}
           />
         )}
@@ -118,11 +118,15 @@ function HeroCell({
                 color: "var(--muted-foreground)",
               }}
             >
-              {m.source ? sourceLabel(m.source) : m.time ? formatTimeAgo(m.time) : ""}
+              {m.source
+                ? sourceLabel(m.source)
+                : m.time
+                  ? formatTimeAgo(m.time)
+                  : ""}
             </span>
           </>
         ) : (
-          <Skeleton  style={{ width: 80, height: 12 }} />
+          <Skeleton style={{ width: 80, height: 12 }} />
         )}
       </div>
 

@@ -1,3 +1,4 @@
+import { Alert } from "@/components/ui/alert";
 import DateControl from "@/components/DateControl";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -45,16 +46,24 @@ export default function BirthDateRow() {
 
   return (
     <Row label="Date of birth">
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
         <DateControl
           className="num"
-          style={{ width: 170 }}
+          style={{ width: 240, maxWidth: "100%" }}
 
           value={draft}
           onValueChange={(value) => setDraft(value)}
           aria-label="Date of birth"
         />
-        <Button variant="outline"
+        <Button
+          variant="outline"
           type="button"
 
           style={{ fontSize: 12 }}
@@ -64,7 +73,8 @@ export default function BirthDateRow() {
           {saving ? "Saving…" : "Save"}
         </Button>
         {stored ? (
-          <Button variant="ghost"
+          <Button
+            variant="ghost"
             type="button"
 
             style={{ fontSize: 12 }}
@@ -79,6 +89,16 @@ export default function BirthDateRow() {
         ) : null}
       </div>
 
+      {(error || query.error) && (
+        <Alert variant="error" className="mt-2">
+          {error || query.error?.message}
+          {query.error && (
+            <Button variant="ghost" onClick={() => void query.refetch()}>
+              Retry
+            </Button>
+          )}
+        </Alert>
+      )}
       <p
         style={{
           font: "400 12px/1.5 var(--font-body)",
@@ -87,9 +107,7 @@ export default function BirthDateRow() {
           maxWidth: "56ch",
         }}
       >
-        {error ? (
-          <span style={{ color: "var(--success-foreground)" }}>{error}</span>
-        ) : query.data?.age ? (
+        {query.data?.age ? (
           <>
             Age {query.data.age}. Used only to estimate a maximum heart rate
             when none is set — nothing else reads it.

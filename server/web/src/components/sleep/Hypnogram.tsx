@@ -1,3 +1,4 @@
+import { Empty } from "@/components/ui/empty";
 import type { ReactNode } from "react";
 import type { SleepStage } from "../../api";
 import { STAGE_LANES, stageColor } from "../../utils/stageColors";
@@ -21,9 +22,9 @@ interface Props {
 export default function Hypnogram({ stages, compact = false, overlay }: Props) {
   if (stages.length === 0) {
     return (
-      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+      <Empty style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         No stage data for this night.
-      </p>
+      </Empty>
     );
   }
 
@@ -68,25 +69,25 @@ export default function Hypnogram({ stages, compact = false, overlay }: Props) {
     const height = (STAGE_LANES.length - 1) * gap + rowHeight;
     return (
       <div style={{ position: "relative" }}>
-      <svg
-        viewBox={`0 0 100 ${height}`}
-        preserveAspectRatio="none"
-        style={{ width: "100%", height: 108, display: "block" }}
-        role="img"
-        aria-label="Sleep stages through the night"
-      >
-        {blocks.map((b) => (
-          <rect
-            key={b.key}
-            x={b.left}
-            y={b.laneIndex * gap}
-            width={b.width}
-            height={rowHeight}
-            fill={b.color}
-          />
-        ))}
-      </svg>
-      {overlay}
+        <svg
+          viewBox={`0 0 100 ${height}`}
+          preserveAspectRatio="none"
+          style={{ width: "100%", height: 108, display: "block" }}
+          role="img"
+          aria-label="Sleep stages through the night"
+        >
+          {blocks.map((b) => (
+            <rect
+              key={b.key}
+              x={b.left}
+              y={b.laneIndex * gap}
+              width={b.width}
+              height={rowHeight}
+              fill={b.color}
+            />
+          ))}
+        </svg>
+        {overlay}
       </div>
     );
   }

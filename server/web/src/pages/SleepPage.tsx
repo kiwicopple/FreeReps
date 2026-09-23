@@ -34,7 +34,9 @@ export default function SleepPage() {
   const isDesktop = useIsDesktop();
   const [params, setParams] = useSearchParams();
   const rawRange = params.get("range");
-  const range: Range = RANGES.includes(rawRange as Range) ? rawRange as Range : "30d";
+  const range: Range = RANGES.includes(rawRange as Range)
+    ? (rawRange as Range)
+    : "30d";
   const rawDate = params.get("date");
   const selectedDate = validDate(rawDate) ? rawDate : null;
   const today = localToday();
@@ -53,8 +55,8 @@ export default function SleepPage() {
 
   // Session dates identify the night, rather than the following wake-up day.
   const last = selectedDate
-    ? sessions.find((s) => s.Date.slice(0, 10) === selectedDate) ?? null
-    : sessions[0] ?? null;
+    ? (sessions.find((s) => s.Date.slice(0, 10) === selectedDate) ?? null)
+    : (sessions[0] ?? null);
   const date = selectedDate ?? last?.Date.slice(0, 10) ?? today;
   const navigateDate = (next: string | null) => {
     const p = new URLSearchParams(params);
@@ -106,38 +108,86 @@ export default function SleepPage() {
         }
       />
 
-      <div className="page-x" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, paddingBottom: 20 }}>
-        <Button variant="outline" aria-label="Previous night" onClick={() => navigateDate(shiftDate(date, -1))} style={{ minWidth: 44, minHeight: 44 }}>←</Button>
-        <DateControl aria-label="Night date"  value={date} max={today} onValueChange={(value) => {
-          if (validDate(value) && value <= today) navigateDate(value);
-        }}  />
-        <Button variant="outline" aria-label="Next night" disabled={date >= today} onClick={() => navigateDate(shiftDate(date, 1))} style={{ minWidth: 44, minHeight: 44 }}>→</Button>
-        <Button variant="outline" onClick={() => navigateDate(null)} style={{ minHeight: 44 }}>Latest</Button>
-        <span style={{ fontSize: 12, color: "var(--muted-foreground)", flexBasis: "100%" }}>Choose the date the night is recorded under.</span>
+      <div
+        className="page-x"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 10,
+          paddingBottom: 20,
+        }}
+      >
+        <Button
+          variant="outline"
+          aria-label="Previous night"
+          onClick={() => navigateDate(shiftDate(date, -1))}
+          style={{ minWidth: 44, minHeight: 44 }}
+        >
+          ←
+        </Button>
+        <DateControl
+          aria-label="Night date"
+          value={date}
+          max={today}
+          onValueChange={(value) => {
+            if (validDate(value) && value <= today) navigateDate(value);
+          }}
+        />
+        <Button
+          variant="outline"
+          aria-label="Next night"
+          disabled={date >= today}
+          onClick={() => navigateDate(shiftDate(date, 1))}
+          style={{ minWidth: 44, minHeight: 44 }}
+        >
+          →
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => navigateDate(null)}
+          style={{ minHeight: 44 }}
+        >
+          Latest
+        </Button>
+        <span
+          style={{
+            fontSize: 12,
+            color: "var(--muted-foreground)",
+            flexBasis: "100%",
+          }}
+        >
+          Choose the date the night is recorded under.
+        </span>
       </div>
 
       {last && <RecoveryScore session={last} />}
 
       {message ? (
-        <Alert variant="error"
+        <Alert
+          variant="error"
           className="page-x"
           style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           {message}
+          <Button variant="outline" onClick={() => query.refetch()}>
+            Retry
+          </Button>
         </Alert>
       ) : state === "loading" ? (
         <div
           className="page-x"
           style={{ borderTop: "2px solid var(--foreground)", paddingTop: 24 }}
         >
-          <Skeleton  style={{ width: 180, height: 44 }} />
+          <Skeleton style={{ width: 180, height: 44 }} />
         </div>
       ) : !last ? (
         <Empty
           className="page-x"
           style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
-          No sleep recorded for this date. Choose another night or return to Latest.
+          No sleep recorded for this date. Choose another night or return to
+          Latest.
         </Empty>
       ) : isDesktop ? (
         <DesktopSleep
@@ -186,7 +236,7 @@ function DesktopSleep({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
+          gridTemplateColumns: "repeat(5, minmax(0,1fr))",
           borderTop: "2px solid var(--foreground)",
           borderBottom: "2px solid var(--foreground)",
         }}
@@ -231,7 +281,6 @@ function DesktopSleep({
         aside={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)} · ${awakenings} awakening${awakenings === 1 ? "" : "s"}`}
       >
         <SleepHeartRate stages={stages} />
-
       </Section>
 
       <Section
@@ -359,7 +408,9 @@ function NightRow({ session }: { session: SleepSession }) {
 
   return (
     <div className="row" style={{ paddingTop: 10, paddingBottom: 10 }}>
-      <span style={{ font: "500 13px var(--font-body)", width: 44, flex: "none" }}>
+      <span
+        style={{ font: "500 13px var(--font-body)", width: 44, flex: "none" }}
+      >
         {new Date(session.Date).toLocaleDateString("en-GB", {
           weekday: "short",
         })}
@@ -432,9 +483,10 @@ function HeroCell({
 }) {
   return (
     <div
-      className="page-x"
+      className="min-w-0"
       style={{
         paddingTop: 24,
+        paddingInline: "clamp(12px, 2vw, 32px)",
         paddingBottom: 22,
         borderRight: "1px solid var(--border)",
       }}
@@ -443,7 +495,7 @@ function HeroCell({
       <div
         className="num"
         style={{
-          font: "800 44px/1 var(--font-heading)",
+          font: "800 clamp(24px, 3vw, 44px)/1 var(--font-heading)",
           letterSpacing: "-0.035em",
           marginTop: 14,
         }}

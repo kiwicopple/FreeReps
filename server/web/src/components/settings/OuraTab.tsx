@@ -1,6 +1,18 @@
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import { Label } from "@/components/ui/label";
+import { Field } from "@/components/ui/field";
+import ConfirmAction from "../ConfirmAction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { useCallback, useEffect, useState } from "react";
 import {
   authorizeOura,
@@ -58,7 +70,9 @@ export default function OuraTab() {
       const { authorize_url } = await authorizeOura();
       window.location.href = authorize_url;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to start authorization");
+      setError(
+        e instanceof Error ? e.message : "Failed to start authorization",
+      );
     }
   }
 
@@ -75,11 +89,6 @@ export default function OuraTab() {
   }
 
   async function handleDisconnect() {
-    if (
-      !confirm("Disconnect Oura Ring? This removes stored tokens and credentials.")
-    ) {
-      return;
-    }
     try {
       await disconnectOura();
       setClientId("");
@@ -93,41 +102,31 @@ export default function OuraTab() {
   return (
     <>
       <TabHeader title="Oura">
-        Oura is polled on a schedule. Register an app at
-        cloud.ouraring.com, save its credentials here, then authorize once.
+        Oura is polled on a schedule. Register an app at cloud.ouraring.com,
+        save its credentials here, then authorize once.
       </TabHeader>
 
-      {status?.redirect_uri ? <RedirectURIRow uri={status.redirect_uri} /> : null}
+      {status?.redirect_uri ? (
+        <RedirectURIRow uri={status.redirect_uri} />
+      ) : null}
 
       {error ? (
-        <p
-          style={{
-            color: "var(--success-foreground)",
-            fontSize: 13,
-            paddingTop: 16,
-          }}
-        >
+        <Alert variant="error" className="mt-4">
           {error}{" "}
-          <Button variant="ghost" type="button"  onClick={load}>
+          <Button variant="ghost" type="button" onClick={load}>
             Retry
           </Button>
-        </p>
+        </Alert>
       ) : null}
 
       {!status ? (
-        <p
-          style={{
-            color: "var(--muted-foreground)",
-            fontSize: 13,
-            paddingTop: 16,
-          }}
-        >
-          Loading…
-        </p>
+        error ? null : (
+          <Spinner className="mt-4 size-5" />
+        )
       ) : !status.configured ? (
         <div style={{ paddingTop: 20, maxWidth: 520 }}>
-          <div className="field" style={{ marginBottom: 14 }}>
-            <label htmlFor="oura-id">Client ID</label>
+          <Field style={{ marginBottom: 14 }}>
+            <Label htmlFor="oura-id">Client ID</Label>
             <Input
               id="oura-id"
 
@@ -136,9 +135,9 @@ export default function OuraTab() {
               onChange={(e) => setClientId(e.target.value)}
               placeholder="Oura client ID"
             />
-          </div>
-          <div className="field" style={{ marginBottom: 16 }}>
-            <label htmlFor="oura-secret">Client secret</label>
+          </Field>
+          <Field style={{ marginBottom: 16 }}>
+            <Label htmlFor="oura-secret">Client secret</Label>
             <Input
               id="oura-secret"
 
@@ -148,8 +147,9 @@ export default function OuraTab() {
               onChange={(e) => setClientSecret(e.target.value)}
               placeholder="Oura client secret"
             />
-          </div>
-          <Button variant="default"
+          </Field>
+          <Button
+            variant="default"
             type="button"
 
             onClick={handleSaveCredentials}
@@ -182,7 +182,7 @@ function StatusPanel({
   syncing: boolean;
   onSync: () => void;
   onConnect: () => void;
-  onDisconnect: () => void;
+  onDisconnect: () => Promise<void>;
 }) {
   const connected = status.connected;
 
@@ -195,7 +195,14 @@ function StatusPanel({
           marginTop: 20,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
           <span
             style={{
               width: 11,
@@ -208,9 +215,17 @@ function StatusPanel({
           <span style={{ font: "600 14px var(--font-body)" }}>
             {connected ? "Connected" : "Credentials saved"}
           </span>
-          <span style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <span
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 8,
+            }}
+          >
             {connected ? (
-              <Button variant="outline"
+              <Button
+                variant="outline"
                 type="button"
 
                 style={{ fontSize: 12 }}
@@ -220,7 +235,8 @@ function StatusPanel({
                 {syncing ? "Syncing…" : "Sync now"}
               </Button>
             ) : (
-              <Button variant="default"
+              <Button
+                variant="default"
                 type="button"
 
                 style={{ fontSize: 12 }}
@@ -229,14 +245,11 @@ function StatusPanel({
                 Authorize with Oura
               </Button>
             )}
-            <Button variant="ghost"
-              type="button"
-
-              style={{ fontSize: 12 }}
-              onClick={onDisconnect}
-            >
-              Disconnect
-            </Button>
+            <ConfirmAction
+              title="Disconnect Oura?"
+              description="This removes stored tokens and credentials. Previously imported data remains available."
+              onConfirm={onDisconnect}
+            />
           </span>
         </div>
         <div
@@ -255,9 +268,9 @@ function StatusPanel({
       </div>
 
       <div style={{ paddingTop: 20, maxWidth: 520 }}>
-        <label className="kick" htmlFor="oura-client">
+        <Label className="kick" htmlFor="oura-client">
           Client ID
-        </label>
+        </Label>
         <Input
           id="oura-client"
 
@@ -270,10 +283,12 @@ function StatusPanel({
       {status.sync_states && Object.keys(status.sync_states).length > 0 ? (
         <div style={{ paddingTop: 30 }}>
           <h3 style={{ fontSize: 15, fontWeight: 700 }}>Pull schedule</h3>
-          <Table  style={{ marginTop: 12 }}>
+          <Table style={{ marginTop: 12 }}>
             <TableHeader>
               <TableRow>
-                <TableHead style={{ width: 200, paddingLeft: 0 }}>Job</TableHead>
+                <TableHead style={{ width: 200, paddingLeft: 0 }}>
+                  Job
+                </TableHead>
                 <TableHead style={{ paddingRight: 0 }}>Last run</TableHead>
               </TableRow>
             </TableHeader>
@@ -282,7 +297,12 @@ function StatusPanel({
                 .sort(([a], [b]) => a.localeCompare(b))
                 .map(([job, lastSync]) => (
                   <TableRow key={job}>
-                    <TableCell style={{ font: "500 13.5px var(--font-body)", paddingLeft: 0 }}>
+                    <TableCell
+                      style={{
+                        font: "500 13.5px var(--font-body)",
+                        paddingLeft: 0,
+                      }}
+                    >
                       {job.replace(/_/g, " ")}
                     </TableCell>
                     <TableCell

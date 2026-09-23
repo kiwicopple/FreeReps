@@ -1,6 +1,15 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWorkoutSets, WorkoutSet } from "../../api";
 
@@ -44,7 +53,7 @@ export default function WorkoutSets({
 }: Props) {
   const isStrength = STRENGTH_TYPES.has(workoutName) || !!alphaSessionName;
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["workoutSets", workoutId],
     queryFn: () => fetchWorkoutSets(workoutId, workoutStart, workoutEnd),
     enabled: isStrength,
@@ -53,10 +62,19 @@ export default function WorkoutSets({
   if (!isStrength) return null;
 
   if (isLoading) {
-    return <Skeleton  style={{ width: "100%", height: 120 }} />;
+    return <Skeleton style={{ width: "100%", height: 120 }} />;
   }
 
-  if (error || !data || data.length === 0) {
+  if (error)
+    return (
+      <Alert variant="error">
+        Exercise sets could not be loaded.
+        <Button variant="outline" onClick={() => void refetch()}>
+          Retry
+        </Button>
+      </Alert>
+    );
+  if (!data || data.length === 0) {
     return null; // No sets data — silently hide
   }
 
@@ -97,7 +115,9 @@ export default function WorkoutSets({
                 marginBottom: 8,
               }}
             >
-              <span style={{ font: "600 14px var(--font-body)" }}>{ex.name}</span>
+              <span style={{ font: "600 14px var(--font-body)" }}>
+                {ex.name}
+              </span>
               {ex.equipment ? (
                 <span
                   style={{
@@ -109,15 +129,17 @@ export default function WorkoutSets({
                 </span>
               ) : null}
               {ex.muscle ? (
-                <Badge variant="secondary" >
+                <Badge variant="secondary">
                   {ex.muscle.replace(/_/g, " ")}
                 </Badge>
               ) : null}
             </div>
-            <Table >
+            <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead style={{ width: 60, paddingLeft: 0 }}>Set</TableHead>
+                  <TableHead style={{ width: 60, paddingLeft: 0 }}>
+                    Set
+                  </TableHead>
                   <TableHead style={{ textAlign: "right" }}>Weight</TableHead>
                   <TableHead style={{ textAlign: "right" }}>Reps</TableHead>
                   <TableHead style={{ textAlign: "right", paddingRight: 0 }}>
@@ -137,13 +159,21 @@ export default function WorkoutSets({
                   >
                     <TableCell
                       className="num"
-                      style={{ paddingLeft: 0, paddingTop: 8, paddingBottom: 8 }}
+                      style={{
+                        paddingLeft: 0,
+                        paddingTop: 8,
+                        paddingBottom: 8,
+                      }}
                     >
                       {set.IsWarmup ? "W" : set.SetNumber}
                     </TableCell>
                     <TableCell
                       className="num"
-                      style={{ textAlign: "right", paddingTop: 8, paddingBottom: 8 }}
+                      style={{
+                        textAlign: "right",
+                        paddingTop: 8,
+                        paddingBottom: 8,
+                      }}
                     >
                       {set.WeightKg > 0
                         ? `${set.WeightKg.toFixed(1)} kg`
@@ -153,7 +183,11 @@ export default function WorkoutSets({
                     </TableCell>
                     <TableCell
                       className="num"
-                      style={{ textAlign: "right", paddingTop: 8, paddingBottom: 8 }}
+                      style={{
+                        textAlign: "right",
+                        paddingTop: 8,
+                        paddingBottom: 8,
+                      }}
                     >
                       {set.Reps}
                     </TableCell>

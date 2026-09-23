@@ -1,7 +1,15 @@
+import { Button } from "@/components/ui/button";
 import { Empty } from "@/components/ui/empty";
 import { Alert } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
-import { Table, TableBody, TableHeader, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -129,7 +137,8 @@ export default function DashboardPage() {
       </div>
 
       {message ? (
-        <Alert variant="error"
+        <Alert
+          variant="error"
           className="page-x"
           style={{
             color: "var(--muted-foreground)",
@@ -138,6 +147,9 @@ export default function DashboardPage() {
           }}
         >
           {message}
+          <Button variant="outline" onClick={() => query.refetch()}>
+            Retry
+          </Button>
         </Alert>
       ) : isDesktop ? (
         <MetricsTable
@@ -165,7 +177,11 @@ export default function DashboardPage() {
         >
           Show {hidden} more metrics →
         </Link>
-        <Link to="/trends" className={buttonVariants({ variant: "ghost" })} style={{ fontSize: 12.5 }}>
+        <Link
+          to="/trends"
+          className={buttonVariants({ variant: "ghost" })}
+          style={{ fontSize: 12.5 }}
+        >
           Open in Trends →
         </Link>
         {/* Correlations needs width the phone does not have, so its entry
@@ -222,7 +238,7 @@ function MetricsTable({
   }
 
   return (
-    <Table >
+    <Table>
       <MetricTableHead range={range} />
       <TableBody>
         {groups.map((group) => (
@@ -240,7 +256,9 @@ function MetricTableHead({ range }: { range: DashboardRange }) {
         <TableHead>Metric</TableHead>
         <TableHead style={{ textAlign: "right", width: 130 }}>Latest</TableHead>
         <TableHead style={{ textAlign: "right", width: 90 }}>Δ 7d</TableHead>
-        <TableHead style={{ textAlign: "right", width: 150 }}>{range} range</TableHead>
+        <TableHead style={{ textAlign: "right", width: 150 }}>
+          {range} range
+        </TableHead>
         <TableHead style={{ width: 200 }}>{range}</TableHead>
         <TableHead style={{ width: 150 }}>Source</TableHead>
         <TableHead style={{ width: 110 }}>Updated</TableHead>
@@ -341,17 +359,14 @@ function TableSkeleton({
   range: DashboardRange;
 }) {
   return (
-    <Table >
+    <Table>
       <MetricTableHead range={range} />
       <TableBody>
         {Array.from({ length: 8 }).map((_, i) => (
           <TableRow key={i}>
             {Array.from({ length: columns }).map((_, j) => (
               <TableCell key={j}>
-                <Skeleton
-
-                  style={{ width: j === 0 ? 120 : 60, height: 14 }}
-                />
+                <Skeleton style={{ width: j === 0 ? 120 : 60, height: 14 }} />
               </TableCell>
             ))}
           </TableRow>

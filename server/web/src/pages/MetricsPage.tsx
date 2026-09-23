@@ -1,3 +1,4 @@
+import { Label } from "@/components/ui/label";
 import Choice from "../components/Choice";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,11 @@ import { metricLabel } from "../utils/metricLabel";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { fetchMetricStats, fetchTimeSeries, type TimeSeriesPoint } from "../api";
+import {
+  fetchMetricStats,
+  fetchTimeSeries,
+  type TimeSeriesPoint,
+} from "../api";
 import DesktopOnly from "../components/DesktopOnly";
 import PageHeader from "../components/PageHeader";
 import RangeControl from "../components/RangeControl";
@@ -107,7 +112,31 @@ export default function MetricsPage() {
           minHeight: 760,
         }}
       >
-        <aside className="w-72 shrink-0 border-r p-5"><label className="mb-3 block text-sm font-medium" htmlFor="metric-choice">{options.length} metrics</label><Choice searchable id="metric-choice" aria-label="Metric" value={metric} onValueChange={value=>setParam("metric",value)}>{groups.map(group=><optgroup key={group.label} label={group.label}>{group.metrics.map(item=><option key={item.value} value={item.value}>{item.label}</option>)}</optgroup>)}</Choice></aside>
+        <aside className="w-72 shrink-0 border-r p-5">
+          <Label
+            className="mb-3 block text-sm font-medium"
+            htmlFor="metric-choice"
+          >
+            {options.length} metrics
+          </Label>
+          <Choice
+            searchable
+            id="metric-choice"
+            aria-label="Metric"
+            value={metric}
+            onValueChange={(value) => setParam("metric", value)}
+          >
+            {groups.map((group) => (
+              <optgroup key={group.label} label={group.label}>
+                {group.metrics.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </Choice>
+        </aside>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
@@ -130,7 +159,8 @@ export default function MetricsPage() {
                   .join(" · ")}
               </div>
             </div>
-            <Button variant="outline"
+            <Button
+              variant="outline"
               type="button"
 
               style={{ fontSize: 12 }}
@@ -169,11 +199,17 @@ export default function MetricsPage() {
 
           <div className="page-x" style={{ paddingTop: 26, paddingBottom: 34 }}>
             {message ? (
-              <Alert variant="error" style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+              <Alert
+                variant="error"
+                style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+              >
                 {message}
+                <Button variant="outline" onClick={() => seriesQuery.refetch()}>
+                  Retry
+                </Button>
               </Alert>
             ) : state === "loading" ? (
-              <Skeleton  style={{ width: "100%", height: 420 }} />
+              <Skeleton style={{ width: "100%", height: 420 }} />
             ) : (
               <MetricChart
                 points={points}

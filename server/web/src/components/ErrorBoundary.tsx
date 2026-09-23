@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Component, ReactNode } from "react";
 
 interface Props {
@@ -26,18 +27,14 @@ export default class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
       return (
         <div className="page-x" style={{ paddingTop: 26, paddingBottom: 26 }}>
-          <h2 style={{ fontSize: 19 }}>Something went wrong</h2>
-          <p
-            style={{
-              font: "400 13px/1.55 var(--font-body)",
-              color: "var(--muted-foreground)",
-              maxWidth: "62ch",
-              margin: "10px 0 0",
-            }}
-          >
-            {this.state.error?.message ?? "An unexpected error occurred."}
-          </p>
-          <Button variant="outline"
+          <Alert variant="error">
+            <AlertTitle>Something went wrong</AlertTitle>
+            <AlertDescription>
+              {this.state.error?.message ?? "An unexpected error occurred."}
+            </AlertDescription>
+          </Alert>
+          <Button
+            variant="outline"
             type="button"
 
             style={{ marginTop: 14 }}

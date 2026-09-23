@@ -1,3 +1,4 @@
+import { Empty } from "@/components/ui/empty";
 import type { ReactNode } from "react";
 import type { WorkoutHR } from "../../api";
 import { ZONE_BOUNDS, ZONE_COLORS, zoneBands } from "../../utils/stageColors";
@@ -17,9 +18,11 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
   if (!hrData || hrData.length < 5) {
     return (
       <Section>
-        <p style={{ color: "var(--muted-foreground)", fontSize: 13, margin: 0 }}>
+        <Empty
+          style={{ color: "var(--muted-foreground)", fontSize: 13, margin: 0 }}
+        >
           Not enough heart rate data for zone analysis.
-        </p>
+        </Empty>
       </Section>
     );
   }
@@ -56,7 +59,9 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
   if (total === 0) {
     return (
       <Section>
-        <p style={{ color: "var(--muted-foreground)", fontSize: 13, margin: 0 }}>
+        <p
+          style={{ color: "var(--muted-foreground)", fontSize: 13, margin: 0 }}
+        >
           Samples are too sparse to measure time in zones.
         </p>
       </Section>
@@ -120,7 +125,9 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
               }}
             >
               {mins}m
-              <span style={{ color: "var(--muted-foreground)", fontWeight: 400 }}>
+              <span
+                style={{ color: "var(--muted-foreground)", fontWeight: 400 }}
+              >
                 {" "}
                 {Math.round(pct)}%
               </span>
@@ -135,7 +142,9 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
 function Section({ children }: { children: ReactNode }) {
   return (
     <div style={{ marginTop: 30 }}>
-      <h2 style={{ fontSize: 19, fontWeight: 700 }}>Time in heart rate zones</h2>
+      <h2 style={{ fontSize: 19, fontWeight: 700 }}>
+        Time in heart rate zones
+      </h2>
       <div
         style={{
           borderTop: "2px solid var(--foreground)",

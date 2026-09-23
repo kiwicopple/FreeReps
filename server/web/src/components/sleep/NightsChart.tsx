@@ -1,3 +1,4 @@
+import { Empty } from "@/components/ui/empty";
 import { useMemo } from "react";
 import type { SleepSession, SleepStage } from "../../api";
 import { stageColor } from "../../utils/stageColors";
@@ -24,9 +25,9 @@ export default function NightsChart({ sessions, stages }: Props) {
 
   if (nights.length === 0) {
     return (
-      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+      <Empty style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         No nights in this window.
-      </p>
+      </Empty>
     );
   }
 
@@ -146,10 +147,7 @@ interface Night {
   blocks: { top: number; height: number; color: string }[];
 }
 
-function buildNights(
-  sessions: SleepSession[],
-  stages: SleepStage[],
-): Night[] {
+function buildNights(sessions: SleepSession[], stages: SleepStage[]): Night[] {
   const ordered = [...sessions].sort(
     (a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime(),
   );

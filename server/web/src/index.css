@@ -3,29 +3,56 @@
 @import "@fontsource-variable/archivo/wght.css";
 @custom-variant dark (&:where(.dark, .dark *));
 :root {
-  --background: #fafafa; --foreground: #202020;
-  --card: #f4f4f4; --card-foreground: var(--foreground);
-  --popover: #ffffff; --popover-foreground: var(--foreground);
-  --primary: #18794e; --primary-foreground: #ffffff;
-  --secondary: #eeeeee; --secondary-foreground: var(--foreground);
-  --muted: #f0f0f0; --muted-foreground: #626262;
-  --accent: #e9e9e9; --accent-foreground: var(--foreground);
-  --border: #d8d8d8; --input: #c8c8c8; --ring: #18794e;
-  --destructive: #c22c38; --destructive-foreground: #b51e2b;
-  --success: #18794e; --success-soft: #e9f9ef; --success-foreground: #12633f;
-  --warning: #97601b; --warning-soft: #f7eee4; --warning-foreground: #8a5512;
-  --radius: .625rem;
+  --background: #fafafa;
+  --foreground: #202020;
+  --card: #f4f4f4;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
+  --primary: #18794e;
+  --primary-foreground: #ffffff;
+  --secondary: #eeeeee;
+  --secondary-foreground: var(--foreground);
+  --muted: #f0f0f0;
+  --muted-foreground: #626262;
+  --accent: #e9e9e9;
+  --accent-foreground: var(--foreground);
+  --border: #d8d8d8;
+  --input: #c8c8c8;
+  --ring: #18794e;
+  --destructive: #c22c38;
+  --destructive-foreground: #b51e2b;
+  --success: #18794e;
+  --success-soft: #e9f9ef;
+  --success-foreground: #12633f;
+  --warning: #97601b;
+  --warning-soft: #f7eee4;
+  --warning-foreground: #8a5512;
+  --radius: 0.625rem;
 }
 .dark {
   color-scheme: dark;
-  --background: #000000; --foreground: #ededed;
-  --card: #111111; --popover: #111111;
-  --primary: #3ecf8e; --primary-foreground: #052e1c;
-  --secondary: #1a1a1a; --muted: #191919; --muted-foreground: #a8a8a8;
-  --accent: #252525; --border: #303030; --input: #404040; --ring: #3ecf8e;
-  --destructive: #e5484d; --destructive-foreground: #ff8b90;
-  --success: #3ecf8e; --success-soft: #0d251a; --success-foreground: #85e0b3;
-  --warning: #e0a95c; --warning-soft: #2e2418; --warning-foreground: #e0a95c;
+  --background: #000000;
+  --foreground: #ededed;
+  --card: #111111;
+  --popover: #111111;
+  --primary: #3ecf8e;
+  --primary-foreground: #052e1c;
+  --secondary: #1a1a1a;
+  --muted: #191919;
+  --muted-foreground: #a8a8a8;
+  --accent: #252525;
+  --border: #303030;
+  --input: #404040;
+  --ring: #3ecf8e;
+  --destructive: #e5484d;
+  --destructive-foreground: #ff8b90;
+  --success: #3ecf8e;
+  --success-soft: #0d251a;
+  --success-foreground: #85e0b3;
+  --warning: #e0a95c;
+  --warning-soft: #2e2418;
+  --warning-foreground: #e0a95c;
 }
 @theme inline {
   --color-background: var(--background);
@@ -63,7 +90,12 @@
   --font-heading: "Archivo Variable", "Archivo", system-ui, sans-serif;
   --font-body: "Archivo Variable", "Archivo", system-ui, sans-serif;
   --page-x: 40px;
-  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; --space-8: 32px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
   --color-data-1: #76a4a4;
   --color-data-2: #538e8e;
   --color-data-3: #337475;
@@ -87,8 +119,15 @@
   --color-stage-awake: var(--color-data-5);
   --color-data-band: #192a2a;
 }
-@media(max-width:767px) { :root { --page-x:20px; } }
-@theme inline { --font-sans:var(--font-body); --font-heading:var(--font-heading); }
+@media (max-width: 767px) {
+  :root {
+    --page-x: 20px;
+  }
+}
+@theme inline {
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-heading);
+}
 *,
 *::before,
 *::after {
@@ -133,7 +172,6 @@ a:hover {
   color: var(--primary);
 }
 
-
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -164,36 +202,6 @@ a:hover {
 /* ══════════════════════════════════════════════════════════════════════════
    Components
    ══════════════════════════════════════════════════════════════════════════ */
-
-/* — forms — */
-.field > label {
-  display: block;
-  font-size: 12px;
-  margin-bottom: 5px;
-  color: var(--muted-foreground);
-}
-
-.input {
-  width: 100%;
-  min-height: 36px;
-  padding: 6px 10px;
-  font: inherit;
-  font-size: 14px;
-  color: var(--foreground);
-  caret-color: var(--primary);
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-}
-
-.input:hover {
-  border-color: color-mix(in srgb, var(--foreground) 45%, transparent);
-}
-
-.input:focus-visible {
-  border-color: var(--primary);
-  outline-offset: 0;
-}
 
 /* — navigation — */
 /* The bar carries the one tonal step the system already has, so chrome and
@@ -238,38 +246,6 @@ a:hover {
   font-weight: 600;
   color: var(--foreground);
   box-shadow: inset 0 -2px 0 var(--primary);
-}
-
-/* — rail (Metrics, Settings) — */
-.rail {
-  width: 248px;
-  flex: none;
-  border-right: 2px solid var(--foreground);
-}
-
-.rail-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  font-size: 13px;
-  color: var(--muted-foreground);
-  background: transparent;
-  border: 0;
-  border-left: 3px solid transparent;
-  cursor: pointer;
-  font-family: var(--font-body);
-}
-
-.rail-item:hover {
-  background: color-mix(in srgb, var(--foreground) 5%, transparent);
-  color: var(--foreground);
-}
-
-.rail-item[aria-selected="true"] {
-  border-left-color: var(--primary);
-  background: var(--success-soft);
-  color: var(--foreground);
-  font-weight: 600;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -324,26 +300,21 @@ a:hover {
   border-bottom: 1px solid var(--border);
 }
 
-/* Square chip — the mobile range control and the workout filters. */
-.chip {
-  font: 600 11px var(--font-body);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 7px 12px;
-  border: 1px solid var(--input);
-  background: transparent;
-  color: var(--muted-foreground);
-  white-space: nowrap;
-  cursor: pointer;
-  border-radius: 0;
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-.chip[aria-pressed="true"],
-.chip[aria-current="true"] {
-  background: var(--foreground);
-  border-color: var(--foreground);
-  color: var(--background);
+p a {
+  text-decoration: underline;
 }
-
-@layer base { * { border-color: var(--border); } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }

@@ -263,8 +263,17 @@
   border-bottom: 1px solid var(--border);
   line-height: 1.6;
 }
-.nutrition-explainer p { margin: 0 0 8px; }
-.nutrition-explainer a { font-size: 13px; }
+.nutrition-explainer p {
+  margin: 0 0 8px;
+}
+.nutrition-explainer a {
+  font-size: 13px;
+}
 
-.nutrition-detail-trigger { align-items: flex-start; }
-.nutrition-editor [data-slot="input-control"], .nutrition-editor [data-slot="select-trigger"] { width: 100%; }
+.nutrition-detail-trigger {
+  align-items: flex-start;
+}
+.nutrition-editor [data-slot="input-control"],
+.nutrition-editor [data-slot="select-trigger"] {
+  width: 100%;
+}

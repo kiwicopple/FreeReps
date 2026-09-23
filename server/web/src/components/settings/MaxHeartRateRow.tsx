@@ -1,3 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
+import { Alert } from "@/components/ui/alert";
+import NumericField from "../NumericField";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -25,7 +28,9 @@ export default function MaxHeartRateRow() {
   useEffect(() => {
     if (loaded || !query.data) return;
     setDraft(
-      query.data.origin === "configured" ? String(Math.round(query.data.bpm)) : "",
+      query.data.origin === "configured"
+        ? String(Math.round(query.data.bpm))
+        : "",
     );
     setLoaded(true);
   }, [loaded, query.data]);
@@ -49,17 +54,26 @@ export default function MaxHeartRateRow() {
 
   return (
     <Row label="Max heart rate">
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <input
-          className="input num"
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <NumericField
+          className="num"
           style={{ width: 110 }}
-          type="number"
+
           min={100}
           max={250}
-          inputMode="numeric"
-          value={draft}
+
+          value={draft === "" ? null : Number(draft)}
           placeholder={data ? String(Math.round(data.observed)) : ""}
-          onChange={(e) => setDraft(e.target.value)}
+          onValueChange={(value) =>
+            setDraft(value === null ? "" : String(value))
+          }
           aria-label="Maximum heart rate in bpm"
         />
         <span
@@ -70,7 +84,8 @@ export default function MaxHeartRateRow() {
         >
           bpm
         </span>
-        <Button variant="outline"
+        <Button
+          variant="outline"
           type="button"
 
           style={{ fontSize: 12 }}
@@ -80,7 +95,8 @@ export default function MaxHeartRateRow() {
           {saving ? "Saving…" : "Save"}
         </Button>
         {data?.origin === "configured" ? (
-          <Button variant="ghost"
+          <Button
+            variant="ghost"
             type="button"
 
             style={{ fontSize: 12 }}
@@ -95,6 +111,16 @@ export default function MaxHeartRateRow() {
         ) : null}
       </div>
 
+      {(error || query.error) && (
+        <Alert variant="error" className="mt-2">
+          {error || query.error?.message}
+          {query.error && (
+            <Button variant="ghost" onClick={() => void query.refetch()}>
+              Retry
+            </Button>
+          )}
+        </Alert>
+      )}
       <p
         style={{
           font: "400 12px/1.5 var(--font-body)",
@@ -103,10 +129,12 @@ export default function MaxHeartRateRow() {
           maxWidth: "56ch",
         }}
       >
-        {error ? (
-          <span style={{ color: "var(--success-foreground)" }}>{error}</span>
-        ) : !data ? (
-          "Loading…"
+        {!data ? (
+          query.isPending ? (
+            <Spinner className="size-4" />
+          ) : (
+            "—"
+          )
         ) : data.origin === "configured" ? (
           <>
             Zones derive from your own figure. Without it they would use{" "}
@@ -134,9 +162,10 @@ export default function MaxHeartRateRow() {
         ) : (
           <>
             Unset, so zones derive from the highest rate your workouts recorded
-            — currently <span className="num">{formatNumber(data.observed, 0)}</span>{" "}
-            bpm. That figure rises after a hard session and shifts every band
-            with it. A date of birth above gives a steadier estimate.
+            — currently{" "}
+            <span className="num">{formatNumber(data.observed, 0)}</span> bpm.
+            That figure rises after a hard session and shifts every band with
+            it. A date of birth above gives a steadier estimate.
           </>
         )}
       </p>

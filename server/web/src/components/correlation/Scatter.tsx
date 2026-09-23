@@ -1,3 +1,4 @@
+import { Empty } from "@/components/ui/empty";
 import { formatNumber } from "../../utils/format";
 import { linearRegression } from "../../utils/stats";
 
@@ -21,9 +22,9 @@ interface Props {
 export default function Scatter({ pairs }: Props) {
   if (pairs.length < 3) {
     return (
-      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+      <Empty style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         Not enough paired days to plot.
-      </p>
+      </Empty>
     );
   }
 
@@ -37,7 +38,8 @@ export default function Scatter({ pairs }: Props) {
   const ySpan = yMax - yMin || 1;
 
   const xFor = (v: number) => LEFT + ((v - xMin) / xSpan) * (RIGHT - LEFT);
-  const yFor = (v: number) => BASELINE - ((v - yMin) / ySpan) * (BASELINE - TOP);
+  const yFor = (v: number) =>
+    BASELINE - ((v - yMin) / ySpan) * (BASELINE - TOP);
 
   const fit = linearRegression(xs, ys);
 

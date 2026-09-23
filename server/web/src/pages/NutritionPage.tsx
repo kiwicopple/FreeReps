@@ -3,7 +3,14 @@ import { Alert } from "@/components/ui/alert";
 import DateControl from "@/components/DateControl";
 import Choice from "@/components/Choice";
 import { Button } from "@/components/ui/button";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -191,14 +198,22 @@ export default function NutritionPage() {
         </summary>
         <div className="nutrition-detail">
           {nutrientInfo[key] && (
-            <section className="nutrition-explainer" aria-label={`About ${nutrientLabel(key)}`}>
+            <section
+              className="nutrition-explainer"
+              aria-label={`About ${nutrientLabel(key)}`}
+            >
               <p>{nutrientInfo[key].summary}</p>
-              <a href={nutrientInfo[key].source} target="_blank" rel="noreferrer">
+              <a
+                href={nutrientInfo[key].source}
+                target="_blank"
+                rel="noreferrer"
+              >
                 Learn more about {nutrientLabel(key).toLowerCase()} ↗
               </a>
             </section>
           )}
-          <Button variant="outline"
+          <Button
+            variant="outline"
             data-sheet-close
             onClick={() => {
               setSelected(key);
@@ -279,7 +294,8 @@ export default function NutritionPage() {
       />
       <div className="page-x nutrition-page">
         <div className="nutrition-toolbar">
-          <Button variant="outline"
+          <Button
+            variant="outline"
             aria-label="Previous date"
             onClick={() => navigate(shiftDate(date, -1))}
           >
@@ -293,31 +309,44 @@ export default function NutritionPage() {
               if (validDate(value)) navigate(value);
             }}
           />
-          <Button variant="outline"
+          <Button
+            variant="outline"
             aria-label="Next date"
             onClick={() => navigate(shiftDate(date, 1))}
           >
             →
           </Button>
-          <Button variant="outline" onClick={() => navigate(localToday())}>Today</Button>
+          <Button variant="outline" onClick={() => navigate(localToday())}>
+            Today
+          </Button>
           <span className="nutrition-muted">
             Asia/Singapore{range !== "day" ? ` · ${start} to ${date}` : ""}
           </span>
-          <Button variant="outline"
+          <Button
+            variant="outline"
             onClick={() => void refresh().catch((e) => setError(String(e)))}
             disabled={query.isFetching}
           >
             Refresh
           </Button>
           {protocol && (
-            <Button variant="outline" onClick={() => setEditing(!editing)}>Edit targets</Button>
+            <Button variant="outline" onClick={() => setEditing(!editing)}>
+              Edit targets
+            </Button>
           )}
         </div>
-        {error && <Alert variant="error" role="alert">{error}</Alert>}
+        {error && (
+          <Alert variant="error" role="alert">
+            {error}
+          </Alert>
+        )}
         {query.isError && (
           <Alert variant="error" role="alert">
             Could not refresh nutrition: {query.error.message}.{" "}
             {data ? "Showing the last loaded data." : ""}
+            <Button variant="outline" onClick={() => query.refetch()}>
+              Retry
+            </Button>
           </Alert>
         )}
         {query.isPending ? (
@@ -352,7 +381,8 @@ export default function NutritionPage() {
                   </p>
                 </div>
                 {range === "day" && (
-                  <Button variant="outline"
+                  <Button
+                    variant="outline"
                     disabled={saving || query.isError}
                     onClick={() => void toggle()}
                   >
@@ -393,7 +423,8 @@ export default function NutritionPage() {
                 <section className="nutrition-section">
                   <div className="nutrition-toolbar">
                     <h2>Daily trend</h2>
-                    <Choice searchable
+                    <Choice
+                      searchable
                       aria-label="Trend nutrient"
                       value={selected}
                       onValueChange={(value) => setSelected(value)}
@@ -419,7 +450,9 @@ export default function NutritionPage() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Date</TableHead>
-                          <TableHead>Logged {unitLabel(data.catalog[selected])}</TableHead>
+                          <TableHead>
+                            Logged {unitLabel(data.catalog[selected])}
+                          </TableHead>
                           <TableHead>Target</TableHead>
                           <TableHead>Coverage</TableHead>
                           <TableHead>Day</TableHead>
@@ -429,7 +462,8 @@ export default function NutritionPage() {
                         {days.map((d) => (
                           <TableRow key={d.date}>
                             <TableCell>
-                              <Button variant="outline"
+                              <Button
+                                variant="outline"
                                 className="nutrition-text-button"
                                 onClick={() => navigate(d.date, "day")}
                               >
@@ -516,7 +550,10 @@ export default function NutritionPage() {
                   Recorded consumption, not a recommended supplement schedule.
                 </p>
               </section>
-              <ResponsiveDetails title="Other nutrients" className="nutrition-section">
+              <ResponsiveDetails
+                title="Other nutrients"
+                className="nutrition-section"
+              >
                 <summary>
                   <h2 style={{ display: "inline" }}>Other nutrients</h2>
                 </summary>
@@ -532,7 +569,11 @@ export default function NutritionPage() {
               <section className="nutrition-section">
                 <h2>Food log</h2>
                 {records.map((r) => (
-                  <ResponsiveDetails title={r.entry.meal || "Food entry"} key={r.entry.id} className="nutrition-log">
+                  <ResponsiveDetails
+                    title={r.entry.meal || "Food entry"}
+                    key={r.entry.id}
+                    className="nutrition-log"
+                  >
                     <summary>
                       <span>
                         <strong>{r.entry.meal || "Food entry"}</strong>
@@ -570,7 +611,10 @@ export default function NutritionPage() {
                 ))}
               </section>
               {protocol && (
-                <ResponsiveDetails title="Your protocol" className="nutrition-section">
+                <ResponsiveDetails
+                  title="Your protocol"
+                  className="nutrition-section"
+                >
                   <summary>
                     Your protocol · effective {protocol.effective_date}
                   </summary>

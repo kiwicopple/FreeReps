@@ -1,3 +1,4 @@
+import { Empty } from "@/components/ui/empty";
 import { useMemo } from "react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
@@ -22,13 +23,12 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
   const { opts, plotData } = useMemo(() => {
     if (!hrData || hrData.length === 0) return { opts: null, plotData: null };
 
-    const times = hrData.map((p) => Math.floor(new Date(p.Time).getTime() / 1000));
+    const times = hrData.map((p) =>
+      Math.floor(new Date(p.Time).getTime() / 1000),
+    );
     const bpms = hrData.map((p) => p.AvgBPM ?? p.MaxBPM ?? p.MinBPM ?? null);
 
-    const peak = Math.max(
-      ...bpms.map((b) => b ?? 0),
-      maxHR ?? 0,
-    );
+    const peak = Math.max(...bpms.map((b) => b ?? 0), maxHR ?? 0);
     const edges = ZONE_BOUNDS.map((f) => f * peak);
 
     const axis = tokenColor("--muted-foreground", "#79848c");
@@ -91,9 +91,9 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
 
   if (!opts || !plotData) {
     return (
-      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+      <Empty style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         No heart rate data for this workout.
-      </p>
+      </Empty>
     );
   }
 

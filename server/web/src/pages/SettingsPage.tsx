@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTab, TabsPanel } from "../components/ui/tabs";
 import { Link, useSearchParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import AlertsTab from "../components/settings/AlertsTab";
@@ -48,7 +48,7 @@ export default function SettingsPage() {
     // content, and the sections are short enough to read in sequence.
     return (
       <>
-        <PageHeader kicker="FreeReps" title="Settings" />
+        <PageHeader kicker="Protocol" title="Settings" />
         <div className="page-x" style={{ paddingBottom: 16 }}>
           <Link to="/trends">View trends →</Link>
         </div>
@@ -56,6 +56,7 @@ export default function SettingsPage() {
           {TABS.map((tab) => (
             <section
               key={tab.id}
+              aria-label={tab.label}
               className="page-x"
               style={{
                 paddingTop: 20,
@@ -73,42 +74,34 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader kicker="FreeReps" title="Settings" />
+      <PageHeader kicker="Protocol" title="Settings" />
 
-      <div
-        style={{
-          display: "flex",
-          borderTop: "2px solid var(--foreground)",
-          minHeight: 640,
-        }}
+      <Tabs
+        orientation="vertical"
+        value={active}
+        onValueChange={(id) => setTab(id as TabID)}
+        className="min-h-[640px] border-t p-6"
       >
-        <div className="rail">
-          {TABS.map((tab) => (
-            <Button variant="outline"
-              key={tab.id}
-              className="rail-item"
-              aria-selected={tab.id === active}
-              style={{ padding: "11px 20px" }}
-              onClick={() => setTab(tab.id)}
-            >
-              {tab.label}
-            </Button>
-          ))}
-        </div>
-
-        <div
-          className="page-x"
-          style={{
-            flex: 1,
-            minWidth: 0,
-            maxWidth: 960,
-            paddingTop: 26,
-            paddingBottom: 40,
-          }}
+        <TabsList
+          aria-label="Settings sections"
+          className="w-56 shrink-0 self-start"
         >
-          {TABS.find((t) => t.id === active)?.render()}
-        </div>
-      </div>
+          {TABS.map((tab) => (
+            <TabsTab key={tab.id} value={tab.id}>
+              {tab.label}
+            </TabsTab>
+          ))}
+        </TabsList>
+        {TABS.map((tab) => (
+          <TabsPanel
+            key={tab.id}
+            value={tab.id}
+            className="min-w-0 max-w-5xl flex-1 px-6 pb-10"
+          >
+            {tab.render()}
+          </TabsPanel>
+        ))}
+      </Tabs>
     </>
   );
 }

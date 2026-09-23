@@ -1,8 +1,20 @@
-import { Pagination, PaginationContent, PaginationItem } from "../components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "../components/ui/pagination";
 import { Empty } from "@/components/ui/empty";
+import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -71,7 +83,8 @@ export default function WorkoutsPage() {
 
   const zonesById = useMemo(() => {
     const map = new Map<string, number[]>();
-    for (const z of zonesQuery.data?.zones ?? []) map.set(z.workout_id, z.shares);
+    for (const z of zonesQuery.data?.zones ?? [])
+      map.set(z.workout_id, z.shares);
     return map;
   }, [zonesQuery.data]);
 
@@ -88,7 +101,9 @@ export default function WorkoutsPage() {
 
   const filtered = useMemo(
     () =>
-      typeFilter ? all.filter((w) => getWorkoutFilterKey(w) === typeFilter) : all,
+      typeFilter
+        ? all.filter((w) => getWorkoutFilterKey(w) === typeFilter)
+        : all,
     [all, typeFilter],
   );
 
@@ -124,7 +139,9 @@ export default function WorkoutsPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: isDesktop ? "repeat(5, 1fr)" : "repeat(3, 1fr)",
+          gridTemplateColumns: isDesktop
+            ? "repeat(5, minmax(0,1fr))"
+            : "repeat(3, minmax(0,1fr))",
           borderTop: "2px solid var(--foreground)",
           borderBottom: "2px solid var(--foreground)",
         }}
@@ -162,7 +179,9 @@ export default function WorkoutsPage() {
               label="Avg heart rate"
               value={summary.avgHR ? formatNumber(summary.avgHR) : "—"}
               unit="bpm"
-              meta={summary.peakHR ? `peak ${formatNumber(summary.peakHR)}` : ""}
+              meta={
+                summary.peakHR ? `peak ${formatNumber(summary.peakHR)}` : ""
+              }
               isDesktop
             />
             <SummaryCell
@@ -222,12 +241,18 @@ export default function WorkoutsPage() {
       </div>
 
       {message ? (
-        <Alert variant="error"
+        <Alert
+          variant="error"
           className="page-x"
           style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           {message}
+          <Button variant="outline" onClick={() => workoutsQuery.refetch()}>
+            Retry
+          </Button>
         </Alert>
+      ) : state === "loading" ? (
+        <Spinner className="mx-auto my-6 size-6" />
       ) : filtered.length === 0 ? (
         <Empty
           className="page-x"
@@ -239,13 +264,21 @@ export default function WorkoutsPage() {
         <WorkoutTable
           groups={groups}
           zonesById={zonesById}
-          onOpen={(id) => navigate(`/workouts/${id}`)}
+          onOpen={(id) =>
+            navigate(`/workouts/${id}`, {
+              state: { workout: all.find((w) => w.ID === id) },
+            })
+          }
         />
       ) : (
         <WorkoutCards
           groups={groups}
           zonesById={zonesById}
-          onOpen={(id) => navigate(`/workouts/${id}`)}
+          onOpen={(id) =>
+            navigate(`/workouts/${id}`, {
+              state: { workout: all.find((w) => w.ID === id) },
+            })
+          }
         />
       )}
 
@@ -269,25 +302,35 @@ export default function WorkoutsPage() {
           {Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
           {filtered.length}
         </span>
-<Pagination className="ml-auto w-auto"><PaginationContent><PaginationItem><Button variant="outline"
-          type="button"
+        <Pagination className="ml-auto w-auto">
+          <PaginationContent>
+            <PaginationItem>
+              <Button
+                variant="outline"
+                type="button"
 
-          style={{ marginLeft: "auto", fontSize: 12 }}
-          disabled={page === 0}
-          onClick={() => setParam("page", String(page - 1))}
-        >
-          Prev
-        </Button></PaginationItem>
-<PaginationItem><Button variant="outline"
-          type="button"
+                style={{ marginLeft: "auto", fontSize: 12 }}
+                disabled={page === 0}
+                onClick={() => setParam("page", String(page - 1))}
+              >
+                Prev
+              </Button>
+            </PaginationItem>
+            <PaginationItem>
+              <Button
+                variant="outline"
+                type="button"
 
-          style={{ fontSize: 12 }}
-          disabled={(page + 1) * PAGE_SIZE >= filtered.length}
-          onClick={() => setParam("page", String(page + 1))}
-        >
-          Next
-        </Button></PaginationItem>
-</PaginationContent></Pagination>      </div>
+                style={{ fontSize: 12 }}
+                disabled={(page + 1) * PAGE_SIZE >= filtered.length}
+                onClick={() => setParam("page", String(page + 1))}
+              >
+                Next
+              </Button>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>{" "}
+      </div>
 
       {isDesktop && maxHR > 0 ? (
         <div
@@ -313,7 +356,10 @@ export default function WorkoutsPage() {
                 style={{ width: 11, height: 11, background: ZONE_COLORS[i] }}
               />
               Zone {i + 1}
-              <span className="num" style={{ color: "var(--muted-foreground)" }}>
+              <span
+                className="num"
+                style={{ color: "var(--muted-foreground)" }}
+              >
                 {band}
               </span>
             </span>
@@ -349,16 +395,24 @@ function WorkoutTable({
   onOpen: (id: string) => void;
 }) {
   return (
-    <Table >
+    <Table>
       <TableHeader>
         <TableRow>
           <TableHead style={{ width: 72 }}>Time</TableHead>
           <TableHead>Workout</TableHead>
-          <TableHead style={{ textAlign: "right", width: 100 }}>Duration</TableHead>
-          <TableHead style={{ textAlign: "right", width: 120 }}>Avg / max HR</TableHead>
+          <TableHead style={{ textAlign: "right", width: 100 }}>
+            Duration
+          </TableHead>
+          <TableHead style={{ textAlign: "right", width: 120 }}>
+            Avg / max HR
+          </TableHead>
           <TableHead style={{ width: 180 }}>HR zones</TableHead>
-          <TableHead style={{ textAlign: "right", width: 100 }}>Energy</TableHead>
-          <TableHead style={{ textAlign: "right", width: 110 }}>Distance</TableHead>
+          <TableHead style={{ textAlign: "right", width: 100 }}>
+            Energy
+          </TableHead>
+          <TableHead style={{ textAlign: "right", width: 110 }}>
+            Distance
+          </TableHead>
           <TableHead style={{ width: 130 }}>Source</TableHead>
         </TableRow>
       </TableHeader>
@@ -374,6 +428,10 @@ function WorkoutTable({
               <TableRow
                 key={w.ID}
                 style={{ cursor: "pointer" }}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") onOpen(w.ID);
+                }}
                 onClick={() => onOpen(w.ID)}
               >
                 <TableCell className="num" style={{ fontSize: 12.5 }}>
@@ -427,7 +485,9 @@ function WorkoutTable({
                 >
                   {formatDistance(w.Distance, w.DistanceUnits)}
                 </TableCell>
-                <TableCell style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
+                <TableCell
+                  style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}
+                >
                   {sourceLabel(w.Source)}
                 </TableCell>
               </TableRow>
@@ -463,13 +523,20 @@ function WorkoutCards({
                 borderBottom: "1px solid var(--border)",
                 cursor: "pointer",
               }}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") onOpen(w.ID);
+              }}
               onClick={() => onOpen(w.ID)}
             >
               <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
                 <span style={{ font: "600 14px var(--font-body)", flex: 1 }}>
                   {getWorkoutDisplayName(w)}
                 </span>
-                <span className="num" style={{ font: "700 14px var(--font-body)" }}>
+                <span
+                  className="num"
+                  style={{ font: "700 14px var(--font-body)" }}
+                >
                   {formatDuration(w.DurationSec)}
                 </span>
               </div>
@@ -492,7 +559,9 @@ function WorkoutCards({
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {[noteFor(w), sourceLabel(w.Source)].filter(Boolean).join(" · ")}
+                  {[noteFor(w), sourceLabel(w.Source)]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </span>
                 <span
                   className="num"
@@ -536,12 +605,17 @@ function FilterPill({
   onClick: () => void;
 }) {
   return (
-    <Button variant={active ? "default" : "outline"} aria-pressed={active}
+    <Button
+      variant={active ? "default" : "outline"}
+      aria-pressed={active}
       type="button"
       onClick={onClick}
     >
       {label}
-      <span className="num" style={{ fontWeight: 400, opacity: 0.65, marginLeft: 7 }}>
+      <span
+        className="num"
+        style={{ fontWeight: 400, opacity: 0.65, marginLeft: 7 }}
+      >
         {count}
       </span>
     </Button>
@@ -566,6 +640,7 @@ function SummaryCell({
       className="page-x"
       style={{
         paddingTop: isDesktop ? 24 : 14,
+        paddingInline: "clamp(12px, 2vw, 32px)",
         paddingBottom: isDesktop ? 22 : 14,
         borderRight: "1px solid var(--border)",
       }}
@@ -574,7 +649,7 @@ function SummaryCell({
       <div
         className="num"
         style={{
-          font: `800 ${isDesktop ? 44 : 26}px/1 var(--font-heading)`,
+          font: `800 ${isDesktop ? "clamp(24px, 3vw, 44px)" : "26px"}/1 var(--font-heading)`,
           letterSpacing: "-0.03em",
           marginTop: isDesktop ? 14 : 8,
         }}

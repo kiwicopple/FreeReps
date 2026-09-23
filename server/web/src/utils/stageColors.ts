@@ -20,7 +20,12 @@ export const STAGE_COLOR: Record<string, string> = {
 export const STAGE_LANES = ["Awake", "REM", "Core", "Deep"] as const;
 
 /** Darkest = deepest, so the composition bar reads as a depth ramp. */
-export const STAGE_COMPOSITION_ORDER = ["Deep", "Core", "REM", "Awake"] as const;
+export const STAGE_COMPOSITION_ORDER = [
+  "Deep",
+  "Core",
+  "REM",
+  "Awake",
+] as const;
 
 export function stageColor(stage: string): string {
   return STAGE_COLOR[stage] ?? "var(--muted-foreground)";

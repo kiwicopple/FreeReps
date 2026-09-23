@@ -1,4 +1,7 @@
+import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import { Empty } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -92,6 +95,19 @@ export default function SourcesTab() {
         wins. Move an entry up to prefer it.
       </TabHeader>
 
+      {config.isPending && <Spinner className="my-4 size-5" />}
+      {config.error && (
+        <Alert variant="error">
+          {config.error.message}
+          <Button variant="ghost" onClick={() => void config.refetch()}>
+            Retry
+          </Button>
+        </Alert>
+      )}
+      {config.isSuccess && order.length === 0 && (
+        <Empty>No sources recorded yet.</Empty>
+      )}
+
       <div style={{ paddingTop: 4 }}>
         {order.map((src, i) => {
           const activity = activityBySource.get(src);
@@ -100,6 +116,7 @@ export default function SourcesTab() {
               key={src || "(healthkit)"}
               style={{
                 display: "flex",
+                flexWrap: "wrap",
                 alignItems: "center",
                 gap: 16,
                 padding: "14px 0",
@@ -127,12 +144,12 @@ export default function SourcesTab() {
                       : `Used when ranks 1–${i} have no reading`}
                 </div>
               </div>
-              <span
-                className={`tag ${activity ? "tag-accent" : "tag-neutral"}`}
+              <Badge
+                variant={activity ? "success" : "secondary"}
                 style={{ flex: "none" }}
               >
                 {activity ? "Delivering" : "No data"}
-              </span>
+              </Badge>
               <span
                 style={{
                   width: 190,
@@ -146,8 +163,16 @@ export default function SourcesTab() {
                   ? `${formatTimeAgo(activity.last_seen)} · ${formatNumber(activity.rows)} rows`
                   : "nothing stored"}
               </span>
-              <span style={{ display: "flex", gap: 4, flex: "none" }}>
-                <Button variant="outline"
+              <span
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 4,
+                  flex: "none",
+                }}
+              >
+                <Button
+                  variant="outline"
                   type="button"
 
                   style={{ fontSize: 11, padding: "4px 8px" }}
@@ -157,7 +182,8 @@ export default function SourcesTab() {
                 >
                   ↑
                 </Button>
-                <Button variant="outline"
+                <Button
+                  variant="outline"
                   type="button"
 
                   style={{ fontSize: 11, padding: "4px 8px" }}
@@ -174,9 +200,9 @@ export default function SourcesTab() {
       </div>
 
       {error ? (
-        <Alert variant="error"
+        <Alert
+          variant="error"
           style={{
-            color: "var(--success-foreground)",
             fontSize: 13,
             marginTop: 14,
           }}
@@ -186,7 +212,8 @@ export default function SourcesTab() {
       ) : null}
 
       <div style={{ paddingTop: 20 }}>
-        <Button variant="default"
+        <Button
+          variant="default"
           type="button"
 
           onClick={save}
@@ -218,6 +245,7 @@ export default function SourcesTab() {
                 key={rule.category}
                 style={{
                   display: "flex",
+                  flexWrap: "wrap",
                   alignItems: "baseline",
                   gap: 16,
                   padding: "12px 0",
@@ -243,7 +271,8 @@ export default function SourcesTab() {
                 >
                   {rule.sources.map(sourceLabelLong).join(" → ")}
                 </span>
-                <Button variant="ghost"
+                <Button
+                  variant="ghost"
                   type="button"
 
                   style={{ fontSize: 12, flex: "none" }}

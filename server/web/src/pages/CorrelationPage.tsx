@@ -1,7 +1,16 @@
+import { Label } from "@/components/ui/label";
+import { Field } from "@/components/ui/field";
 import { Alert } from "@/components/ui/alert";
 import Choice from "@/components/Choice";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -67,8 +76,21 @@ export default function CorrelationPage() {
     const xs = xQuery.data ?? [];
     const ys = yQuery.data ?? [];
     return LAGS.map((l) => {
-      const pairs = pairWithLag(xs, ys, l, xMeta?.multiplier ?? 1, yMeta?.multiplier ?? 1);
-      return { lag: l, pairs, r: pearsonR(pairs.map((p) => p.x), pairs.map((p) => p.y)) };
+      const pairs = pairWithLag(
+        xs,
+        ys,
+        l,
+        xMeta?.multiplier ?? 1,
+        yMeta?.multiplier ?? 1,
+      );
+      return {
+        lag: l,
+        pairs,
+        r: pearsonR(
+          pairs.map((p) => p.x),
+          pairs.map((p) => p.y),
+        ),
+      };
     });
   }, [xQuery.data, yQuery.data, xMeta, yMeta]);
 
@@ -113,14 +135,19 @@ export default function CorrelationPage() {
 
       <div
         className="page-x"
-        style={{ display: "flex", gap: 32, alignItems: "flex-end", paddingBottom: 20 }}
+        style={{
+          display: "flex",
+          gap: 32,
+          alignItems: "flex-end",
+          paddingBottom: 20,
+        }}
       >
-        <div className="field" style={{ width: 280 }}>
-          <label htmlFor="corr-x">X axis</label>
-          <Choice searchable
+        <Field style={{ width: 280 }}>
+          <Label htmlFor="corr-x">X axis</Label>
+          <Choice
+            searchable
             id="corr-x"
-            className=""
-            value={xMetric}
+                        value={xMetric}
             onValueChange={(value) => setParam("x", value)}
           >
             {groups.map((g) => (
@@ -133,14 +160,14 @@ export default function CorrelationPage() {
               </optgroup>
             ))}
           </Choice>
-        </div>
+        </Field>
 
-        <div className="field" style={{ width: 280 }}>
-          <label htmlFor="corr-y">Y axis</label>
-          <Choice searchable
+        <Field style={{ width: 280 }}>
+          <Label htmlFor="corr-y">Y axis</Label>
+          <Choice
+            searchable
             id="corr-y"
-            className=""
-            value={yMetric}
+                        value={yMetric}
             onValueChange={(value) => setParam("y", value)}
           >
             {groups.map((g) => (
@@ -153,14 +180,13 @@ export default function CorrelationPage() {
               </optgroup>
             ))}
           </Choice>
-        </div>
+        </Field>
 
-        <div className="field" style={{ width: 200 }}>
-          <label htmlFor="corr-lag">Lag</label>
+        <Field style={{ width: 200 }}>
+          <Label htmlFor="corr-lag">Lag</Label>
           <Choice
             id="corr-lag"
-            className=""
-            value={lag}
+                        value={lag}
             onValueChange={(value) => setParam("lag", value)}
           >
             <option value={0}>Same day</option>
@@ -168,10 +194,12 @@ export default function CorrelationPage() {
             <option value={2}>2 days</option>
             <option value={3}>3 days</option>
           </Choice>
-        </div>
+        </Field>
       </div>
 
-      <div style={{ display: "flex", borderTop: "2px solid var(--foreground)" }}>
+      <div
+        style={{ display: "flex", borderTop: "2px solid var(--foreground)" }}
+      >
         <div
           className="page-x"
           style={{
@@ -188,11 +216,22 @@ export default function CorrelationPage() {
               perfectly, which says nothing.
             </p>
           ) : message ? (
-            <Alert variant="error" style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+            <Alert
+              variant="error"
+              style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+            >
               {message}
+              <Button
+                variant="outline"
+                onClick={() =>
+                  Promise.all([xQuery.refetch(), yQuery.refetch()])
+                }
+              >
+                Retry
+              </Button>
             </Alert>
           ) : state === "loading" ? (
-            <Skeleton  style={{ width: "100%", height: 520 }} />
+            <Skeleton style={{ width: "100%", height: 520 }} />
           ) : (
             <>
               <Scatter pairs={active?.pairs ?? []} />
@@ -249,7 +288,9 @@ export default function CorrelationPage() {
           </div>
 
           <div className="page-x" style={{ paddingTop: 22, paddingBottom: 10 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700 }}>Correlation by lag</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 700 }}>
+              Correlation by lag
+            </h3>
             <p
               style={{
                 font: "400 11.5px var(--font-body)",
@@ -261,11 +302,13 @@ export default function CorrelationPage() {
             </p>
           </div>
 
-          <Table  style={{ fontSize: 13.5 }}>
+          <Table style={{ fontSize: 13.5 }}>
             <TableHeader>
               <TableRow>
                 <TableHead>Lag</TableHead>
-                <TableHead style={{ textAlign: "right", width: 70 }}>r</TableHead>
+                <TableHead style={{ textAlign: "right", width: 70 }}>
+                  r
+                </TableHead>
                 <TableHead style={{ width: 150 }}>Strength</TableHead>
               </TableRow>
             </TableHeader>
@@ -281,7 +324,9 @@ export default function CorrelationPage() {
                           : "var(--muted-foreground)",
                     }}
                   >
-                    {b.lag === 0 ? "Same day" : `${b.lag} day${b.lag > 1 ? "s" : ""}`}
+                    {b.lag === 0
+                      ? "Same day"
+                      : `${b.lag} day${b.lag > 1 ? "s" : ""}`}
                   </TableCell>
                   <TableCell
                     className="num"
@@ -321,7 +366,8 @@ export default function CorrelationPage() {
             >
               {CAVEAT}
             </p>
-            <Button variant="ghost"
+            <Button
+              variant="ghost"
               type="button"
 
               style={{ fontSize: 12.5, marginTop: 12, marginLeft: -4 }}

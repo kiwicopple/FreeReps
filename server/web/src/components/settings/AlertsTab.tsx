@@ -1,3 +1,6 @@
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import NumericField from "../NumericField";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,9 +46,7 @@ function ConditionRow({ c }: { c: AlertCondition }) {
           height: 10,
           flex: "none",
           alignSelf: "center",
-          background: c.firing
-            ? "var(--primary)"
-            : "var(--input)",
+          background: c.firing ? "var(--primary)" : "var(--input)",
         }}
       />
       <span style={{ font: "600 13px var(--font-body)", minWidth: 220 }}>
@@ -96,8 +97,23 @@ export default function AlertsTab() {
     setSettings((s) => (s ? { ...s, ...next } : s));
   }
 
+  const [emptyFields, setEmptyFields] = useState<Set<string>>(new Set());
+  function patchNumber(
+    key: "check_interval_sec" | "failure_threshold" | "apple_silence_sec",
+    value: number | null,
+    scale: number,
+    min: number,
+  ) {
+    setEmptyFields((old) => {
+      const next = new Set(old);
+      if (value === null) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+    if (value !== null) patch({ [key]: Math.max(min, value) * scale });
+  }
   async function handleSave() {
-    if (!settings) return;
+    if (!settings || emptyFields.size) return;
     setSaving(true);
     setError(null);
     setNotice(null);
@@ -118,7 +134,9 @@ export default function AlertsTab() {
     setNotice(null);
     try {
       const r = await sendTestAlert();
-      setNotice(`Test message sent to ${r.target} on monitor_id ${r.monitor_id}.`);
+      setNotice(
+        `Test message sent to ${r.target} on monitor_id ${r.monitor_id}.`,
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Test failed");
     } finally {
@@ -133,58 +151,47 @@ export default function AlertsTab() {
         <a href="https://ntfy.sh" target="_blank" rel="noreferrer">
           ntfy
         </a>{" "}
-        topic, so a silent integration surfaces without anyone reading the import
-        log. The payload follows Uptime Kuma's webhook shape, and each condition
-        carries its own monitor id — a receiver can group by it. Stored in the
-        database, not in the config file.
+        topic, so a silent integration surfaces without anyone reading the
+        import log. The payload follows Uptime Kuma's webhook shape, and each
+        condition carries its own monitor id — a receiver can group by it.
+        Stored in the database, not in the config file.
       </TabHeader>
 
       {error ? (
-        <p
-          style={{
-            color: "var(--success-foreground)",
-            fontSize: 13,
-            paddingTop: 16,
-          }}
-        >
+        <Alert variant="error" className="mt-4">
           {error}{" "}
-          <Button variant="ghost" type="button"  onClick={load}>
+          <Button variant="ghost" type="button" onClick={load}>
             Retry
           </Button>
-        </p>
+        </Alert>
       ) : null}
 
       {notice ? (
-        <p
-          style={{
-            font: "400 13px/1.5 var(--font-body)",
-            color: "var(--muted-foreground)",
-            paddingTop: 16,
-          }}
-        >
+        <Alert variant="success" role="status" className="mt-4">
           {notice}
-        </p>
+        </Alert>
       ) : null}
 
       {!settings ? (
-        <p
-          style={{
-            color: "var(--muted-foreground)",
-            fontSize: 13,
-            paddingTop: 16,
-          }}
-        >
-          Loading…
-        </p>
+        error ? null : (
+          <Spinner className="mt-4 size-5" />
+        )
       ) : (
         <>
           <div style={{ paddingTop: 12, maxWidth: 640 }}>
             <Row label="Reporting">
-              <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <label
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
                 <Switch
-
                   checked={settings.enabled}
-                  onCheckedChange={(checked) => patch({ enabled: checked })} />
+                  onCheckedChange={(checked) => patch({ enabled: checked })}
+                />
                 <span style={{ font: "400 13px var(--font-body)" }}>
                   {settings.enabled
                     ? "Conditions are reported"
@@ -195,9 +202,9 @@ export default function AlertsTab() {
 
             <Row label="ntfy topic URL">
               <Input
-
                 style={{ ...MONO, width: "100%" }}
                 type="url"
+                aria-label="ntfy topic URL"
                 value={settings.ntfy_url}
                 onChange={(e) => patch({ ntfy_url: e.target.value })}
                 placeholder="https://ntfy.example.com/freereps-alerts"
@@ -217,8 +224,8 @@ export default function AlertsTab() {
 
             <Row label="Reported as">
               <Input
-
                 style={{ ...MONO, width: 260, maxWidth: "100%" }}
+                aria-label="Reported as"
                 value={settings.hostname}
                 onChange={(e) => patch({ hostname: e.target.value })}
                 placeholder="freereps"
@@ -237,32 +244,40 @@ export default function AlertsTab() {
 
             <Row label="Check every">
               <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <input
-                  className="input"
-                  style={{ ...MONO, width: 90 }}
-                  type="number"
+                <NumericField
+                  required
+                  aria-label="Check interval in minutes"
+                  className="max-w-28"
                   min={1}
-                  value={Math.round(settings.check_interval_sec / MIN)}
-                  onChange={(e) =>
-                    patch({
-                      check_interval_sec: Math.max(1, Number(e.target.value)) * MIN,
-                    })
+                  value={
+                    emptyFields.has("check_interval_sec")
+                      ? null
+                      : Math.round(settings.check_interval_sec / MIN)
+                  }
+                  onValueChange={(value) =>
+                    patchNumber("check_interval_sec", value, MIN, 1)
                   }
                 />
-                <span style={{ font: "400 13px var(--font-body)" }}>minutes</span>
+                <span style={{ font: "400 13px var(--font-body)" }}>
+                  minutes
+                </span>
               </span>
             </Row>
 
             <Row label="Failures before alert">
               <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <input
-                  className="input"
-                  style={{ ...MONO, width: 90 }}
-                  type="number"
+                <NumericField
+                  required
+                  aria-label="Failures before alert"
+                  className="max-w-28"
                   min={1}
-                  value={settings.failure_threshold}
-                  onChange={(e) =>
-                    patch({ failure_threshold: Math.max(1, Number(e.target.value)) })
+                  value={
+                    emptyFields.has("failure_threshold")
+                      ? null
+                      : settings.failure_threshold
+                  }
+                  onValueChange={(value) =>
+                    patchNumber("failure_threshold", value, 1, 1)
                   }
                 />
                 <span
@@ -280,16 +295,18 @@ export default function AlertsTab() {
 
             <Row label="Apple Health silence">
               <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <input
-                  className="input"
-                  style={{ ...MONO, width: 90 }}
-                  type="number"
+                <NumericField
+                  required
+                  aria-label="Apple Health silence in hours"
+                  className="max-w-28"
                   min={0}
-                  value={Math.round(settings.apple_silence_sec / HOUR)}
-                  onChange={(e) =>
-                    patch({
-                      apple_silence_sec: Math.max(0, Number(e.target.value)) * HOUR,
-                    })
+                  value={
+                    emptyFields.has("apple_silence_sec")
+                      ? null
+                      : Math.round(settings.apple_silence_sec / HOUR)
+                  }
+                  onValueChange={(value) =>
+                    patchNumber("apple_silence_sec", value, HOUR, 0)
                   }
                 />
                 <span
@@ -306,15 +323,17 @@ export default function AlertsTab() {
           </div>
 
           <div style={{ display: "flex", gap: 8, paddingTop: 20 }}>
-            <Button variant="default"
+            <Button
+              variant="default"
               type="button"
 
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || emptyFields.size > 0}
             >
               {saving ? "Saving…" : "Save"}
             </Button>
-            <Button variant="outline"
+            <Button
+              variant="outline"
               type="button"
 
               onClick={handleTest}

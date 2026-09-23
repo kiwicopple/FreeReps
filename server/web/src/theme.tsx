@@ -42,13 +42,18 @@ const ThemeContext = createContext<ThemeContextValue>({
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemePreference>(readStored);
 
-  const [systemDark, setSystemDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
   useEffect(() => {
     const query = window.matchMedia("(prefers-color-scheme: dark)");
     const apply = () => {
       setSystemDark(query.matches);
       document.documentElement.setAttribute("data-theme", theme);
-      document.documentElement.classList.toggle("dark", theme === "dark" || (theme === "auto" && query.matches));
+      document.documentElement.classList.toggle(
+        "dark",
+        theme === "dark" || (theme === "auto" && query.matches),
+      );
     };
     apply();
     query.addEventListener("change", apply);
@@ -64,8 +69,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const resolvedTheme = theme === "dark" || (theme === "auto" && systemDark) ? "dark" : "light";
-  const value = useMemo<ThemeContextValue>(() => ({ theme, resolvedTheme, setTheme }), [theme, resolvedTheme, setTheme]);
+  const resolvedTheme =
+    theme === "dark" || (theme === "auto" && systemDark) ? "dark" : "light";
+  const value = useMemo<ThemeContextValue>(
+    () => ({ theme, resolvedTheme, setTheme }),
+    [theme, resolvedTheme, setTheme],
+  );
 
   return <ThemeContext value={value}>{children}</ThemeContext>;
 }
