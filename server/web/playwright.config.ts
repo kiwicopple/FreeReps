@@ -25,6 +25,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "npm run dev -- --host 127.0.0.1 --port 4173",
+    env: { PROTOCOL_TEST_API_ONLY: "1" },
     url: "http://127.0.0.1:4173",
     reuseExistingServer: false,
   },

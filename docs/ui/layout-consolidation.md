@@ -114,6 +114,9 @@ Existing behavioral assertions remain; only locators tied to replaced markup
 were updated. Browser tests cover 320, 390, 767, 768, 1024, 1279, 1280 and 1440px with intercepted,
 invented API fixtures in Chromium and WebKit. No real API captures, screenshots,
 logs, browser artifacts or credentials belong in this public repository.
+The browser test server disables its development API proxy and rejects requests
+that escape fixture interception, including requests during teardown. A dedicated
+acceptance check verifies that this cannot fall through to the personal backend.
 
 The new overlay axe checks exclude only `[data-base-ui-focus-guard]`: Base UI
 1.8 intentionally gives its invisible WebKit VoiceOver cursor sentinels an
@@ -146,8 +149,12 @@ import button semantics and all settings layouts in both palettes.
 `chart-resize.unit.test.tsx` covers hidden/visible sizing and instance retention;
 `data.spec.ts` checks canvas identity and Leaflet resizing after sidebar changes.
 The previous numerical and exact-payload assertions are retained.
+Each settings viewport/theme combination runs independently so cumulative
+interaction time cannot exhaust one test's timeout on CI. The metric selector
+check also holds back a chart response to verify that late data cannot reset an
+in-progress metric search. Both analysis pages use the same stable options.
 
-Final local verification: 204 browser cases passed with 6 intentional viewport
+Final local verification: 216 browser cases passed with 6 intentional viewport
 skips, 11 Vitest cases and all existing nutrition/recovery numerical checks
 passed. Type checking, production build, Go build/vet/tests, golangci-lint
 (zero issues), document contracts and whitespace checks passed. Synthetic

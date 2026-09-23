@@ -393,15 +393,16 @@ test("import Browse opens file selection and Remove stays separate", async ({
   ).toHaveCount(0);
 });
 
-// All nine panels, including populated exceptions, must fit and remain accessible in both themes.
-test("settings panels fit compact widths in both palettes", async ({
-  safePage: page,
-}, info) => {
-  await page.goto("/settings");
-  for (const colorScheme of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
-    for (const width of [320, 768, 1440]) {
+// Test each viewport/theme independently: all 54 selections in one test can
+// exhaust the CI time limit before reaching later panels, hiding real failures.
+for (const colorScheme of ["light", "dark"] as const) {
+  for (const width of [320, 768, 1440]) {
+    test(`settings panels fit ${width}px in ${colorScheme}`, async ({
+      safePage: page,
+    }, info) => {
+      await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
       await page.setViewportSize({ width, height: 900 });
+      await page.goto("/settings");
       for (const label of [
         "Identity",
         "Sources",
@@ -418,21 +419,23 @@ test("settings panels fit compact widths in both palettes", async ({
           .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
           .toBeLessThanOrEqual(width);
       }
-    }
-    const audit = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa"])
-      .analyze();
-    expect(
-      audit.violations.filter((v) =>
-        ["serious", "critical"].includes(v.impact ?? ""),
-      ),
-    ).toEqual([]);
-    if (process.env.PW_SCREENSHOTS === "1")
-      await page.screenshot({
-        path: info.outputPath(`synthetic-settings-${colorScheme}.png`),
-      });
+      const audit = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa"])
+        .analyze();
+      expect(
+        audit.violations.filter((v) =>
+          ["serious", "critical"].includes(v.impact ?? ""),
+        ),
+      ).toEqual([]);
+      if (process.env.PW_SCREENSHOTS === "1")
+        await page.screenshot({
+          path: info.outputPath(
+            `synthetic-settings-${width}-${colorScheme}.png`,
+          ),
+        });
+    });
   }
-});
+}
 
 // Supplement shortcuts must expose the same estimates and sources as their food-log record.
 test("supplements open scrolling details on both layouts", async ({
