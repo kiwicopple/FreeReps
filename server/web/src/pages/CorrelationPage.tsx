@@ -48,7 +48,7 @@ const CAVEAT =
 export default function CorrelationPage() {
   const isDesktop = useIsDesktop();
   const [params, setParams] = useSearchParams();
-  const { groups, lookup } = useAvailableMetrics();
+  const { choiceOptions, lookup, isPending } = useAvailableMetrics();
 
   const range = (params.get("range") as Range) ?? "90d";
   const lag = parseInt(params.get("lag") ?? "0", 10);
@@ -144,13 +144,8 @@ export default function CorrelationPage() {
             id="corr-x"
             value={xMetric}
             onValueChange={(value) => setParam("x", value)}
-            options={groups.flatMap((group) =>
-              group.metrics.map((item) => ({
-                value: item.value,
-                label: item.label,
-                group: group.label,
-              })),
-            )}
+            options={choiceOptions}
+            disabled={isPending}
           />
         </Field>
 
@@ -161,13 +156,8 @@ export default function CorrelationPage() {
             id="corr-y"
             value={yMetric}
             onValueChange={(value) => setParam("y", value)}
-            options={groups.flatMap((group) =>
-              group.metrics.map((item) => ({
-                value: item.value,
-                label: item.label,
-                group: group.label,
-              })),
-            )}
+            options={choiceOptions}
+            disabled={isPending}
           />
         </Field>
 

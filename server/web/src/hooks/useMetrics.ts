@@ -47,8 +47,17 @@ export function useAvailableMetrics() {
     }
     // Sort categories in a readable order
     const order = [
-      "cardiovascular", "sleep", "body", "fitness", "activity",
-      "oura", "hearing", "respiratory", "nutrition", "lab", "other",
+      "cardiovascular",
+      "sleep",
+      "body",
+      "fitness",
+      "activity",
+      "oura",
+      "hearing",
+      "respiratory",
+      "nutrition",
+      "lab",
+      "other",
     ];
     return order
       .filter((cat) => byCategory.has(cat))
@@ -58,7 +67,24 @@ export function useAvailableMetrics() {
       }));
   }, [options]);
 
-  const visibleOptions = useMemo(() => options.filter((m) => m.visible), [options]);
+  // Keep selected option objects stable when unrelated chart queries refresh.
+  // Base UI synchronizes its search text when the selected object changes.
+  const choiceOptions = useMemo(
+    () =>
+      groups.flatMap((group) =>
+        group.metrics.map((item) => ({
+          value: item.value,
+          label: item.label,
+          group: group.label,
+        })),
+      ),
+    [groups],
+  );
+
+  const visibleOptions = useMemo(
+    () => options.filter((m) => m.visible),
+    [options],
+  );
 
   const visibleGroups: MetricGroup[] = useMemo(() => {
     const byCategory = new Map<string, MetricOption[]>();
@@ -68,8 +94,17 @@ export function useAvailableMetrics() {
       byCategory.set(m.category, list);
     }
     const order = [
-      "cardiovascular", "sleep", "body", "fitness", "activity",
-      "oura", "hearing", "respiratory", "nutrition", "lab", "other",
+      "cardiovascular",
+      "sleep",
+      "body",
+      "fitness",
+      "activity",
+      "oura",
+      "hearing",
+      "respiratory",
+      "nutrition",
+      "lab",
+      "other",
     ];
     return order
       .filter((cat) => byCategory.has(cat))
@@ -85,5 +120,13 @@ export function useAvailableMetrics() {
     return map;
   }, [options]);
 
-  return { ...query, options, groups, visibleOptions, visibleGroups, lookup };
+  return {
+    ...query,
+    options,
+    groups,
+    choiceOptions,
+    visibleOptions,
+    visibleGroups,
+    lookup,
+  };
 }

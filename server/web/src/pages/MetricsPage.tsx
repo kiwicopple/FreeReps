@@ -39,7 +39,7 @@ const RANGE_DAYS: Record<Range, number> = {
 export default function MetricsPage() {
   const isDesktop = useIsDesktop();
   const [params, setParams] = useSearchParams();
-  const { options, groups, lookup } = useAvailableMetrics();
+  const { options, choiceOptions, lookup, isPending } = useAvailableMetrics();
 
   const range = (params.get("range") as Range) ?? "90d";
   const metric = params.get("metric") ?? "";
@@ -122,13 +122,8 @@ export default function MetricsPage() {
             aria-label="Metric"
             value={metric}
             onValueChange={(value) => setParam("metric", value)}
-            options={groups.flatMap((group) =>
-              group.metrics.map((item) => ({
-                value: item.value,
-                label: item.label,
-                group: group.label,
-              })),
-            )}
+            options={choiceOptions}
+            disabled={isPending}
           />
         </div>
 

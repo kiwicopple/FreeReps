@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { test, expect, workout } from "./fixtures";
+import { test, expect, workout, routes } from "./fixtures";
 test("metric search preserves selection and CSV values with display multipliers", async ({
   safePage: page,
   isMobile,
@@ -40,14 +40,30 @@ test("metric search preserves selection and CSV values with display multipliers"
     "date,value\n2025-01-14,175\n2025-01-15,",
   );
 });
+// A late statistics response must not replace an in-progress metric search.
 test("metric combobox and correlation controls retain query keys", async ({
   safePage: page,
   isMobile,
 }) => {
   test.skip(isMobile, "Analysis pages intentionally desktop-only");
+  let releaseStats!: () => void;
+  const statsReady = new Promise<void>((resolve) => {
+    releaseStats = resolve;
+  });
+  await page.route("**/api/v1/metrics/stats?*", async (route) => {
+    await statsReady;
+    await route.fulfill({ json: routes["/metrics/stats"] });
+  });
   await page.goto("/metrics?metric=heart_rate");
   const select = page.getByRole("combobox", { name: "Metric", exact: true });
+  await expect(select).toHaveValue("Heart Rate");
   await select.fill("HRV");
+  await expect(
+    page.getByRole("option", { name: "HRV", exact: true }),
+  ).toBeVisible();
+  releaseStats();
+  await expect(page.getByText("60", { exact: true }).first()).toBeVisible();
+  await expect(select).toHaveValue("HRV");
   await page.getByRole("option", { name: "HRV", exact: true }).click();
   await expect(page).toHaveURL(/metric=heart_rate_variability/);
   await page.goto("/correlations?x=heart_rate&y=heart_rate_variability");
