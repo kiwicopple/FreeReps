@@ -1,3 +1,4 @@
+import { Pagination, PaginationContent, PaginationItem } from "../components/ui/pagination";
 import { Empty } from "@/components/ui/empty";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -268,7 +269,7 @@ export default function WorkoutsPage() {
           {Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
           {filtered.length}
         </span>
-        <Button variant="outline"
+<Pagination className="ml-auto w-auto"><PaginationContent><PaginationItem><Button variant="outline"
           type="button"
 
           style={{ marginLeft: "auto", fontSize: 12 }}
@@ -276,8 +277,8 @@ export default function WorkoutsPage() {
           onClick={() => setParam("page", String(page - 1))}
         >
           Prev
-        </Button>
-        <Button variant="outline"
+        </Button></PaginationItem>
+<PaginationItem><Button variant="outline"
           type="button"
 
           style={{ fontSize: 12 }}
@@ -285,8 +286,8 @@ export default function WorkoutsPage() {
           onClick={() => setParam("page", String(page + 1))}
         >
           Next
-        </Button>
-      </div>
+        </Button></PaginationItem>
+</PaginationContent></Pagination>      </div>
 
       {isDesktop && maxHR > 0 ? (
         <div
@@ -535,19 +536,9 @@ function FilterPill({
   onClick: () => void;
 }) {
   return (
-    <Button variant="outline"
+    <Button variant={active ? "default" : "outline"} aria-pressed={active}
       type="button"
       onClick={onClick}
-      style={{
-        border: `1px solid ${active ? "var(--primary)" : "var(--border)"}`,
-        background: active ? "var(--primary)" : "transparent",
-        color: active ? "var(--background)" : "var(--foreground)",
-        padding: "6px 12px",
-        font: "600 12px var(--font-heading)",
-        cursor: "pointer",
-        borderRadius: 0,
-        whiteSpace: "nowrap",
-      }}
     >
       {label}
       <span className="num" style={{ fontWeight: 400, opacity: 0.65, marginLeft: 7 }}>

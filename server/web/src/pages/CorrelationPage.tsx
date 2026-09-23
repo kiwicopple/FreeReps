@@ -157,7 +157,7 @@ export default function CorrelationPage() {
 
         <div className="field" style={{ width: 200 }}>
           <label htmlFor="corr-lag">Lag</label>
-          <Choice searchable
+          <Choice
             id="corr-lag"
             className=""
             value={lag}

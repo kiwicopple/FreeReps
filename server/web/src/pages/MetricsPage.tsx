@@ -1,3 +1,4 @@
+import Choice from "../components/Choice";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,7 +11,7 @@ import DesktopOnly from "../components/DesktopOnly";
 import PageHeader from "../components/PageHeader";
 import RangeControl from "../components/RangeControl";
 import MetricChart from "../components/metrics/MetricChart";
-import { useAvailableMetrics, type MetricOption } from "../hooks/useMetrics";
+import { useAvailableMetrics } from "../hooks/useMetrics";
 import { useIsDesktop } from "../hooks/useMediaQuery";
 import { formatDateWithYear, formatNumber } from "../utils/format";
 import { queryMessage, queryState } from "../utils/queryState";
@@ -106,35 +107,7 @@ export default function MetricsPage() {
           minHeight: 760,
         }}
       >
-        <div className="rail">
-          <div className="kick" style={{ padding: "14px 20px 10px" }}>
-            {options.length} metrics
-          </div>
-          {groups.map((group) => (
-            <div key={group.label}>
-              <div
-                className="kick"
-                style={{
-                  padding: "16px 20px 6px",
-                  color: "var(--muted-foreground)",
-                }}
-              >
-                {group.label}
-              </div>
-              {group.metrics.map((m: MetricOption) => (
-                <Button variant="outline"
-                  key={m.value}
-                  className="rail-item"
-                  aria-selected={m.value === metric}
-                  style={{ padding: "9px 20px" }}
-                  onClick={() => setParam("metric", m.value)}
-                >
-                  {m.label}
-                </Button>
-              ))}
-            </div>
-          ))}
-        </div>
+        <aside className="w-72 shrink-0 border-r p-5"><label className="mb-3 block text-sm font-medium" htmlFor="metric-choice">{options.length} metrics</label><Choice searchable id="metric-choice" aria-label="Metric" value={metric} onValueChange={value=>setParam("metric",value)}>{groups.map(group=><optgroup key={group.label} label={group.label}>{group.metrics.map(item=><option key={item.value} value={item.value}>{item.label}</option>)}</optgroup>)}</Choice></aside>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
