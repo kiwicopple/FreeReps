@@ -9,9 +9,9 @@ test("secondary header stays visible beneath navigation across breakpoints", asy
 }) => {
   await page.goto("/nutrition");
   await expect(
-    page.getByRole("button", { name: "Edit targets", exact: true }),
+    page.getByRole("region", { name: "Logging status" }),
   ).toBeVisible();
-  for (const width of [320, 390, 767, 768, 1440]) {
+  for (const width of [320, 390, 767, 768, 1024, 1279, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate(() => window.scrollTo(0, 700));
     await expect
@@ -20,15 +20,15 @@ test("secondary header stays visible beneath navigation across breakpoints", asy
           .locator(".page-header")
           .evaluate((el) => Math.round(el.getBoundingClientRect().top)),
       )
-      .toBe(width < 768 ? 0 : 64);
+      .toBe(0);
     if (width >= 768)
       await expect
         .poll(() =>
           page
-            .locator(".nav")
-            .evaluate((el) => Math.round(el.getBoundingClientRect().bottom)),
+            .locator(".app-sidebar")
+            .evaluate((el) => Math.round(el.getBoundingClientRect().width)),
         )
-        .toBe(64);
+        .toBe(width < 1280 ? 64 : 224);
     const date = page.getByRole("button", { name: "Choose end date" });
     await date.click();
     await expect(page.getByLabel("Enter date", { exact: true })).toBeVisible();
@@ -58,6 +58,8 @@ test("all four nutrition cards open accessible scrolling sheets at every width",
     await trigger.click();
     const sheet = page.getByRole("dialog", { name, exact: true });
     await expect(sheet).toBeVisible();
+    await expect(sheet).not.toHaveAttribute("data-starting-style", "");
+    await sheet.evaluate(async element => { await Promise.all(element.getAnimations().map(animation => animation.finished)); });
     await expect(
       sheet.getByRole("region", { name: `About ${name}` }),
     ).toBeVisible();

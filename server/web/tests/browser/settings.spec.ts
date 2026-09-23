@@ -15,17 +15,19 @@ test("all nine settings sections and tab URLs remain available", async ({
   isMobile,
 }) => {
   await page.goto("/settings?tab=sources");
+  await expect(page.getByRole("tabpanel", { name: "Sources", exact: true })).toBeVisible();
   for (const [id, label] of sections) {
-    if (!isMobile) {
-      await page.getByRole("tab", { name: label, exact: true }).click();
-      await expect(page).toHaveURL(new RegExp("tab=" + id));
-      await expect(
-        page.getByRole("tabpanel", { name: label, exact: true }),
-      ).toBeVisible();
-    } else
-      await expect(
-        page.getByRole("region", { name: label, exact: true }),
-      ).toBeVisible();
+    const tab = page.getByRole("tab", { name: label, exact: true });
+    if (await tab.isVisible()) await tab.click();
+    else {
+      await page.getByRole("combobox", { name: "Settings section" }).click();
+      await page.getByRole("option", { name: label, exact: true }).click();
+    }
+    await expect(page).toHaveURL(new RegExp("tab=" + id));
+    await expect(
+      page.getByRole("tabpanel", { name: label, exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("tabpanel")).toHaveCount(1);
   }
 });
 test("identity saves and clears birth date and overrides and resets maximum HR", async ({
@@ -108,7 +110,7 @@ for (const provider of ["oura", "withings", "hevy"])
     await page.goto("/settings?tab=" + provider);
     const label =
       provider === "oura" ? "Oura" : provider === "hevy" ? "Hevy" : "Withings";
-    const panel = page.getByRole(isMobile ? "region" : "tabpanel", {
+    const panel = page.getByRole("tabpanel", {
       name: label,
       exact: true,
     });
@@ -126,15 +128,17 @@ for (const provider of ["oura", "withings", "hevy"])
       await panel.getByRole("button", { name: "Save credentials" }).click();
     }
     await panel.getByRole("button", { name: "Sync now", exact: true }).click();
-    await panel
-      .getByRole("button", { name: "Disconnect", exact: true })
+    await panel.getByRole("button", { name: `Manage ${label}` }).click();
+    await page
+      .getByRole("menuitem", { name: "Disconnect", exact: true })
       .click();
     const dialog = page.getByRole("alertdialog");
     await expect(dialog).toBeVisible();
     await dialog.getByRole("button", { name: "Cancel" }).click();
     expect(calls.filter((c) => c.path === "disconnect")).toEqual([]);
-    await panel
-      .getByRole("button", { name: "Disconnect", exact: true })
+    await panel.getByRole("button", { name: `Manage ${label}` }).click();
+    await page
+      .getByRole("menuitem", { name: "Disconnect", exact: true })
       .click();
     await dialog
       .getByRole("button", { name: "Disconnect", exact: true })
@@ -177,7 +181,7 @@ test("sources reorder and remove overrides with unchanged payloads", async ({
     await r.fulfill({ json: {} });
   });
   await page.goto("/settings?tab=sources");
-  const panel = page.getByRole(isMobile ? "region" : "tabpanel", {
+  const panel = page.getByRole("tabpanel", {
     name: "Sources",
     exact: true,
   });
@@ -220,7 +224,7 @@ test("alerts save uses seconds and test action is mocked", async ({
     await r.fulfill({ json: {} });
   });
   await page.goto("/settings?tab=alerts");
-  const panel = page.getByRole(isMobile ? "region" : "tabpanel", {
+  const panel = page.getByRole("tabpanel", {
     name: "Alerts",
     exact: true,
   });
@@ -265,7 +269,7 @@ test("import selection removal, failed upload and retry preserve the file", asyn
     );
   });
   await page.goto("/settings?tab=import");
-  const panel = page.getByRole(isMobile ? "region" : "tabpanel", {
+  const panel = page.getByRole("tabpanel", {
     name: "Import",
     exact: true,
   });
@@ -325,7 +329,7 @@ test("front-page visibility, hero limit, selection order, save and reset", async
     await r.fulfill({ json: {} });
   });
   await page.goto("/settings?tab=front-page");
-  const panel = page.getByRole(isMobile ? "region" : "tabpanel", {
+  const panel = page.getByRole("tabpanel", {
     name: "Front page",
     exact: true,
   });
@@ -376,11 +380,11 @@ for (const provider of ["oura", "withings"])
       });
     });
     await page.goto("/settings?tab=" + provider);
-    const panel = page.getByRole(isMobile ? "region" : "tabpanel", {
+    const panel = page.getByRole("tabpanel", {
       name: provider === "oura" ? "Oura" : "Withings",
       exact: true,
     });
-    await expect(panel.getByLabel("Redirect URI")).toHaveValue(
+    await expect(panel.getByRole("textbox", { name: "Redirect URI", exact: true })).toHaveValue(
       `https://example.invalid/${provider}/callback`,
     );
     await panel.getByRole("button", { name: /Authorize with/ }).click();
@@ -411,7 +415,7 @@ for (const [tab, label, path] of [
       ),
     );
     await page.goto("/settings?tab=" + tab);
-    const panel = page.getByRole(isMobile ? "region" : "tabpanel", {
+    const panel = page.getByRole("tabpanel", {
       name: label,
       exact: true,
     });
@@ -470,7 +474,7 @@ test("empty alert numbers stay empty and prevent saving", async ({
   isMobile,
 }) => {
   await page.goto("/settings?tab=alerts");
-  const panel = page.getByRole(isMobile ? "region" : "tabpanel", {
+  const panel = page.getByRole("tabpanel", {
     name: "Alerts",
     exact: true,
   });

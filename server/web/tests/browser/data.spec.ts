@@ -73,10 +73,8 @@ test("workout pagination resets on type changes and opens detail and back", asyn
   await page.goto("/workouts");
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page).toHaveURL(/page=1/);
-  await page
-    .getByRole("button", { name: /Indoor Run/ })
-    .first()
-    .click();
+  await page.getByRole("combobox", { name: "Workout type" }).fill("Indoor Run");
+  await page.getByRole("option", { name: /Indoor Run/ }).click();
   await expect(page).not.toHaveURL(/page=1/);
   await expect(
     page.getByText("Showing 1–10 of 31", { exact: true }),
@@ -84,7 +82,11 @@ test("workout pagination resets on type changes and opens detail and back", asyn
   // The cards and desktop rows use the same route callback.
   await page.getByText("Indoor Run", { exact: true }).first().click();
   await expect(page).toHaveURL(/\/workouts\/synthetic/);
-  await page.getByRole("link", { name: "← Workouts" }).click();
+  await page
+    .locator("main")
+    .getByRole("link", { name: "Workouts", exact: true })
+    .click();
+  await expect(page).toHaveURL(/type=Indoor\+Run/);
   await expect(
     page.getByRole("heading", { name: "Workouts", exact: true }),
   ).toBeVisible();
@@ -113,6 +115,7 @@ test("uPlot resizes with viewport and the retained route map renders", async ({
   await page.goto("/workouts/synthetic-run");
   await expect(page.locator(".uplot")).toBeVisible();
   await expect(page.locator(".leaflet-container")).toBeVisible();
+  const canvas = await page.locator(".uplot canvas").elementHandle();
   for (const width of [768, 390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const selector of [".uplot", ".leaflet-container"]) {
@@ -124,6 +127,29 @@ test("uPlot resizes with viewport and the retained route map renders", async ({
         .toBe(true);
     }
   }
+  await page.getByRole("button", { name: "Collapse sidebar" }).click();
+  await expect
+    .poll(() =>
+      page
+        .locator(".app-sidebar")
+        .evaluate((el) => el.getBoundingClientRect().width),
+    )
+    .toBe(64);
+  expect(
+    await page
+      .locator(".uplot canvas")
+      .evaluate((el, original) => el === original, canvas),
+  ).toBe(true);
+  // Leaflet's SVG renderer re-measures the container, not merely its CSS box.
+  const routeSvg = page.locator(".leaflet-overlay-pane svg");
+  await expect
+    .poll(async () => {
+      const box = await page.locator(".leaflet-container").boundingBox();
+      return (
+        Number(await routeSvg.getAttribute("width")) >= (box?.width ?? Infinity)
+      );
+    })
+    .toBe(true);
 });
 // Imported strength sessions have no workout row; navigation must carry their metadata.
 test("synthetic strength sessions retain exercises and effort units", async ({

@@ -62,7 +62,9 @@ test("today and trends retain values, sources, sparklines and metric links", asy
     page.getByText("Synthetic Watch", { exact: false }).first(),
   ).toBeVisible();
   await expect(page.locator("main svg polyline").first()).toBeVisible();
-  await page.getByRole("link", { name: "Open in Trends →" }).click();
+  if (isMobile)
+    await page.getByRole("button", { name: "More", exact: true }).click();
+  await page.getByRole("link", { name: "Trends", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Trends", exact: true }),
   ).toBeVisible();

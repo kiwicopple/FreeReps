@@ -92,7 +92,7 @@ test("route navigation retains back, forward and active route state", async ({
     page.getByRole("heading", { name: "Nutrition", exact: true }),
   ).toBeVisible();
   if (!isMobile) {
-    await page.getByRole("link", { name: "Protocol", exact: true }).click();
+    await page.getByRole("link", { name: "Protocol home", exact: true }).click();
     await expect(page).toHaveURL(/\/$/);
   }
 });

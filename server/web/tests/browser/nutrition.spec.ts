@@ -10,7 +10,7 @@ test("nested nutrient drawer closes to its parent and restores focus", async ({
   await expect(
     page.getByText("Your body uses cholesterol", { exact: false }),
   ).toBeVisible();
-  if (isMobile) {
+  {
     await expect(
       page.getByRole("dialog", { name: "Cholesterol", exact: true }),
     ).toBeVisible();
@@ -42,7 +42,7 @@ test("editor retains drafts on conflict, validates blanks and sends versioned pa
         : { json: { protocol, version: 2 } },
     );
   });
-  await page.goto("/nutrition");
+  await page.goto("/nutrition?tab=protocol");
   await page.getByRole("button", { name: "Edit targets", exact: true }).click();
   const editor = page.getByRole("region", { name: "Edit nutrition targets" });
   await editor
@@ -107,7 +107,7 @@ test("cancel makes no mutation and completion uses the expected version", async 
       json: { date: "2025-01-15", complete: true, version: 2 },
     });
   });
-  await page.goto("/nutrition");
+  await page.goto("/nutrition?tab=protocol");
   await page.getByRole("button", { name: "Edit targets", exact: true }).click();
   await page.getByLabel("Reason", { exact: true }).fill("Unsaved");
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
@@ -155,7 +155,7 @@ for (const kind of ["goal", "range", "maximum", "reference"])
       saved = r.request().postDataJSON();
       await r.fulfill({ json: { protocol: base, version: 4 } });
     });
-    await page.goto("/nutrition");
+    await page.goto("/nutrition?tab=protocol");
     await page
       .getByRole("button", { name: "Edit targets", exact: true })
       .click();
@@ -238,9 +238,11 @@ test("nutrition period totals, trend selection, food details and protocol histor
   await expect(nutrient).toHaveValue("Protein");
   await page.getByRole("button", { name: "2025-01-15", exact: true }).click();
   await expect(page).toHaveURL(/range=day/);
+  await page.getByRole("tab", { name: "Protocol", exact: true }).click();
   await expect(
     page.getByText("Version 1 · effective 2025-01-01 · Synthetic"),
   ).toBeVisible();
+  await page.getByRole("tab", { name: "Food log", exact: true }).click();
   await page.getByRole("button", { name: /Breakfast/ }).click();
   await expect(
     page.getByText("Synthetic fixture", { exact: true }),
@@ -267,7 +269,7 @@ test("nutrition profile edits and target addition and removal preserve the paylo
     saved = r.request().postDataJSON();
     await r.fulfill({ json: { protocol: base, version: 6 } });
   });
-  await page.goto("/nutrition");
+  await page.goto("/nutrition?tab=protocol");
   await page.getByRole("button", { name: "Edit targets" }).click();
   const editor = page.getByRole("region", { name: "Edit nutrition targets" });
   await editor.getByRole("button", { name: "Profile and preferences" }).click();

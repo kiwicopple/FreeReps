@@ -170,7 +170,7 @@ test("protocol editor focuses its heading and restores Edit targets after cancel
     if (route.request().method() === "PUT") saves++;
     return route.fulfill({ json: records });
   });
-  await page.goto("/nutrition");
+  await page.goto("/nutrition?tab=protocol");
   const edit = page.getByRole("button", { name: "Edit targets", exact: true });
   await edit.click();
   await expect(
@@ -201,7 +201,7 @@ test("nested nutrient trend navigation closes the drawer stack", async ({
   await page.getByRole("button", { name: /^Cholesterol/ }).click();
   await page.getByRole("button", { name: "Show cholesterol trend" }).click();
   await expect(page).toHaveURL(/range=7d/);
-  if (isMobile) await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(
     page.getByRole("combobox", { name: "Trend nutrient" }),
   ).toHaveValue("Cholesterol");
@@ -267,10 +267,10 @@ test("form dates retain editing and a single calendar trigger", async ({
 });
 
 // Analysis must stack below the agreed desktop breakpoint without squeezing its chart.
-test("correlation panels switch from stacked to adjacent at 1280px", async ({
+test("correlation panels switch from stacked to adjacent at 960px of content width", async ({
   safePage: page,
 }) => {
-  await page.setViewportSize({ width: 1279, height: 1000 });
+  await page.setViewportSize({ width: 1024, height: 1000 });
   await page.goto("/correlations?x=heart_rate&y=heart_rate_variability");
   const chart = page.getByRole("region", {
     name: "Metric relationship",
@@ -285,7 +285,7 @@ test("correlation panels switch from stacked to adjacent at 1280px", async ({
       return !!a && !!b && b.y >= a.y + a.height;
     })
     .toBe(true);
-  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await expect
     .poll(async () => {
       const a = await chart.boundingBox(),

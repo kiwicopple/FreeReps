@@ -52,10 +52,10 @@ for (const path of [
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    for (const width of [320, 390, 767, 768, 1440]) {
+    for (const width of [320, 390, 767, 768, 1024, 1279, 1280, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       const overflow = await page.evaluate(() =>
-        [...document.querySelectorAll("main *")]
+        [...document.querySelectorAll("body *")]
           .filter((el) => el.getBoundingClientRect().right > innerWidth + 1)
           .slice(-12)
           .map((el) => ({
@@ -79,7 +79,9 @@ for (const path of [
           width,
           height: width === 390 ? 844 : 900,
         });
-        await expect(page.locator(".nav")).toHaveCount(width < 768 ? 0 : 1);
+        await expect(page.locator(".app-sidebar")).toHaveCount(
+          width < 768 ? 0 : 1,
+        );
         await page.evaluate(() => window.scrollTo(0, 0));
         await expect
           .poll(() =>
@@ -87,7 +89,7 @@ for (const path of [
               .locator(".page-header")
               .evaluate((el) => Math.round(el.getBoundingClientRect().top)),
           )
-          .toBe(width < 768 ? 0 : 64);
+          .toBe(0);
         await page.screenshot({
           path: info.outputPath(
             `synthetic-${width < 768 ? "mobile" : "desktop"}.png`,
@@ -111,11 +113,11 @@ for (const path of [
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     if (path === "/nutrition")
       await expect(
-        page.getByRole("button", { name: "Edit targets" }),
+        page.getByRole("region", { name: "Logging status" }),
       ).toBeVisible();
     if (path === "/settings" && isMobile)
       await expect(
-        page.getByRole("region", { name: "Alerts", exact: true }),
+        page.getByRole("tabpanel", { name: "Identity", exact: true }),
       ).toBeVisible();
     const result = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa"])

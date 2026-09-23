@@ -45,6 +45,10 @@ for (const [path, endpoint, empty] of [
         .getByRole("alert")
         .filter({ hasText: "The data could not be loaded" }),
     ).toBeVisible({ timeout: 15000 });
+    if (path === "/workouts" || path === "/trends")
+      await expect(
+        page.getByRole("region", { name: "Key metrics", exact: true }),
+      ).toHaveCount(0);
     state = "empty";
     await page
       .getByRole("button", { name: "Retry", exact: true })
