@@ -125,9 +125,9 @@ test("calendar selection preserves the local day", async ({
   await page.getByRole("button", { name: "Choose end date" }).click();
   await page.getByRole("button", { name: /January 10th, 2025/ }).click();
   await expect(page).toHaveURL(/date=2025-01-10/);
-  await expect(page.getByRole("button", {name: "Choose end date"})).toContainText(
-    "2025-01-10",
-  );
+  await expect(
+    page.getByRole("button", { name: "Choose end date" }),
+  ).toContainText("2025-01-10");
 });
 // Changing comparison modes must preserve their distinct server payloads.
 for (const kind of ["goal", "range", "maximum", "reference"])
@@ -285,11 +285,29 @@ test("nutrition profile edits and target addition and removal preserve the paylo
   await add.fill("Fiber");
   await page.getByRole("option", { name: "Fiber", exact: true }).click();
   await editor.getByRole("button", { name: "Add", exact: true }).click();
-  await editor.getByRole("button", { name: "Fiber · 1 g" }).click();
+  const fiber = editor.getByRole("button", { name: "Fiber · 1 g" });
+  await fiber.click();
+  const fiberPanel = page.locator(
+    `[id="${await fiber.getAttribute("aria-controls")}"]`,
+  );
+  // WebKit may scroll between pointerdown/up while this height transition runs.
+  await expect(fiberPanel).not.toHaveAttribute("data-starting-style", "");
+  await fiberPanel.evaluate(async (panel) => {
+    await Promise.all(
+      panel.getAnimations().map((animation) => animation.finished),
+    );
+  });
   await editor.getByRole("button", { name: "Remove target" }).click();
+  await expect(fiber).toHaveCount(0);
   await add.fill("Protein");
   await page.getByRole("option", { name: "Protein", exact: true }).click();
   await editor.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(
+    editor.getByRole("button", { name: "Protein · 1 g" }),
+  ).toBeVisible();
+  await expect(editor.getByRole("button", { name: "Fiber · 1 g" })).toHaveCount(
+    0,
+  );
   await editor.getByRole("button", { name: "Save targets" }).click();
   await expect.poll(() => saved?.expected_version).toBe(5);
   expect(saved.protocol.profile).toEqual({

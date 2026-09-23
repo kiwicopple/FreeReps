@@ -63,6 +63,7 @@ export default function BirthDateRow() {
             style={{ width: 240, maxWidth: "100%" }}
 
             value={draft}
+            disabled={!loaded || saving}
             onValueChange={(value) => setDraft(value)}
             aria-label="Date of birth"
           />
@@ -71,7 +72,7 @@ export default function BirthDateRow() {
             type="button"
 
             style={{ fontSize: 12 }}
-            disabled={saving || draft === stored}
+            disabled={!loaded || saving || draft === stored}
             onClick={() => commit(draft)}
           >
             {saving ? "Saving…" : "Save"}
@@ -82,7 +83,7 @@ export default function BirthDateRow() {
               type="button"
 
               style={{ fontSize: 12 }}
-              disabled={saving}
+              disabled={!loaded || saving}
               onClick={() => {
                 setDraft("");
                 commit("");

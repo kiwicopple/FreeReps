@@ -74,6 +74,7 @@ export default function MaxHeartRateRow() {
             max={250}
 
             value={draft === "" ? null : Number(draft)}
+            disabled={!loaded || saving}
             placeholder={data ? String(Math.round(data.observed)) : ""}
             onValueChange={(value) =>
               setDraft(value === null ? "" : String(value))
@@ -93,7 +94,7 @@ export default function MaxHeartRateRow() {
             type="button"
 
             style={{ fontSize: 12 }}
-            disabled={saving || draft === ""}
+            disabled={!loaded || saving || draft === ""}
             onClick={() => commit(Number(draft))}
           >
             {saving ? "Saving…" : "Save"}
@@ -104,7 +105,7 @@ export default function MaxHeartRateRow() {
               type="button"
 
               style={{ fontSize: 12 }}
-              disabled={saving}
+              disabled={!loaded || saving}
               onClick={() => {
                 setDraft("");
                 commit(0);

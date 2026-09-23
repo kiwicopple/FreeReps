@@ -24,6 +24,9 @@ API payload or preference changes.
   only close the current sheet. No markup inspection or delegated DOM clicks.
 - Editable settings use coss Field/FieldLabel/FieldDescription/FieldError;
   read-only rows and separate save operations remain distinct.
+  Identity fields wait for their initial preferences before allowing edits,
+  so a delayed response cannot overwrite a new draft. A delayed-response
+  acceptance test covers this race in both browsers.
 
 Content is centered at a maximum width of 1440px, with 20px mobile and 32px
 desktop padding, 24px section gaps and 16px/24px panel padding. The desktop
@@ -82,7 +85,7 @@ nutrition progress bars, delegated `data-sheet-close`, redundant dividers and
 obsolete nutrition grid/progress styling. Specialized chart geometry and domain
 presentation remain intentionally. There is no migration flag or dual layout.
 
-Automated local results: 176 browser cases passed, with 6 intentional viewport
+Automated local results: 178 browser cases passed, with 6 intentional viewport
 skips; 10 Vitest cases and the existing nutrition/recovery numerical suites passed.
 Type checking, production build, Go build/vet/tests, golangci-lint (zero issues),
 the document check and whitespace check passed.

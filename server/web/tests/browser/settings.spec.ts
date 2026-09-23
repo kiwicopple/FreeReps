@@ -485,3 +485,44 @@ test("empty alert numbers stay empty and prevent saving", async ({
     panel.getByRole("button", { name: "Save", exact: true }),
   ).toBeEnabled();
 });
+
+// A late initial response must not overwrite a date or HR draft entered on a slow connection.
+test("identity fields wait for initial preferences before accepting edits", async ({
+  safePage: page,
+}) => {
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/v1/preferences/birth-date", async (route) => {
+    await pending;
+    await route.fulfill({ json: { birth_date: "1980-01-01", age: 45 } });
+  });
+  await page.route("**/api/v1/preferences/max-heart-rate", async (route) => {
+    await pending;
+    await route.fulfill({
+      json: { bpm: 180, origin: "configured", observed: 170, estimated: 175 },
+    });
+  });
+  await page.goto("/settings");
+  const date = page.getByRole("textbox", {
+    name: "Date of birth",
+    exact: true,
+  });
+  const heart = page.getByRole("textbox", {
+    name: "Maximum heart rate in bpm",
+    exact: true,
+  });
+  await expect(date).toBeDisabled();
+  await expect(heart).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Choose date of birth" }),
+  ).toBeDisabled();
+  release();
+  await expect(date).toHaveValue("1980-01-01");
+  await expect(heart).toHaveValue("180");
+  await date.fill("1990-01-15");
+  await heart.fill("190");
+  await expect(date).toHaveValue("1990-01-15");
+  await expect(heart).toHaveValue("190");
+});
