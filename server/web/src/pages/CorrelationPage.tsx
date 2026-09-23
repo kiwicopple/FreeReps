@@ -1,3 +1,4 @@
+import { Alert } from "@/components/ui/alert";
 import Choice from "@/components/Choice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -187,9 +188,9 @@ export default function CorrelationPage() {
               perfectly, which says nothing.
             </p>
           ) : message ? (
-            <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+            <Alert variant="error" style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
               {message}
-            </p>
+            </Alert>
           ) : state === "loading" ? (
             <Skeleton  style={{ width: "100%", height: 520 }} />
           ) : (

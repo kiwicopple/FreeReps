@@ -1,3 +1,5 @@
+import { Empty } from "@/components/ui/empty";
+import { Alert } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableHeader, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -127,7 +129,7 @@ export default function DashboardPage() {
       </div>
 
       {message ? (
-        <p
+        <Alert variant="error"
           className="page-x"
           style={{
             color: "var(--muted-foreground)",
@@ -136,7 +138,7 @@ export default function DashboardPage() {
           }}
         >
           {message}
-        </p>
+        </Alert>
       ) : isDesktop ? (
         <MetricsTable
           groups={groups}
@@ -210,12 +212,12 @@ function MetricsTable({
 
   if (groups.length === 0) {
     return (
-      <p
+      <Empty
         className="page-x"
         style={{ color: "var(--muted-foreground)", fontSize: 13 }}
       >
         No metrics selected. Pick which metrics the table lists in Settings.
-      </p>
+      </Empty>
     );
   }
 

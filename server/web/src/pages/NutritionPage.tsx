@@ -1,3 +1,5 @@
+import { Empty } from "@/components/ui/empty";
+import { Alert } from "@/components/ui/alert";
 import DateControl from "@/components/DateControl";
 import Choice from "@/components/Choice";
 import { Button } from "@/components/ui/button";
@@ -311,12 +313,12 @@ export default function NutritionPage() {
             <Button variant="outline" onClick={() => setEditing(!editing)}>Edit targets</Button>
           )}
         </div>
-        {error && <p role="alert">{error}</p>}
+        {error && <Alert variant="error" role="alert">{error}</Alert>}
         {query.isError && (
-          <p role="alert">
+          <Alert variant="error" role="alert">
             Could not refresh nutrition: {query.error.message}.{" "}
             {data ? "Showing the last loaded data." : ""}
-          </p>
+          </Alert>
         )}
         {query.isPending ? (
           <p>Loading your nutrition log…</p>
@@ -369,11 +371,11 @@ export default function NutritionPage() {
                 </p>
               )}
               {!records.length && (
-                <p className="nutrition-notice">
+                <Empty className="nutrition-notice">
                   No intake logged in this period. Send a photo or description
                   in the connected conversation to add food, drinks or
                   supplements.
-                </p>
+                </Empty>
               )}
               <section
                 className="nutrition-heroes"

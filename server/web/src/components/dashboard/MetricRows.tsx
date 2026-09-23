@@ -1,3 +1,4 @@
+import { Empty } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FrontPageMetric } from "../../api";
 import Sparkline from "../Sparkline";
@@ -34,12 +35,12 @@ export default function MetricRows({ groups, loading }: Props) {
 
   if (groups.length === 0) {
     return (
-      <p
+      <Empty
         className="page-x"
         style={{ color: "var(--muted-foreground)", fontSize: 13 }}
       >
         No metrics selected. Pick which metrics the list shows in Settings.
-      </p>
+      </Empty>
     );
   }
 

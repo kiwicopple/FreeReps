@@ -17,7 +17,7 @@ interface Props {
 export default function HRTimelineChart({ hrData, maxHR }: Props) {
   // The theme decides what the resolved token values are, so the chart is
   // rebuilt when it changes.
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   const { opts, plotData } = useMemo(() => {
     if (!hrData || hrData.length === 0) return { opts: null, plotData: null };
@@ -87,7 +87,7 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
       plotData: [new Float64Array(times), bpms] as uPlot.AlignedData,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hrData, maxHR, theme]);
+  }, [hrData, maxHR, resolvedTheme]);
 
   if (!opts || !plotData) {
     return (

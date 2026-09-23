@@ -1,3 +1,5 @@
+import { Empty } from "@/components/ui/empty";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
@@ -219,19 +221,19 @@ export default function WorkoutsPage() {
       </div>
 
       {message ? (
-        <p
+        <Alert variant="error"
           className="page-x"
           style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           {message}
-        </p>
+        </Alert>
       ) : filtered.length === 0 ? (
-        <p
+        <Empty
           className="page-x"
           style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           No workouts in this window.
-        </p>
+        </Empty>
       ) : isDesktop ? (
         <WorkoutTable
           groups={groups}

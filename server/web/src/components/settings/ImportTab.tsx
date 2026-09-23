@@ -1,3 +1,4 @@
+import { Alert } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
@@ -142,7 +143,7 @@ export default function ImportTab() {
       ) : null}
 
       {error ? (
-        <p
+        <Alert variant="error"
           style={{
             color: "var(--success-foreground)",
             fontSize: 13,
@@ -150,7 +151,7 @@ export default function ImportTab() {
           }}
         >
           {error}
-        </p>
+        </Alert>
       ) : null}
 
       {result ? (

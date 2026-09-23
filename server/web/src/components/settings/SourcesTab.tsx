@@ -1,3 +1,4 @@
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -173,7 +174,7 @@ export default function SourcesTab() {
       </div>
 
       {error ? (
-        <p
+        <Alert variant="error"
           style={{
             color: "var(--success-foreground)",
             fontSize: 13,
@@ -181,7 +182,7 @@ export default function SourcesTab() {
           }}
         >
           {error}
-        </p>
+        </Alert>
       ) : null}
 
       <div style={{ paddingTop: 20 }}>

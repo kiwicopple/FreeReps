@@ -1,3 +1,4 @@
+import { Alert } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -127,7 +128,7 @@ export default function TrendsPage() {
       </div>
 
       {message ? (
-        <p
+        <Alert variant="error"
           className="page-x"
           style={{
             color: "var(--muted-foreground)",
@@ -136,7 +137,7 @@ export default function TrendsPage() {
           }}
         >
           {message}
-        </p>
+        </Alert>
       ) : items.length === 0 ? (
         <p
           className="page-x"

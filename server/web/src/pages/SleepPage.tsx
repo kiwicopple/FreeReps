@@ -1,3 +1,5 @@
+import { Empty } from "@/components/ui/empty";
+import { Alert } from "@/components/ui/alert";
 import DateControl from "@/components/DateControl";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -108,7 +110,7 @@ export default function SleepPage() {
         <Button variant="outline" aria-label="Previous night" onClick={() => navigateDate(shiftDate(date, -1))} style={{ minWidth: 44, minHeight: 44 }}>←</Button>
         <DateControl aria-label="Night date"  value={date} max={today} onValueChange={(value) => {
           if (validDate(value) && value <= today) navigateDate(value);
-        }} style={{ minHeight: 44, minWidth: 0, colorScheme: "dark", background: "var(--card)", color: "var(--foreground)", border: "1px solid var(--border)", padding: "0 8px" }} />
+        }}  />
         <Button variant="outline" aria-label="Next night" disabled={date >= today} onClick={() => navigateDate(shiftDate(date, 1))} style={{ minWidth: 44, minHeight: 44 }}>→</Button>
         <Button variant="outline" onClick={() => navigateDate(null)} style={{ minHeight: 44 }}>Latest</Button>
         <span style={{ fontSize: 12, color: "var(--muted-foreground)", flexBasis: "100%" }}>Choose the date the night is recorded under.</span>
@@ -117,12 +119,12 @@ export default function SleepPage() {
       {last && <RecoveryScore session={last} />}
 
       {message ? (
-        <p
+        <Alert variant="error"
           className="page-x"
           style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           {message}
-        </p>
+        </Alert>
       ) : state === "loading" ? (
         <div
           className="page-x"
@@ -131,12 +133,12 @@ export default function SleepPage() {
           <Skeleton  style={{ width: 180, height: 44 }} />
         </div>
       ) : !last ? (
-        <p
+        <Empty
           className="page-x"
           style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           No sleep recorded for this date. Choose another night or return to Latest.
-        </p>
+        </Empty>
       ) : isDesktop ? (
         <DesktopSleep
           session={last}

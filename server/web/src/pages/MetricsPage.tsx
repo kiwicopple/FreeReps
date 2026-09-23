@@ -1,3 +1,4 @@
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { metricLabel } from "../utils/metricLabel";
@@ -195,9 +196,9 @@ export default function MetricsPage() {
 
           <div className="page-x" style={{ paddingTop: 26, paddingBottom: 34 }}>
             {message ? (
-              <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+              <Alert variant="error" style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
                 {message}
-              </p>
+              </Alert>
             ) : state === "loading" ? (
               <Skeleton  style={{ width: "100%", height: 420 }} />
             ) : (

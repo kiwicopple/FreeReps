@@ -1,3 +1,4 @@
+import { Alert } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -213,9 +214,9 @@ export default function FrontPageTab() {
       </div>
 
       {error ? (
-        <p style={{ color: "var(--success-foreground)", fontSize: 13, marginTop: 14 }}>
+        <Alert variant="error" style={{ color: "var(--success-foreground)", fontSize: 13, marginTop: 14 }}>
           {error}
-        </p>
+        </Alert>
       ) : null}
 
       <div style={{ display: "flex", gap: 12, paddingTop: 20 }}>
