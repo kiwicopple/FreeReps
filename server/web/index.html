@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>FreeReps</title>
+    <title>Protocol</title>
 
     <link rel="icon" href="/app-icon/favicon-32.png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/app-icon/apple-touch-icon-180.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
 
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="FreeReps" />
+    <meta name="apple-mobile-web-app-title" content="Protocol" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="theme-color" content="#edf0f1" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
@@ -24,6 +24,7 @@
           document.documentElement.setAttribute("data-theme", t);
         }
       } catch (e) {}
+      document.documentElement.classList.toggle("dark", t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches));
     </script>
   </head>
   <body>

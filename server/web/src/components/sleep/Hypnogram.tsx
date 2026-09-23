@@ -21,7 +21,7 @@ interface Props {
 export default function Hypnogram({ stages, compact = false, overlay }: Props) {
   if (stages.length === 0) {
     return (
-      <p style={{ color: "var(--color-neutral-600)", fontSize: 13 }}>
+      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         No stage data for this night.
       </p>
     );
@@ -102,7 +102,7 @@ export default function Hypnogram({ stages, compact = false, overlay }: Props) {
               display: "flex",
               alignItems: "center",
               font: "400 11px var(--font-body)",
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
             }}
           >
             {lane}
@@ -126,7 +126,7 @@ export default function Hypnogram({ stages, compact = false, overlay }: Props) {
               right: 0,
               top: (i + 1) * LANE_HEIGHT - 1,
               height: 1,
-              background: "var(--color-neutral-300)",
+              background: "var(--border)",
             }}
           />
         ))}

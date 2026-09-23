@@ -49,7 +49,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <NavLink
             to="/settings"
             className="ml-auto"
-            style={{ color: "var(--color-neutral-600)" }}
+            style={{ color: "var(--muted-foreground)" }}
           >
             {user?.display_name || user?.login || "Settings"}
           </NavLink>

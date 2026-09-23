@@ -41,7 +41,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemePreference>(readStored);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const apply = () => {
+      document.documentElement.setAttribute("data-theme", theme);
+      document.documentElement.classList.toggle("dark", theme === "dark" || (theme === "auto" && query.matches));
+    };
+    apply();
+    query.addEventListener("change", apply);
+    return () => query.removeEventListener("change", apply);
   }, [theme]);
 
   const setTheme = useCallback((next: ThemePreference) => {

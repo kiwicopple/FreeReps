@@ -14,7 +14,7 @@ export default function ZoneBar({ shares, width = 170, height = 14 }: Props) {
       <span
         style={{
           font: "400 12px var(--font-body)",
-          color: "var(--color-neutral-600)",
+          color: "var(--muted-foreground)",
         }}
       >
         —
@@ -28,7 +28,7 @@ export default function ZoneBar({ shares, width = 170, height = 14 }: Props) {
         display: "flex",
         width,
         height,
-        border: "1px solid var(--color-divider)",
+        border: "1px solid var(--border)",
       }}
     >
       {shares.map((share, i) => (

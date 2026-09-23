@@ -44,7 +44,7 @@ export default function RouteMap({ route }: Props) {
       <h2 style={{ fontSize: 19, fontWeight: 700 }}>Route</h2>
       <div
         style={{
-          borderTop: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
           marginTop: 12,
           paddingTop: 12,
         }}

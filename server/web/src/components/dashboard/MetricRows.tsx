@@ -18,7 +18,7 @@ interface Props {
 export default function MetricRows({ groups, loading }: Props) {
   if (loading && groups.length === 0) {
     return (
-      <div style={{ borderTop: "2px solid var(--color-text)" }}>
+      <div style={{ borderTop: "2px solid var(--foreground)" }}>
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="row">
             <div className="flex-1">
@@ -35,7 +35,7 @@ export default function MetricRows({ groups, loading }: Props) {
     return (
       <p
         className="page-x"
-        style={{ color: "var(--color-neutral-600)", fontSize: 13 }}
+        style={{ color: "var(--muted-foreground)", fontSize: 13 }}
       >
         No metrics selected. Pick which metrics the list shows in Settings.
       </p>
@@ -43,7 +43,7 @@ export default function MetricRows({ groups, loading }: Props) {
   }
 
   return (
-    <div style={{ borderTop: "2px solid var(--color-text)" }}>
+    <div style={{ borderTop: "2px solid var(--foreground)" }}>
       {groups.map((group) => (
         <div key={group.category}>
           <div className="kick row-group">{group.label}</div>
@@ -77,7 +77,7 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
         <div
           style={{
             font: "400 11px var(--font-body)",
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             marginTop: 3,
           }}
         >
@@ -90,7 +90,7 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
         width={90}
         height={20}
         cssWidth={72}
-        stroke="var(--color-neutral-500)"
+        stroke="var(--muted-foreground)"
         strokeWidth={1.4}
       />
 
@@ -101,7 +101,7 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
             style={{
               fontWeight: 400,
               fontSize: 11,
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
             }}
           >
             {m.unit}

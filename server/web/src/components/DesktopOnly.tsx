@@ -13,12 +13,12 @@ export default function DesktopOnly({ title }: { title: string }) {
       <PageHeader kicker="Desktop only" title={title} />
       <div
         className="page-x"
-        style={{ borderTop: "2px solid var(--color-text)", paddingTop: 20 }}
+        style={{ borderTop: "2px solid var(--foreground)", paddingTop: 20 }}
       >
         <p
           style={{
             font: "400 13px/1.55 var(--font-body)",
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             maxWidth: "42ch",
             margin: 0,
           }}

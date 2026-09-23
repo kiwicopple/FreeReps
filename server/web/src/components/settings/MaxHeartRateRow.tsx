@@ -64,7 +64,7 @@ export default function MaxHeartRateRow() {
         <span
           style={{
             font: "400 12px var(--font-body)",
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
           }}
         >
           bpm
@@ -97,13 +97,13 @@ export default function MaxHeartRateRow() {
       <p
         style={{
           font: "400 12px/1.5 var(--font-body)",
-          color: "var(--color-neutral-600)",
+          color: "var(--muted-foreground)",
           margin: "8px 0 0",
           maxWidth: "56ch",
         }}
       >
         {error ? (
-          <span style={{ color: "var(--color-accent-700)" }}>{error}</span>
+          <span style={{ color: "var(--success-foreground)" }}>{error}</span>
         ) : !data ? (
           "Loading…"
         ) : data.origin === "configured" ? (

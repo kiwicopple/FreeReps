@@ -105,10 +105,10 @@ export default function SleepPage() {
         <button aria-label="Previous night" onClick={() => navigateDate(shiftDate(date, -1))} style={{ minWidth: 44, minHeight: 44 }}>←</button>
         <input aria-label="Night date" type="date" value={date} max={today} onChange={(e) => {
           if (validDate(e.target.value) && e.target.value <= today) navigateDate(e.target.value);
-        }} style={{ minHeight: 44, minWidth: 0, colorScheme: "dark", background: "var(--color-surface)", color: "var(--color-text)", border: "1px solid var(--color-divider)", padding: "0 8px" }} />
+        }} style={{ minHeight: 44, minWidth: 0, colorScheme: "dark", background: "var(--card)", color: "var(--foreground)", border: "1px solid var(--border)", padding: "0 8px" }} />
         <button aria-label="Next night" disabled={date >= today} onClick={() => navigateDate(shiftDate(date, 1))} style={{ minWidth: 44, minHeight: 44 }}>→</button>
         <button onClick={() => navigateDate(null)} style={{ minHeight: 44 }}>Latest</button>
-        <span style={{ fontSize: 12, color: "var(--color-neutral-600)", flexBasis: "100%" }}>Choose the date the night is recorded under.</span>
+        <span style={{ fontSize: 12, color: "var(--muted-foreground)", flexBasis: "100%" }}>Choose the date the night is recorded under.</span>
       </div>
 
       {last && <RecoveryScore session={last} />}
@@ -116,21 +116,21 @@ export default function SleepPage() {
       {message ? (
         <p
           className="page-x"
-          style={{ color: "var(--color-neutral-600)", fontSize: 13 }}
+          style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           {message}
         </p>
       ) : state === "loading" ? (
         <div
           className="page-x"
-          style={{ borderTop: "2px solid var(--color-text)", paddingTop: 24 }}
+          style={{ borderTop: "2px solid var(--foreground)", paddingTop: 24 }}
         >
           <span className="skel" style={{ width: 180, height: 44 }} />
         </div>
       ) : !last ? (
         <p
           className="page-x"
-          style={{ color: "var(--color-neutral-600)", fontSize: 13 }}
+          style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           No sleep recorded for this date. Choose another night or return to Latest.
         </p>
@@ -182,8 +182,8 @@ function DesktopSleep({
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(5, 1fr)",
-          borderTop: "2px solid var(--color-text)",
-          borderBottom: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
+          borderBottom: "2px solid var(--foreground)",
         }}
       >
         <HeroCell
@@ -236,7 +236,7 @@ function DesktopSleep({
             <>
               {formatDayMonth(new Date(sessions[sessions.length - 1].Date))} –{" "}
               {formatDayMonth(new Date(sessions[0].Date))} · average{" "}
-              <span style={{ fontWeight: 700, color: "var(--color-text)" }}>
+              <span style={{ fontWeight: 700, color: "var(--foreground)" }}>
                 {formatHoursMinutes(averageHours)}
               </span>
             </>
@@ -283,7 +283,7 @@ function MobileSleep({
           <span
             style={{
               font: "500 13px var(--font-body)",
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
             }}
           >
             in bed {formatHoursMinutes(session.InBed)}
@@ -296,8 +296,8 @@ function MobileSleep({
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
-          borderTop: "2px solid var(--color-text)",
-          borderBottom: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
+          borderBottom: "2px solid var(--foreground)",
         }}
       >
         <MobileStat label="Deep" value={formatHoursMinutes(totals.Deep)} />
@@ -326,7 +326,7 @@ function MobileSleep({
       <div
         className="kick page-x"
         style={{
-          borderTop: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
           paddingTop: 12,
           paddingBottom: 6,
         }}
@@ -392,7 +392,7 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <div style={{ borderTop: "2px solid var(--color-text)", marginTop: 26 }}>
+    <div style={{ borderTop: "2px solid var(--foreground)", marginTop: 26 }}>
       <div
         className="flex items-baseline justify-between gap-5 page-x"
         style={{ paddingTop: 20, paddingBottom: 16 }}
@@ -402,7 +402,7 @@ function Section({
           <span
             style={{
               font: "400 12px var(--font-body)",
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
             }}
           >
             {aside}
@@ -431,7 +431,7 @@ function HeroCell({
       style={{
         paddingTop: 24,
         paddingBottom: 22,
-        borderRight: "1px solid var(--color-divider)",
+        borderRight: "1px solid var(--border)",
       }}
     >
       <div className="kick">{label}</div>
@@ -448,7 +448,7 @@ function HeroCell({
       <div
         style={{
           font: "400 12px var(--font-body)",
-          color: "var(--color-neutral-600)",
+          color: "var(--muted-foreground)",
           marginTop: 12,
         }}
       >
@@ -465,7 +465,7 @@ function MobileStat({ label, value }: { label: string; value: string }) {
       style={{
         paddingTop: 12,
         paddingBottom: 12,
-        borderRight: "1px solid var(--color-divider)",
+        borderRight: "1px solid var(--border)",
       }}
     >
       <div className="kick">{label}</div>

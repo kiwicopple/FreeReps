@@ -17,7 +17,7 @@ export function Row({
         alignItems: "baseline",
         gap: 24,
         padding: "15px 0",
-        borderBottom: "1px solid var(--color-neutral-300)",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <span className="kick" style={{ width: labelWidth, flex: "none" }}>
@@ -42,7 +42,7 @@ export function TabHeader({
       <p
         style={{
           font: "400 13px/1.55 var(--font-body)",
-          color: "var(--color-neutral-700)",
+          color: "var(--muted-foreground)",
           maxWidth: "62ch",
           margin: "10px 0 0",
         }}
@@ -51,7 +51,7 @@ export function TabHeader({
       </p>
       <div
         style={{
-          borderTop: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
           marginTop: 20,
         }}
       />
@@ -90,9 +90,9 @@ export function SquareCheckbox({
         cursor: "pointer",
         borderRadius: 0,
         border: checked
-          ? "2px solid var(--color-accent)"
-          : "1px solid var(--color-divider)",
-        background: checked ? "var(--color-accent)" : "transparent",
+          ? "2px solid var(--primary)"
+          : "1px solid var(--border)",
+        background: checked ? "var(--primary)" : "transparent",
       }}
     />
   );
@@ -122,8 +122,8 @@ export function SquareSwitch({
         padding: 2,
         cursor: "pointer",
         borderRadius: 0,
-        border: "1px solid var(--color-neutral-400)",
-        background: checked ? "var(--color-accent)" : "transparent",
+        border: "1px solid var(--input)",
+        background: checked ? "var(--primary)" : "transparent",
         display: "flex",
         alignItems: "center",
         justifyContent: checked ? "flex-end" : "flex-start",
@@ -134,7 +134,7 @@ export function SquareSwitch({
           width: 20,
           height: 20,
           display: "block",
-          background: checked ? "var(--color-bg)" : "var(--color-neutral-400)",
+          background: checked ? "var(--background)" : "var(--input)",
         }}
       />
     </button>
@@ -166,7 +166,7 @@ export function RedirectURIRow({ uri }: { uri: string }) {
       <p
         style={{
           font: "400 12px/1.5 var(--font-body)",
-          color: "var(--color-neutral-600)",
+          color: "var(--muted-foreground)",
           margin: "6px 0 0",
         }}
       >

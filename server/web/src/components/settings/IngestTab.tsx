@@ -37,7 +37,7 @@ export default function IngestTab() {
         <h3 style={{ fontSize: 15, fontWeight: 700 }}>Recent ingests</h3>
         <div
           style={{
-            borderTop: "2px solid var(--color-text)",
+            borderTop: "2px solid var(--foreground)",
             marginTop: 12,
           }}
         >
@@ -46,7 +46,7 @@ export default function IngestTab() {
           ) : (
             <p
               style={{
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
                 fontSize: 13,
                 paddingTop: 14,
               }}
@@ -81,7 +81,7 @@ function IngestRow({ log }: { log: ImportLog }) {
         alignItems: "baseline",
         gap: 16,
         padding: "12px 0",
-        borderBottom: "1px solid var(--color-neutral-300)",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <span
@@ -90,7 +90,7 @@ function IngestRow({ log }: { log: ImportLog }) {
           width: 150,
           flex: "none",
           font: "400 12px var(--font-body)",
-          color: "var(--color-neutral-600)",
+          color: "var(--muted-foreground)",
         }}
       >
         {new Date(log.created_at).toLocaleString("en-GB", {
@@ -110,7 +110,7 @@ function IngestRow({ log }: { log: ImportLog }) {
           flex: 1,
           minWidth: 0,
           font: "400 12.5px var(--font-body)",
-          color: "var(--color-neutral-700)",
+          color: "var(--muted-foreground)",
         }}
       >
         {log.error_message || summary || "nothing new"}

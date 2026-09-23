@@ -31,7 +31,7 @@ function ConditionRow({ c }: { c: AlertCondition }) {
         alignItems: "baseline",
         gap: 12,
         padding: "10px 0",
-        borderBottom: "1px solid var(--color-neutral-300)",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <span
@@ -41,20 +41,20 @@ function ConditionRow({ c }: { c: AlertCondition }) {
           flex: "none",
           alignSelf: "center",
           background: c.firing
-            ? "var(--color-accent)"
-            : "var(--color-neutral-400)",
+            ? "var(--primary)"
+            : "var(--input)",
         }}
       />
       <span style={{ font: "600 13px var(--font-body)", minWidth: 220 }}>
         {c.service}
       </span>
-      <span style={{ ...MONO, fontSize: 12, color: "var(--color-neutral-600)" }}>
+      <span style={{ ...MONO, fontSize: 12, color: "var(--muted-foreground)" }}>
         {c.monitor_id}
       </span>
       <span
         style={{
           font: "400 12px/1.5 var(--font-body)",
-          color: "var(--color-neutral-600)",
+          color: "var(--muted-foreground)",
           flex: 1,
           minWidth: 0,
         }}
@@ -139,7 +139,7 @@ export default function AlertsTab() {
       {error ? (
         <p
           style={{
-            color: "var(--color-accent-700)",
+            color: "var(--success-foreground)",
             fontSize: 13,
             paddingTop: 16,
           }}
@@ -155,7 +155,7 @@ export default function AlertsTab() {
         <p
           style={{
             font: "400 13px/1.5 var(--font-body)",
-            color: "var(--color-neutral-700)",
+            color: "var(--muted-foreground)",
             paddingTop: 16,
           }}
         >
@@ -166,7 +166,7 @@ export default function AlertsTab() {
       {!settings ? (
         <p
           style={{
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             fontSize: 13,
             paddingTop: 16,
           }}
@@ -203,7 +203,7 @@ export default function AlertsTab() {
               <p
                 style={{
                   font: "400 12px/1.5 var(--font-body)",
-                  color: "var(--color-neutral-600)",
+                  color: "var(--muted-foreground)",
                   margin: "6px 0 0",
                 }}
               >
@@ -224,7 +224,7 @@ export default function AlertsTab() {
               <p
                 style={{
                   font: "400 12px/1.5 var(--font-body)",
-                  color: "var(--color-neutral-600)",
+                  color: "var(--muted-foreground)",
                   margin: "6px 0 0",
                 }}
               >
@@ -266,7 +266,7 @@ export default function AlertsTab() {
                 <span
                   style={{
                     font: "400 12px/1.5 var(--font-body)",
-                    color: "var(--color-neutral-600)",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   consecutive failed runs of one source for one user. At a
@@ -293,7 +293,7 @@ export default function AlertsTab() {
                 <span
                   style={{
                     font: "400 12px/1.5 var(--font-body)",
-                    color: "var(--color-neutral-600)",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   hours without a Health Auto Export delivery before the ingress

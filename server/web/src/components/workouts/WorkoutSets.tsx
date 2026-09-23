@@ -83,7 +83,7 @@ export default function WorkoutSets({
   return (
     <div>
       <h2 style={{ fontSize: 19, fontWeight: 700 }}>Exercises</h2>
-      <div style={{ borderTop: "2px solid var(--color-text)", marginTop: 12 }}>
+      <div style={{ borderTop: "2px solid var(--foreground)", marginTop: 12 }}>
         {exercises.map((ex) => (
           <div key={ex.name} style={{ paddingTop: 18, paddingBottom: 6 }}>
             <div
@@ -99,7 +99,7 @@ export default function WorkoutSets({
                 <span
                   style={{
                     font: "400 12px var(--font-body)",
-                    color: "var(--color-neutral-600)",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   {ex.equipment}
@@ -128,8 +128,8 @@ export default function WorkoutSets({
                     key={i}
                     style={{
                       color: set.IsWarmup
-                        ? "var(--color-neutral-500)"
-                        : "var(--color-text)",
+                        ? "var(--muted-foreground)"
+                        : "var(--foreground)",
                     }}
                   >
                     <td

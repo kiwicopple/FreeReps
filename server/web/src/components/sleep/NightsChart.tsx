@@ -24,7 +24,7 @@ export default function NightsChart({ sessions, stages }: Props) {
 
   if (nights.length === 0) {
     return (
-      <p style={{ color: "var(--color-neutral-600)", fontSize: 13 }}>
+      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         No nights in this window.
       </p>
     );
@@ -46,7 +46,7 @@ export default function NightsChart({ sessions, stages }: Props) {
                 right: 0,
                 top: yFor(h),
                 height: 1,
-                background: "var(--color-neutral-300)",
+                background: "var(--border)",
               }}
             />
           ))}
@@ -91,7 +91,7 @@ export default function NightsChart({ sessions, stages }: Props) {
                 flex: 1,
                 textAlign: "center",
                 font: "400 10px var(--font-body)",
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
                 whiteSpace: "nowrap",
               }}
             >
@@ -118,7 +118,7 @@ export default function NightsChart({ sessions, stages }: Props) {
               left: 8,
               top: yFor(h) - 7,
               font: "400 11px var(--font-body)",
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
             }}
           >
             {String(h % 24).padStart(2, "0")}:00

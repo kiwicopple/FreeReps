@@ -90,9 +90,9 @@ export function directionOf(metricName: string): Direction {
  * movement is neutral-500.
  */
 export function deltaColor(metricName: string, delta: number | null): string {
-  if (delta == null || delta === 0) return "var(--color-neutral-500)";
+  if (delta == null || delta === 0) return "var(--muted-foreground)";
   const dir = directionOf(metricName);
-  if (dir === "neutral") return "var(--color-neutral-700)";
+  if (dir === "neutral") return "var(--muted-foreground)";
   const improving = dir === "higher" ? delta > 0 : delta < 0;
-  return improving ? "var(--color-positive-700)" : "var(--color-negative-700)";
+  return improving ? "var(--success-foreground)" : "var(--warning-foreground)";
 }

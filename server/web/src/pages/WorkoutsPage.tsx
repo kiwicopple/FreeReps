@@ -120,8 +120,8 @@ export default function WorkoutsPage() {
         style={{
           display: "grid",
           gridTemplateColumns: isDesktop ? "repeat(5, 1fr)" : "repeat(3, 1fr)",
-          borderTop: "2px solid var(--color-text)",
-          borderBottom: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
+          borderBottom: "2px solid var(--foreground)",
         }}
       >
         <SummaryCell
@@ -206,7 +206,7 @@ export default function WorkoutsPage() {
             style={{
               marginLeft: "auto",
               font: "400 11.5px var(--font-body)",
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
               whiteSpace: "nowrap",
             }}
           >
@@ -219,14 +219,14 @@ export default function WorkoutsPage() {
       {message ? (
         <p
           className="page-x"
-          style={{ color: "var(--color-neutral-600)", fontSize: 13 }}
+          style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           {message}
         </p>
       ) : filtered.length === 0 ? (
         <p
           className="page-x"
-          style={{ color: "var(--color-neutral-600)", fontSize: 13 }}
+          style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           No workouts in this window.
         </p>
@@ -247,7 +247,7 @@ export default function WorkoutsPage() {
       <div
         className="page-x flex items-center gap-4"
         style={{
-          borderTop: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
           paddingTop: 14,
           paddingBottom: 14,
           marginTop: "auto",
@@ -257,7 +257,7 @@ export default function WorkoutsPage() {
           className="num"
           style={{
             font: "400 12px var(--font-body)",
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
           }}
         >
           Showing {filtered.length === 0 ? 0 : page * PAGE_SIZE + 1}–
@@ -288,7 +288,7 @@ export default function WorkoutsPage() {
         <div
           className="page-x flex items-center gap-6 flex-wrap"
           style={{
-            borderTop: "1px solid var(--color-neutral-300)",
+            borderTop: "1px solid var(--border)",
             paddingTop: 14,
             paddingBottom: 40,
           }}
@@ -301,14 +301,14 @@ export default function WorkoutsPage() {
                 alignItems: "center",
                 gap: 8,
                 font: "400 11.5px var(--font-body)",
-                color: "var(--color-neutral-700)",
+                color: "var(--muted-foreground)",
               }}
             >
               <span
                 style={{ width: 11, height: 11, background: ZONE_COLORS[i] }}
               />
               Zone {i + 1}
-              <span className="num" style={{ color: "var(--color-neutral-600)" }}>
+              <span className="num" style={{ color: "var(--muted-foreground)" }}>
                 {band}
               </span>
             </span>
@@ -317,7 +317,7 @@ export default function WorkoutsPage() {
             style={{
               marginLeft: "auto",
               font: "400 11px var(--font-body)",
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
             }}
           >
             Bands from a maximum of {formatNumber(maxHR)} bpm
@@ -390,7 +390,7 @@ function WorkoutTable({
                   style={{
                     textAlign: "right",
                     fontSize: 12.5,
-                    color: "var(--color-neutral-700)",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   {w.AvgHeartRate
@@ -405,7 +405,7 @@ function WorkoutTable({
                   style={{
                     textAlign: "right",
                     fontSize: 12.5,
-                    color: "var(--color-neutral-700)",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   {energyKcal(w) != null
@@ -417,12 +417,12 @@ function WorkoutTable({
                   style={{
                     textAlign: "right",
                     fontSize: 12.5,
-                    color: "var(--color-neutral-700)",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   {formatDistance(w.Distance, w.DistanceUnits)}
                 </td>
-                <td style={{ fontSize: 12.5, color: "var(--color-neutral-700)" }}>
+                <td style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
                   {sourceLabel(w.Source)}
                 </td>
               </tr>
@@ -444,7 +444,7 @@ function WorkoutCards({
   onOpen: (id: string) => void;
 }) {
   return (
-    <div style={{ borderTop: "2px solid var(--color-text)" }}>
+    <div style={{ borderTop: "2px solid var(--foreground)" }}>
       {groups.map((group) => (
         <div key={group.key}>
           <div className="kick row-group">{group.label}</div>
@@ -455,7 +455,7 @@ function WorkoutCards({
               style={{
                 paddingTop: 12,
                 paddingBottom: 12,
-                borderBottom: "1px solid var(--color-divider)",
+                borderBottom: "1px solid var(--border)",
                 cursor: "pointer",
               }}
               onClick={() => onOpen(w.ID)}
@@ -479,7 +479,7 @@ function WorkoutCards({
                 <span
                   style={{
                     font: "400 11.5px var(--font-body)",
-                    color: "var(--color-neutral-600)",
+                    color: "var(--muted-foreground)",
                     flex: 1,
                     minWidth: 0,
                     overflow: "hidden",
@@ -493,7 +493,7 @@ function WorkoutCards({
                   className="num"
                   style={{
                     font: "500 11.5px var(--font-body)",
-                    color: "var(--color-neutral-700)",
+                    color: "var(--muted-foreground)",
                     whiteSpace: "nowrap",
                     flex: "none",
                   }}
@@ -535,9 +535,9 @@ function FilterPill({
       type="button"
       onClick={onClick}
       style={{
-        border: `1px solid ${active ? "var(--color-accent)" : "var(--color-divider)"}`,
-        background: active ? "var(--color-accent)" : "transparent",
-        color: active ? "var(--color-bg)" : "var(--color-text)",
+        border: `1px solid ${active ? "var(--primary)" : "var(--border)"}`,
+        background: active ? "var(--primary)" : "transparent",
+        color: active ? "var(--background)" : "var(--foreground)",
         padding: "6px 12px",
         font: "600 12px var(--font-heading)",
         cursor: "pointer",
@@ -572,7 +572,7 @@ function SummaryCell({
       style={{
         paddingTop: isDesktop ? 24 : 14,
         paddingBottom: isDesktop ? 22 : 14,
-        borderRight: "1px solid var(--color-divider)",
+        borderRight: "1px solid var(--border)",
       }}
     >
       <div className="kick">{label}</div>
@@ -589,7 +589,7 @@ function SummaryCell({
           <span
             style={{
               font: `500 ${isDesktop ? 14 : 11}px var(--font-body)`,
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
               marginLeft: isDesktop ? 6 : 3,
             }}
           >
@@ -601,7 +601,7 @@ function SummaryCell({
         <div
           style={{
             font: "400 12px var(--font-body)",
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             marginTop: 12,
           }}
         >

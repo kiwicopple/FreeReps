@@ -27,13 +27,13 @@ export default function RecoveryScore({ session }: { session: SleepSession }) {
     staleTime: 60000,
   });
   const result = query.data;
-  return <section className="page-x" style={{ borderTop: "1px solid var(--color-divider)", borderBottom: "1px solid var(--color-divider)", paddingTop: 18, paddingBottom: 18, marginBottom: 20 }} aria-label="Protocol recovery score">
+  return <section className="page-x" style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", paddingTop: 18, paddingBottom: 18, marginBottom: 20 }} aria-label="Protocol recovery score">
     <div className="kick">Protocol recovery · experimental v1</div>
     {query.isLoading ? <p>Calculating recovery…</p> : query.isError ? <p>Recovery could not load. <button onClick={() => query.refetch()}>Retry</button></p> : result && <>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginTop: 10 }}><strong className="num" style={{ fontSize: 40 }}>{result.score ?? "—"}<span style={{ fontSize: 16, fontWeight: 400 }}> / 100</span></strong><span style={{ fontSize: 13 }}>{result.score == null ? "Insufficient sleep data" : result.sleepOnly ? "Provisional · sleep-only" : result.provisional ? "Provisional · partial data" : "Personal baseline available"}</span></div>
-      <p style={{ fontSize: 12, color: "var(--color-neutral-600)", marginTop: 6 }}>Data coverage: {result.coverage}% of the model. A personal trend indicator, not a medical assessment or clearance to train.</p>
+      <p style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 6 }}>Data coverage: {result.coverage}% of the model. A personal trend indicator, not a medical assessment or clearance to train.</p>
       <details style={{ marginTop: 12 }}><summary style={{ cursor: "pointer" }}>Contributors &amp; how it works</summary>
-        {result.parts.map((p) => <div key={p.name} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-divider)", fontSize: 13 }}><div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}><strong>{p.name} · {p.weight}%</strong><span>{p.score == null ? "Not included" : `${Math.round(p.score)}/100`}</span></div><div style={{ color: "var(--color-neutral-600)", marginTop: 4 }}>{p.detail}</div></div>)}
+        {result.parts.map((p) => <div key={p.name} style={{ padding: "10px 0", borderBottom: "1px solid var(--border)", fontSize: 13 }}><div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}><strong>{p.name} · {p.weight}%</strong><span>{p.score == null ? "Not included" : `${Math.round(p.score)}/100`}</span></div><div style={{ color: "var(--muted-foreground)", marginTop: 4 }}>{p.detail}</div></div>)}
         <div style={{ fontSize: 12, lineHeight: 1.7, marginTop: 12 }}>
           <p>Score = weighted average of available contributors. Missing contributors are excluded and remaining weights are rescaled. Partial scores are not directly comparable with full scores.</p>
           <p>Duration = hours asleep ÷ 8 × 100, capped at 100. Eight hours is our starting reference, not a measured personal need. Continuity = time asleep ÷ recorded sleep window × 100.</p>

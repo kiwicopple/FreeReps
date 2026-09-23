@@ -17,7 +17,7 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
   if (!hrData || hrData.length < 5) {
     return (
       <Section>
-        <p style={{ color: "var(--color-neutral-600)", fontSize: 13, margin: 0 }}>
+        <p style={{ color: "var(--muted-foreground)", fontSize: 13, margin: 0 }}>
           Not enough heart rate data for zone analysis.
         </p>
       </Section>
@@ -56,7 +56,7 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
   if (total === 0) {
     return (
       <Section>
-        <p style={{ color: "var(--color-neutral-600)", fontSize: 13, margin: 0 }}>
+        <p style={{ color: "var(--muted-foreground)", fontSize: 13, margin: 0 }}>
           Samples are too sparse to measure time in zones.
         </p>
       </Section>
@@ -90,7 +90,7 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
                 width: 70,
                 flex: "none",
                 font: "400 11.5px var(--font-body)",
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
               }}
             >
               {bands[i]}
@@ -99,7 +99,7 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
               style={{
                 flex: 1,
                 height: 14,
-                border: "1px solid var(--color-divider)",
+                border: "1px solid var(--border)",
               }}
             >
               <div
@@ -120,7 +120,7 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
               }}
             >
               {mins}m
-              <span style={{ color: "var(--color-neutral-600)", fontWeight: 400 }}>
+              <span style={{ color: "var(--muted-foreground)", fontWeight: 400 }}>
                 {" "}
                 {Math.round(pct)}%
               </span>
@@ -138,7 +138,7 @@ function Section({ children }: { children: ReactNode }) {
       <h2 style={{ fontSize: 19, fontWeight: 700 }}>Time in heart rate zones</h2>
       <div
         style={{
-          borderTop: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
           marginTop: 12,
           paddingTop: 8,
         }}

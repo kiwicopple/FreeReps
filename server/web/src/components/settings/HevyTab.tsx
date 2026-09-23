@@ -89,7 +89,7 @@ export default function HevyTab() {
       {error ? (
         <p
           style={{
-            color: "var(--color-accent-700)",
+            color: "var(--success-foreground)",
             fontSize: 13,
             paddingTop: 16,
           }}
@@ -104,7 +104,7 @@ export default function HevyTab() {
       {!status ? (
         <p
           style={{
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             fontSize: 13,
             paddingTop: 16,
           }}
@@ -138,7 +138,7 @@ export default function HevyTab() {
             <p
               style={{
                 font: "400 12px/1.5 var(--font-body)",
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
                 margin: "6px 0 0",
               }}
             >
@@ -160,7 +160,7 @@ export default function HevyTab() {
         <>
           <div
             style={{
-              border: "2px solid var(--color-text)",
+              border: "2px solid var(--foreground)",
               padding: "22px 24px",
               marginTop: 20,
             }}
@@ -170,7 +170,7 @@ export default function HevyTab() {
                 style={{
                   width: 11,
                   height: 11,
-                  background: "var(--color-accent)",
+                  background: "var(--primary)",
                 }}
               />
               <span style={{ font: "600 14px var(--font-body)" }}>Connected</span>
@@ -197,7 +197,7 @@ export default function HevyTab() {
             <div
               style={{
                 font: "400 12px var(--font-body)",
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
                 marginTop: 8,
               }}
             >

@@ -29,7 +29,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           <p
             style={{
               font: "400 13px/1.55 var(--font-body)",
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
               maxWidth: "62ch",
               margin: "10px 0 0",
             }}

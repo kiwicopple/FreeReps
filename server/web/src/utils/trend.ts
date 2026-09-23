@@ -10,9 +10,9 @@ export type Verdict = "improving" | "flat" | "declining";
  * brand and regression carried the tone of a metric that had not moved.
  */
 export const VERDICT_COLOR: Record<Verdict, string> = {
-  improving: "var(--color-positive-700)",
-  flat: "var(--color-neutral-500)",
-  declining: "var(--color-negative-700)",
+  improving: "var(--success-foreground)",
+  flat: "var(--muted-foreground)",
+  declining: "var(--warning-foreground)",
 };
 
 export interface Fit {

@@ -6,9 +6,9 @@
 .nutrition-page input,
 .nutrition-page textarea {
   font: inherit;
-  color: var(--color-text);
-  background: var(--color-bg);
-  border: 1px solid var(--color-neutral-400);
+  color: var(--foreground);
+  background: var(--background);
+  border: 1px solid var(--input);
   border-radius: 3px;
   padding: 8px 12px;
 }
@@ -16,7 +16,7 @@
   cursor: pointer;
 }
 .nutrition-page button:hover {
-  border-color: var(--color-accent);
+  border-color: var(--primary);
 }
 .nutrition-page button:disabled {
   opacity: 0.5;
@@ -24,7 +24,7 @@
 }
 .nutrition-page a,
 .nutrition-text-button {
-  color: var(--color-accent);
+  color: var(--primary);
 }
 .nutrition-page :is(summary, .nutrition-sheet-trigger) {
   cursor: pointer;
@@ -37,7 +37,7 @@
   margin: 16px 0;
 }
 .nutrition-muted {
-  color: var(--color-neutral-600);
+  color: var(--muted-foreground);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -46,7 +46,7 @@
   justify-content: space-between;
   gap: 20px;
   align-items: center;
-  border-top: 2px solid var(--color-text);
+  border-top: 2px solid var(--foreground);
   padding: 18px 0;
 }
 .nutrition-intro p {
@@ -58,15 +58,15 @@
 .nutrition-heroes {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 2px solid var(--color-text);
-  border-bottom: 2px solid var(--color-text);
+  border-top: 2px solid var(--foreground);
+  border-bottom: 2px solid var(--foreground);
 }
 .nutrition-hero {
   padding: 20px 18px;
   min-width: 0;
 }
 .nutrition-hero + .nutrition-hero {
-  border-left: 1px solid var(--color-neutral-400);
+  border-left: 1px solid var(--input);
 }
 .nutrition-hero :is(summary, .nutrition-sheet-trigger),
 .nutrition-nutrient :is(summary, .nutrition-sheet-trigger) {
@@ -98,20 +98,20 @@
 .nutrition-page progress {
   width: 100%;
   height: 5px;
-  accent-color: var(--color-accent);
+  accent-color: var(--primary);
   margin: 8px 0;
 }
 .nutrition-secondary {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-bottom: 1px solid var(--color-neutral-400);
+  border-bottom: 1px solid var(--input);
 }
 .nutrition-secondary .nutrition-value {
   font-size: 26px;
 }
 .nutrition-section {
   padding: 24px 0;
-  border-bottom: 1px solid var(--color-neutral-400);
+  border-bottom: 1px solid var(--input);
 }
 .nutrition-section h2,
 .nutrition-editor h2 {
@@ -125,7 +125,7 @@
   gap: 0 24px;
 }
 .nutrition-nutrient {
-  border-bottom: 1px solid var(--color-neutral-400);
+  border-bottom: 1px solid var(--input);
   padding: 16px 0;
   min-width: 0;
 }
@@ -146,18 +146,18 @@
   grid-template-columns: 1fr auto;
   gap: 4px 12px;
   padding: 8px 0;
-  border-bottom: 1px solid var(--color-neutral-400);
+  border-bottom: 1px solid var(--input);
 }
 .nutrition-contribution small {
   grid-column: 1/-1;
-  color: var(--color-neutral-600);
+  color: var(--muted-foreground);
 }
 .nutrition-supplement {
   display: flex;
   justify-content: space-between;
   gap: 20px;
   padding: 14px 0;
-  border-bottom: 1px solid var(--color-neutral-400);
+  border-bottom: 1px solid var(--input);
   font-size: 14px;
 }
 .nutrition-supplement > span {
@@ -165,7 +165,7 @@
   font-size: 13px;
 }
 .nutrition-log {
-  border-bottom: 1px solid var(--color-neutral-400);
+  border-bottom: 1px solid var(--input);
   padding: 16px 0;
 }
 .nutrition-log :is(summary, .nutrition-sheet-trigger) {
@@ -177,7 +177,7 @@
 .nutrition-log small {
   display: block;
   font-size: 12px;
-  color: var(--color-neutral-600);
+  color: var(--muted-foreground);
   margin-top: 5px;
 }
 .nutrition-chart {
@@ -196,7 +196,7 @@
 .nutrition-page th {
   padding: 10px 12px;
   text-align: left;
-  border-bottom: 1px solid var(--color-neutral-400);
+  border-bottom: 1px solid var(--input);
   white-space: nowrap;
 }
 .nutrition-page .nutrition-text-button {
@@ -204,12 +204,12 @@
   padding: 0;
 }
 .nutrition-editor {
-  border: 2px solid var(--color-accent);
+  border: 2px solid var(--primary);
   padding: 20px;
   margin: 18px 0;
 }
 .nutrition-editor details {
-  border-top: 1px solid var(--color-neutral-400);
+  border-top: 1px solid var(--input);
   padding: 12px 0;
 }
 .nutrition-form-grid {
@@ -229,7 +229,7 @@
 }
 .nutrition-notice {
   padding: 12px 0;
-  color: var(--color-neutral-600);
+  color: var(--muted-foreground);
 }
 .nutrition-footer {
   margin-top: 24px;
@@ -245,7 +245,7 @@
     border-left: 0;
   }
   .nutrition-hero:nth-child(n + 3) {
-    border-top: 1px solid var(--color-neutral-400);
+    border-top: 1px solid var(--input);
   }
   .nutrition-value {
     font-size: 28px;
@@ -279,20 +279,20 @@
 .nutrition-page progress {
   appearance: none;
   border: 0;
-  background: var(--color-neutral-400);
+  background: var(--input);
 }
 .nutrition-page progress::-webkit-progress-bar {
-  background: var(--color-neutral-400);
+  background: var(--input);
 }
 .nutrition-page progress::-webkit-progress-value {
-  background: var(--color-accent);
+  background: var(--primary);
 }
 .nutrition-page progress::-moz-progress-bar {
-  background: var(--color-accent);
+  background: var(--primary);
 }
 .nutrition-label::after {
   content: " +";
-  color: var(--color-neutral-600);
+  color: var(--muted-foreground);
 }
 details[open] > :is(summary, .nutrition-sheet-trigger) .nutrition-label::after {
   content: " −";
@@ -307,7 +307,7 @@ details[open] > :is(summary, .nutrition-sheet-trigger) .nutrition-label::after {
   text-align: left;
 }
 .nutrition-sheet-trigger:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--primary);
   outline-offset: 5px;
 }
 dialog.nutrition-sheet {
@@ -318,10 +318,10 @@ dialog.nutrition-sheet {
   max-width: none;
   max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 16px);
   padding: 0;
-  color: var(--color-text);
-  background: var(--color-bg);
+  color: var(--foreground);
+  background: var(--background);
   border: 0;
-  border-top: 1px solid var(--color-divider);
+  border-top: 1px solid var(--border);
   border-radius: 16px 16px 0 0;
   overflow: hidden;
 }
@@ -337,7 +337,7 @@ dialog.nutrition-sheet[open] {
   gap: 16px;
   flex-shrink: 0;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--border);
 }
 .nutrition-sheet-header h2 { margin: 0; font-size: 20px; }
 .nutrition-sheet-body {
@@ -352,7 +352,7 @@ dialog.nutrition-sheet[open] {
 .nutrition-explainer {
   margin-bottom: 20px;
   padding-bottom: 18px;
-  border-bottom: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--border);
   line-height: 1.6;
 }
 .nutrition-explainer p { margin: 0 0 8px; }

@@ -73,8 +73,8 @@ export default function ImportTab() {
         onDrop={handleDrop}
         onClick={() => fileRef.current?.click()}
         style={{
-          border: `2px dashed ${dragOver || selectedFile ? "var(--color-accent)" : "var(--color-divider)"}`,
-          background: dragOver ? "var(--color-accent-100)" : "transparent",
+          border: `2px dashed ${dragOver || selectedFile ? "var(--primary)" : "var(--border)"}`,
+          background: dragOver ? "var(--success-soft)" : "transparent",
           padding: 30,
           textAlign: "center",
           cursor: "pointer",
@@ -118,7 +118,7 @@ export default function ImportTab() {
           <p
             style={{
               font: "400 13px var(--font-body)",
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
               margin: 0,
             }}
           >
@@ -142,7 +142,7 @@ export default function ImportTab() {
       {error ? (
         <p
           style={{
-            color: "var(--color-accent-700)",
+            color: "var(--success-foreground)",
             fontSize: 13,
             marginTop: 16,
           }}
@@ -160,7 +160,7 @@ export default function ImportTab() {
             className="num"
             style={{
               font: "400 12.5px var(--font-body)",
-              color: "var(--color-neutral-700)",
+              color: "var(--muted-foreground)",
               margin: "6px 0 0",
             }}
           >

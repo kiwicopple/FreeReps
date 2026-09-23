@@ -66,7 +66,7 @@ export default function RangeControl<T extends string>({
       <button
         type="button"
         className="chip"
-        style={{ borderColor: "var(--color-text)", color: "var(--color-text)" }}
+        style={{ borderColor: "var(--foreground)", color: "var(--foreground)" }}
         onClick={() => setSheetOpen(true)}
       >
         {LONG_LABEL[value] ?? value}
@@ -76,13 +76,13 @@ export default function RangeControl<T extends string>({
         <div
           className="fixed inset-0 z-30 flex flex-col justify-end"
           style={{
-            background: "color-mix(in srgb, var(--color-text) 45%, transparent)",
+            background: "color-mix(in srgb, var(--foreground) 45%, transparent)",
           }}
           onClick={() => setSheetOpen(false)}
         >
           <div
-            className="bg-bg"
-            style={{ borderTop: "2px solid var(--color-text)" }}
+            className="bg-background"
+            style={{ borderTop: "2px solid var(--foreground)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div
@@ -99,7 +99,7 @@ export default function RangeControl<T extends string>({
                 aria-current={value === opt}
                 style={{
                   background:
-                    value === opt ? "var(--color-accent-100)" : "transparent",
+                    value === opt ? "var(--success-soft)" : "transparent",
                   fontWeight: value === opt ? 600 : 400,
                   minHeight: 48,
                 }}
@@ -119,7 +119,7 @@ export default function RangeControl<T extends string>({
                 className="page-x"
                 style={{
                   font: "400 12px/1.5 var(--font-body)",
-                  color: "var(--color-neutral-700)",
+                  color: "var(--muted-foreground)",
                   paddingTop: 14,
                   paddingBottom: 14,
                   margin: 0,

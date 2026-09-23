@@ -30,7 +30,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
 
   if (!model) {
     return (
-      <p style={{ color: "var(--color-neutral-600)", fontSize: 13 }}>
+      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         No samples in this window.
       </p>
     );
@@ -61,7 +61,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
               x2={PLOT_RIGHT}
               y1={t.y}
               y2={t.y}
-              stroke="var(--color-neutral-300)"
+              stroke="var(--border)"
               strokeWidth={1}
             />
             <text
@@ -69,7 +69,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
               y={t.y + 4}
               textAnchor="end"
               fontSize={12}
-              fill="var(--color-neutral-600)"
+              fill="var(--muted-foreground)"
             >
               {t.label}
             </text>
@@ -81,7 +81,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
           x2={PLOT_RIGHT}
           y1={BASELINE}
           y2={BASELINE}
-          stroke="var(--color-text)"
+          stroke="var(--foreground)"
           strokeWidth={2}
         />
 
@@ -89,7 +89,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
           <polyline
             points={model.mean}
             fill="none"
-            stroke="var(--color-neutral-500)"
+            stroke="var(--muted-foreground)"
             strokeWidth={1.5}
             strokeDasharray="5 4"
           />
@@ -111,7 +111,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
             y={H - 14}
             textAnchor="middle"
             fontSize={12}
-            fill="var(--color-neutral-600)"
+            fill="var(--muted-foreground)"
           >
             {t.label}
           </text>
@@ -137,7 +137,7 @@ export default function MetricChart({ points, multiplier, unit }: Props) {
             style={{
               width: 16,
               height: 0,
-              borderTop: "1.5px dashed var(--color-neutral-500)",
+              borderTop: "1.5px dashed var(--muted-foreground)",
             }}
           />
         </LegendItem>
@@ -169,7 +169,7 @@ function LegendItem({
         alignItems: "center",
         gap: 9,
         font: "500 11.5px var(--font-body)",
-        color: "var(--color-neutral-700)",
+        color: "var(--muted-foreground)",
       }}
     >
       {children}

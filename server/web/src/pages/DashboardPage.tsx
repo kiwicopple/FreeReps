@@ -77,7 +77,7 @@ export default function DashboardPage() {
               <span
                 style={{
                   font: "400 11.5px var(--font-body)",
-                  color: "var(--color-neutral-600)",
+                  color: "var(--muted-foreground)",
                 }}
               >
                 Last sync {syncLine}
@@ -94,7 +94,7 @@ export default function DashboardPage() {
             <span
               style={{
                 font: "400 11px var(--font-body)",
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
               }}
             >
               Sync {syncLine}
@@ -127,7 +127,7 @@ export default function DashboardPage() {
         <p
           className="page-x"
           style={{
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             fontSize: 13,
             paddingTop: 4,
           }}
@@ -147,7 +147,7 @@ export default function DashboardPage() {
       <div
         className="page-x flex items-center gap-6 flex-wrap"
         style={{
-          borderTop: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
           paddingTop: 16,
           paddingBottom: 16,
           marginTop: "auto",
@@ -178,7 +178,7 @@ export default function DashboardPage() {
               style={{
                 marginLeft: "auto",
                 font: "400 11.5px var(--font-body)",
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
               }}
             >
               {shown} of {total} metrics shown · edit visibility in Settings
@@ -209,7 +209,7 @@ function MetricsTable({
     return (
       <p
         className="page-x"
-        style={{ color: "var(--color-neutral-600)", fontSize: 13 }}
+        style={{ color: "var(--muted-foreground)", fontSize: 13 }}
       >
         No metrics selected. Pick which metrics the table lists in Settings.
       </p>
@@ -281,7 +281,7 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
         style={{ textAlign: "right", fontWeight: 700, whiteSpace: "nowrap" }}
       >
         {displayValue(m)}{" "}
-        <span style={{ fontWeight: 400, color: "var(--color-neutral-600)" }}>
+        <span style={{ fontWeight: 400, color: "var(--muted-foreground)" }}>
           {m.unit}
         </span>
       </td>
@@ -301,7 +301,7 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
         style={{
           textAlign: "right",
           fontSize: 12.5,
-          color: "var(--color-neutral-700)",
+          color: "var(--muted-foreground)",
           whiteSpace: "nowrap",
         }}
       >
@@ -313,14 +313,14 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
           width={180}
           height={22}
           cssWidth={180}
-          stroke="var(--color-neutral-500)"
+          stroke="var(--muted-foreground)"
           strokeWidth={1.4}
         />
       </td>
-      <td style={{ fontSize: 12.5, color: "var(--color-neutral-700)" }}>
+      <td style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
         {sourceLabel(m.source)}
       </td>
-      <td style={{ fontSize: 12.5, color: "var(--color-neutral-600)" }}>
+      <td style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
         {m.time ? formatTimeAgo(m.time) : "—"}
       </td>
     </tr>

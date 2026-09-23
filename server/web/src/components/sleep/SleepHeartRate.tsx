@@ -29,25 +29,25 @@ export default function SleepHeartRate({ stages, compact = false }: { stages: Sl
   const path = points.map((p, i) => `${i === 0 || p.time - points[i - 1].time > 300000 ? "M" : "L"}${x(p.time)},${y(p.value)}`).join(" ");
   const overlay = show && lowest ? (
     <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`Heart rate in five-minute averages. Lowest ${lowest.value.toFixed(0)} beats per minute around ${formatClock(new Date(lowest.time).toISOString())}.`} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible", pointerEvents: "none" }}>
-      <path d={path} fill="none" stroke="var(--color-bg)" strokeWidth={5} vectorEffect="non-scaling-stroke" />
-      <path d={path} fill="none" stroke="var(--color-accent)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
-      {points.map((p) => <path key={p.time} d={`M${x(p.time)},${y(p.value)}h0.01`} stroke="var(--color-accent)" strokeWidth={3} strokeLinecap="round" vectorEffect="non-scaling-stroke" />)}
-      <line x1={x(lowest.time)} x2={x(lowest.time)} y1={0} y2={100} stroke="var(--color-accent)" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
-      <path d={`M${x(lowest.time)},${y(lowest.value)}h0.01`} stroke="var(--color-text)" strokeWidth={8} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+      <path d={path} fill="none" stroke="var(--background)" strokeWidth={5} vectorEffect="non-scaling-stroke" />
+      <path d={path} fill="none" stroke="var(--primary)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+      {points.map((p) => <path key={p.time} d={`M${x(p.time)},${y(p.value)}h0.01`} stroke="var(--primary)" strokeWidth={3} strokeLinecap="round" vectorEffect="non-scaling-stroke" />)}
+      <line x1={x(lowest.time)} x2={x(lowest.time)} y1={0} y2={100} stroke="var(--primary)" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
+      <path d={`M${x(lowest.time)},${y(lowest.value)}h0.01`} stroke="var(--foreground)" strokeWidth={8} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
     </svg>
   ) : undefined;
   return <>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "space-between", marginBottom: 12, fontSize: 12 }}>
-      <label style={{ display: "flex", gap: 7, alignItems: "center", color: "var(--color-accent)" }}><input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} /> Heart rate</label>
+      <label style={{ display: "flex", gap: 7, alignItems: "center", color: "var(--primary)" }}><input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} /> Heart rate</label>
       {show && lowest && <span>{min}–{max} bpm · bottom to top</span>}
     </div>
     <Hypnogram stages={stages} compact={compact} overlay={overlay} />
     {!compact && <div style={{ position: "relative", height: 20, marginLeft: 52 }}>
-      {hourTicks(stages).map((tick) => <span key={tick.pct} style={{ position: "absolute", left: `${tick.pct}%`, transform: "translateX(-50%)", fontSize: 11, color: "var(--color-neutral-600)" }}>{tick.label}</span>)}
+      {hourTicks(stages).map((tick) => <span key={tick.pct} style={{ position: "absolute", left: `${tick.pct}%`, transform: "translateX(-50%)", fontSize: 11, color: "var(--muted-foreground)" }}>{tick.label}</span>)}
     </div>}
     {compact && valid && <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginTop: 6 }}><span>{formatClock(new Date(start).toISOString())}</span><span>{formatClock(new Date(end).toISOString())}</span></div>}
-    <div aria-live="polite" style={{ fontSize: 12, lineHeight: 1.6, marginTop: 12, color: "var(--color-neutral-600)" }}>
-      {query.isLoading ? "Loading overnight heart rate…" : query.isError ? <>Heart rate could not load. <button onClick={() => query.refetch()}>Retry</button></> : lowest ? <><strong style={{ color: "var(--color-text)" }}>Lowest 5-minute average: {lowest.value.toFixed(0)} bpm around {formatClock(new Date(lowest.time).toISOString())}</strong><br />{Math.floor((lowest.time - start) / 3600000)}h {Math.floor((lowest.time - start) / 60000) % 60}m into the recorded night · {points.length} recorded intervals. Gaps indicate missing readings.</> : "No heart-rate readings for this night yet."}
+    <div aria-live="polite" style={{ fontSize: 12, lineHeight: 1.6, marginTop: 12, color: "var(--muted-foreground)" }}>
+      {query.isLoading ? "Loading overnight heart rate…" : query.isError ? <>Heart rate could not load. <button onClick={() => query.refetch()}>Retry</button></> : lowest ? <><strong style={{ color: "var(--foreground)" }}>Lowest 5-minute average: {lowest.value.toFixed(0)} bpm around {formatClock(new Date(lowest.time).toISOString())}</strong><br />{Math.floor((lowest.time - start) / 3600000)}h {Math.floor((lowest.time - start) / 60000) % 60}m into the recorded night · {points.length} recorded intervals. Gaps indicate missing readings.</> : "No heart-rate readings for this night yet."}
     </div>
   </>;
 }

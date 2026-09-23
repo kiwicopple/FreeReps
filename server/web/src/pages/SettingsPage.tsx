@@ -51,7 +51,7 @@ export default function SettingsPage() {
         <div className="page-x" style={{ paddingBottom: 16 }}>
           <Link to="/trends">View trends →</Link>
         </div>
-        <div style={{ borderTop: "2px solid var(--color-text)" }}>
+        <div style={{ borderTop: "2px solid var(--foreground)" }}>
           {TABS.map((tab) => (
             <section
               key={tab.id}
@@ -59,7 +59,7 @@ export default function SettingsPage() {
               style={{
                 paddingTop: 20,
                 paddingBottom: 24,
-                borderBottom: "2px solid var(--color-text)",
+                borderBottom: "2px solid var(--foreground)",
               }}
             >
               {tab.render()}
@@ -77,7 +77,7 @@ export default function SettingsPage() {
       <div
         style={{
           display: "flex",
-          borderTop: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
           minHeight: 640,
         }}
       >

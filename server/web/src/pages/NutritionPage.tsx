@@ -659,7 +659,7 @@ function Trend({
       <path
         d={path(values)}
         fill="none"
-        stroke="var(--color-accent)"
+        stroke="var(--primary)"
         strokeWidth="3"
       />
       {values.map((v, i) =>
@@ -669,7 +669,7 @@ function Trend({
             cx={45 + (i * 640) / Math.max(days.length - 1, 1)}
             cy={175 - (v / max) * 150}
             r="3"
-            fill="var(--color-accent)"
+            fill="var(--primary)"
           />
         ),
       )}

@@ -99,7 +99,7 @@ export default function MetricsPage() {
       <div
         style={{
           display: "flex",
-          borderTop: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
           minHeight: 760,
         }}
       >
@@ -113,7 +113,7 @@ export default function MetricsPage() {
                 className="kick"
                 style={{
                   padding: "16px 20px 6px",
-                  color: "var(--color-neutral-500)",
+                  color: "var(--muted-foreground)",
                 }}
               >
                 {group.label}
@@ -145,7 +145,7 @@ export default function MetricsPage() {
               <div
                 style={{
                   font: "400 12px var(--font-body)",
-                  color: "var(--color-neutral-600)",
+                  color: "var(--muted-foreground)",
                   marginTop: 7,
                 }}
               >
@@ -169,8 +169,8 @@ export default function MetricsPage() {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(6, 1fr)",
-              borderTop: "2px solid var(--color-text)",
-              borderBottom: "2px solid var(--color-text)",
+              borderTop: "2px solid var(--foreground)",
+              borderBottom: "2px solid var(--foreground)",
             }}
           >
             <Stat label="Latest" value={scale(latest, multiplier)} />
@@ -193,7 +193,7 @@ export default function MetricsPage() {
 
           <div className="page-x" style={{ paddingTop: 26, paddingBottom: 34 }}>
             {message ? (
-              <p style={{ color: "var(--color-neutral-600)", fontSize: 13 }}>
+              <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
                 {message}
               </p>
             ) : state === "loading" ? (
@@ -217,7 +217,7 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div
       style={{
         padding: "18px 20px 16px",
-        borderRight: "1px solid var(--color-divider)",
+        borderRight: "1px solid var(--border)",
       }}
     >
       <div className="kick">{label}</div>

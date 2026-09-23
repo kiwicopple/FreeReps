@@ -101,7 +101,7 @@ export default function WithingsTab() {
       {error ? (
         <p
           style={{
-            color: "var(--color-accent-700)",
+            color: "var(--success-foreground)",
             fontSize: 13,
             paddingTop: 16,
           }}
@@ -116,7 +116,7 @@ export default function WithingsTab() {
       {!status ? (
         <p
           style={{
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             fontSize: 13,
             paddingTop: 16,
           }}
@@ -189,7 +189,7 @@ function StatusPanel({
     <>
       <div
         style={{
-          border: "2px solid var(--color-text)",
+          border: "2px solid var(--foreground)",
           padding: "22px 24px",
           marginTop: 20,
         }}
@@ -200,8 +200,8 @@ function StatusPanel({
               width: 11,
               height: 11,
               background: connected
-                ? "var(--color-accent)"
-                : "var(--color-neutral-500)",
+                ? "var(--primary)"
+                : "var(--muted-foreground)",
             }}
           />
           <span style={{ font: "600 14px var(--font-body)" }}>
@@ -241,7 +241,7 @@ function StatusPanel({
         <div
           style={{
             font: "400 12px var(--font-body)",
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             marginTop: 8,
           }}
         >
@@ -288,7 +288,7 @@ function StatusPanel({
                       className="num"
                       style={{
                         ...MONO,
-                        color: "var(--color-neutral-700)",
+                        color: "var(--muted-foreground)",
                         paddingRight: 0,
                       }}
                     >

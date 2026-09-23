@@ -101,7 +101,7 @@ export default function SourcesTab() {
                 alignItems: "center",
                 gap: 16,
                 padding: "14px 0",
-                borderBottom: "1px solid var(--color-neutral-300)",
+                borderBottom: "1px solid var(--border)",
               }}
             >
               <span className="kick num" style={{ width: 20, flex: "none" }}>
@@ -114,7 +114,7 @@ export default function SourcesTab() {
                 <div
                   style={{
                     font: "400 12px var(--font-body)",
-                    color: "var(--color-neutral-600)",
+                    color: "var(--muted-foreground)",
                     marginTop: 2,
                   }}
                 >
@@ -137,7 +137,7 @@ export default function SourcesTab() {
                   flex: "none",
                   textAlign: "right",
                   font: "400 12px var(--font-body)",
-                  color: "var(--color-neutral-600)",
+                  color: "var(--muted-foreground)",
                 }}
               >
                 {activity
@@ -174,7 +174,7 @@ export default function SourcesTab() {
       {error ? (
         <p
           style={{
-            color: "var(--color-accent-700)",
+            color: "var(--success-foreground)",
             fontSize: 13,
             marginTop: 14,
           }}
@@ -200,7 +200,7 @@ export default function SourcesTab() {
           <p
             style={{
               font: "400 12px/1.5 var(--font-body)",
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
               margin: "6px 0 0",
               maxWidth: "62ch",
             }}
@@ -209,7 +209,7 @@ export default function SourcesTab() {
             this list the order above would look like it governed everything.
           </p>
           <div
-            style={{ borderTop: "2px solid var(--color-text)", marginTop: 12 }}
+            style={{ borderTop: "2px solid var(--foreground)", marginTop: 12 }}
           >
             {overrides.map((rule) => (
               <div
@@ -219,7 +219,7 @@ export default function SourcesTab() {
                   alignItems: "baseline",
                   gap: 16,
                   padding: "12px 0",
-                  borderBottom: "1px solid var(--color-neutral-300)",
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
                 <span
@@ -227,7 +227,7 @@ export default function SourcesTab() {
                   style={{
                     width: 140,
                     flex: "none",
-                    color: "var(--color-text)",
+                    color: "var(--foreground)",
                   }}
                 >
                   {rule.category}
@@ -236,7 +236,7 @@ export default function SourcesTab() {
                   style={{
                     flex: 1,
                     font: "400 13px var(--font-body)",
-                    color: "var(--color-neutral-700)",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   {rule.sources.map(sourceLabelLong).join(" → ")}

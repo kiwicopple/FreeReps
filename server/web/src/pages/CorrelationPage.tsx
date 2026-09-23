@@ -166,24 +166,24 @@ export default function CorrelationPage() {
         </div>
       </div>
 
-      <div style={{ display: "flex", borderTop: "2px solid var(--color-text)" }}>
+      <div style={{ display: "flex", borderTop: "2px solid var(--foreground)" }}>
         <div
           className="page-x"
           style={{
             flex: 1,
             minWidth: 0,
-            borderRight: "2px solid var(--color-text)",
+            borderRight: "2px solid var(--foreground)",
             paddingTop: 26,
             paddingBottom: 34,
           }}
         >
           {sameMetric ? (
-            <p style={{ color: "var(--color-neutral-600)", fontSize: 13 }}>
+            <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
               Pick two different metrics. A metric correlates with itself
               perfectly, which says nothing.
             </p>
           ) : message ? (
-            <p style={{ color: "var(--color-neutral-600)", fontSize: 13 }}>
+            <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
               {message}
             </p>
           ) : state === "loading" ? (
@@ -218,7 +218,7 @@ export default function CorrelationPage() {
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
-              borderBottom: "2px solid var(--color-text)",
+              borderBottom: "2px solid var(--foreground)",
             }}
           >
             <FitStat
@@ -248,7 +248,7 @@ export default function CorrelationPage() {
             <p
               style={{
                 font: "400 11.5px var(--font-body)",
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
                 margin: "6px 0 0",
               }}
             >
@@ -272,8 +272,8 @@ export default function CorrelationPage() {
                       fontWeight: b.lag === lag ? 700 : 400,
                       color:
                         b.lag === lag
-                          ? "var(--color-text)"
-                          : "var(--color-neutral-600)",
+                          ? "var(--foreground)"
+                          : "var(--muted-foreground)",
                     }}
                   >
                     {b.lag === 0 ? "Same day" : `${b.lag} day${b.lag > 1 ? "s" : ""}`}
@@ -285,8 +285,8 @@ export default function CorrelationPage() {
                       fontWeight: b.lag === lag ? 700 : 400,
                       color:
                         b.lag === lag
-                          ? "var(--color-text)"
-                          : "var(--color-neutral-600)",
+                          ? "var(--foreground)"
+                          : "var(--muted-foreground)",
                     }}
                   >
                     {b.r != null ? formatR(b.r) : "—"}
@@ -302,7 +302,7 @@ export default function CorrelationPage() {
           <div
             className="page-x"
             style={{
-              borderTop: "1px solid var(--color-neutral-300)",
+              borderTop: "1px solid var(--border)",
               paddingTop: 16,
               paddingBottom: 40,
             }}
@@ -310,7 +310,7 @@ export default function CorrelationPage() {
             <p
               style={{
                 font: "400 12px/1.5 var(--font-body)",
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
                 margin: 0,
               }}
             >
@@ -348,7 +348,7 @@ function PearsonBlock({
   // the scatter takes, so the figure and the line read as one statement. The
   // accent said "good" and "selected", which a strong negative correlation is
   // neither.
-  const color = strong ? "var(--color-data-5)" : "var(--color-text)";
+  const color = strong ? "var(--color-data-5)" : "var(--foreground)";
 
   return (
     <div
@@ -356,7 +356,7 @@ function PearsonBlock({
       style={{
         paddingTop: 26,
         paddingBottom: 22,
-        borderBottom: "2px solid var(--color-text)",
+        borderBottom: "2px solid var(--foreground)",
       }}
     >
       <div className="kick">Pearson r</div>
@@ -383,7 +383,7 @@ function PearsonBlock({
       <p
         style={{
           font: "400 12.5px/1.55 var(--font-body)",
-          color: "var(--color-neutral-700)",
+          color: "var(--muted-foreground)",
           margin: "8px 0 0",
         }}
       >
@@ -415,8 +415,8 @@ function FitStat({
            clearance from the divider. */
         paddingLeft: border ? "var(--page-x)" : 20,
         paddingRight: border ? 20 : "var(--page-x)",
-        borderRight: border ? "1px solid var(--color-neutral-300)" : undefined,
-        borderTop: top ? "1px solid var(--color-neutral-300)" : undefined,
+        borderRight: border ? "1px solid var(--border)" : undefined,
+        borderTop: top ? "1px solid var(--border)" : undefined,
       }}
     >
       <div className="kick">{label}</div>
@@ -443,14 +443,14 @@ function DivergingBar({
   active: boolean;
 }) {
   const magnitude = value == null ? 0 : Math.min(Math.abs(value), 1) * 50;
-  const color = active ? "var(--color-data-3)" : "var(--color-neutral-500)";
+  const color = active ? "var(--color-data-3)" : "var(--muted-foreground)";
 
   return (
     <div
       style={{
         position: "relative",
         height: 10,
-        background: "var(--color-neutral-200)",
+        background: "var(--secondary)",
       }}
     >
       <div
@@ -460,7 +460,7 @@ function DivergingBar({
           top: 0,
           bottom: 0,
           width: 1,
-          background: "var(--color-neutral-500)",
+          background: "var(--muted-foreground)",
         }}
       />
       {value != null ? (

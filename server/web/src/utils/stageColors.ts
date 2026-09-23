@@ -23,7 +23,7 @@ export const STAGE_LANES = ["Awake", "REM", "Core", "Deep"] as const;
 export const STAGE_COMPOSITION_ORDER = ["Deep", "Core", "REM", "Awake"] as const;
 
 export function stageColor(stage: string): string {
-  return STAGE_COLOR[stage] ?? "var(--color-neutral-500)";
+  return STAGE_COLOR[stage] ?? "var(--muted-foreground)";
 }
 
 export const ZONE_COLORS = [

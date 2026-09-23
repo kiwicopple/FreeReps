@@ -93,8 +93,8 @@ export default function TrendsPage() {
           gridTemplateColumns: isDesktop ? undefined : "repeat(3, 1fr)",
           gap: isDesktop ? 56 : 0,
           alignItems: isDesktop ? "flex-start" : undefined,
-          borderTop: "2px solid var(--color-text)",
-          borderBottom: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
+          borderBottom: "2px solid var(--foreground)",
           paddingTop: isDesktop ? 20 : 14,
           paddingBottom: isDesktop ? 20 : 14,
         }}
@@ -102,13 +102,13 @@ export default function TrendsPage() {
         <VerdictCount
           label="Improving"
           value={counts.improving}
-          color="var(--color-positive)"
+          color="var(--success)"
         />
         <VerdictCount label="Flat" value={counts.flat} />
         <VerdictCount
           label="Declining"
           value={counts.declining}
-          color="var(--color-negative)"
+          color="var(--warning)"
         />
         {isDesktop ? (
           <p
@@ -116,7 +116,7 @@ export default function TrendsPage() {
               marginLeft: "auto",
               maxWidth: "46ch",
               font: "400 12.5px/1.5 var(--font-body)",
-              color: "var(--color-neutral-700)",
+              color: "var(--muted-foreground)",
               textAlign: "right",
             }}
           >
@@ -129,7 +129,7 @@ export default function TrendsPage() {
         <p
           className="page-x"
           style={{
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             fontSize: 13,
             paddingTop: 16,
           }}
@@ -140,7 +140,7 @@ export default function TrendsPage() {
         <p
           className="page-x"
           style={{
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             fontSize: 13,
             paddingTop: 16,
           }}
@@ -198,8 +198,8 @@ function SmallMultiples({
                edge like every other strip on the screen. */
             paddingLeft: i % 5 === 0 ? "var(--page-x)" : 24,
             paddingRight: i % 5 === 4 ? "var(--page-x)" : 24,
-            borderRight: "1px solid var(--color-divider)",
-            borderBottom: "1px solid var(--color-divider)",
+            borderRight: "1px solid var(--border)",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <div className="kick">{metric.label || metric.metric_name}</div>
@@ -215,7 +215,7 @@ function SmallMultiples({
             <span
               style={{
                 font: "500 11.5px var(--font-body)",
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
                 marginLeft: 5,
               }}
             >
@@ -242,7 +242,7 @@ function SmallMultiples({
             <span
               style={{
                 font: "400 11.5px var(--font-body)",
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
               }}
             >
               {fit.verdict}
@@ -256,7 +256,7 @@ function SmallMultiples({
               display: "flex",
               justifyContent: "space-between",
               font: "400 10px var(--font-body)",
-              color: "var(--color-neutral-600)",
+              color: "var(--muted-foreground)",
               marginTop: 4,
             }}
           >
@@ -327,7 +327,7 @@ function TrendRows({ items }: { items: TrendItem[] }) {
                     style={{
                       fontWeight: 400,
                       fontSize: 10,
-                      color: "var(--color-neutral-600)",
+                      color: "var(--muted-foreground)",
                     }}
                   >
                     {metric.unit}
@@ -385,7 +385,7 @@ function TrendChart({
         y1={height - 1}
         x2={width}
         y2={height - 1}
-        stroke="var(--color-neutral-300)"
+        stroke="var(--border)"
         strokeWidth={1}
         vectorEffect="non-scaling-stroke"
       />
@@ -446,7 +446,7 @@ function VerdictCount({
           font: "800 34px/1 var(--font-heading)",
           letterSpacing: "-0.03em",
           marginTop: 8,
-          color: color ?? "var(--color-text)",
+          color: color ?? "var(--foreground)",
         }}
       >
         {value}
@@ -463,7 +463,7 @@ function LegendLine({ color, label }: { color: string; label: string }) {
         alignItems: "center",
         gap: 9,
         font: "500 11.5px var(--font-body)",
-        color: "var(--color-neutral-700)",
+        color: "var(--muted-foreground)",
       }}
     >
       <span style={{ width: 16, height: 2, background: color }} />

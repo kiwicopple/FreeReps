@@ -31,8 +31,8 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
     );
     const edges = ZONE_BOUNDS.map((f) => f * peak);
 
-    const axis = tokenColor("--color-neutral-600", "#79848c");
-    const grid = tokenColor("--color-neutral-300", "#cfd4d6");
+    const axis = tokenColor("--muted-foreground", "#79848c");
+    const grid = tokenColor("--border", "#cfd4d6");
     const line = tokenColor("--color-data-3", "#337475");
     const zoneTint = tokenColorAlpha("--color-data-5", 0.1);
 
@@ -91,7 +91,7 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
 
   if (!opts || !plotData) {
     return (
-      <p style={{ color: "var(--color-neutral-600)", fontSize: 13 }}>
+      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         No heart rate data for this workout.
       </p>
     );
@@ -102,7 +102,7 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
       <h2 style={{ fontSize: 19, fontWeight: 700 }}>Heart rate</h2>
       <div
         style={{
-          borderTop: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
           marginTop: 12,
           paddingTop: 12,
         }}

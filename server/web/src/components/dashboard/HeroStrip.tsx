@@ -30,8 +30,8 @@ export default function HeroStrip({ metrics, loading }: Props) {
       style={{
         display: "grid",
         gridTemplateColumns: isDesktop ? "repeat(4, 1fr)" : "1fr 1fr",
-        borderTop: "2px solid var(--color-text)",
-        borderBottom: "2px solid var(--color-text)",
+        borderTop: "2px solid var(--foreground)",
+        borderBottom: "2px solid var(--foreground)",
       }}
     >
       {cells.map((m, i) => (
@@ -55,9 +55,9 @@ function HeroCell({
            class's padding-inline and pull the cell to the page edge. */
         paddingTop: isDesktop ? 24 : 16,
         paddingBottom: isDesktop ? 22 : 16,
-        borderRight: "1px solid var(--color-divider)",
+        borderRight: "1px solid var(--border)",
         /* On the 2×2 grid the first row needs its own rule. */
-        borderBottom: isDesktop ? undefined : "1px solid var(--color-divider)",
+        borderBottom: isDesktop ? undefined : "1px solid var(--border)",
       }}
       className="page-x"
     >
@@ -77,7 +77,7 @@ function HeroCell({
             <span
               style={{
                 font: `500 ${isDesktop ? 15 : 12}px var(--font-body)`,
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
                 marginLeft: isDesktop ? 6 : 4,
               }}
             >
@@ -114,7 +114,7 @@ function HeroCell({
             <span
               style={{
                 font: `400 ${isDesktop ? 12 : 11}px var(--font-body)`,
-                color: "var(--color-neutral-600)",
+                color: "var(--muted-foreground)",
               }}
             >
               {m.source ? sourceLabel(m.source) : m.time ? formatTimeAgo(m.time) : ""}

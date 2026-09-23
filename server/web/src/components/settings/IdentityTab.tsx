@@ -68,7 +68,7 @@ export default function IdentityTab() {
         <p
           style={{
             font: "400 12px var(--font-body)",
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             margin: "8px 0 0",
           }}
         >

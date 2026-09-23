@@ -1,0 +1,10 @@
+# Coss UI source
+
+Source: https://github.com/cosscom/coss
+Revision: 59e8c88c4be28cbfdd9eb3cd7274c60ffa91413e
+Imported from apps/ui/registry/default (MIT, see upstream LICENSING.md).
+The source registry imports were changed to this application's aliases.
+Companion library utilities and use-media-query share this provenance.
+The adjacent license preserves coss.com's MIT notice. No code was copied
+from the differently licensed packages/ui directory.
+Update deliberately; do not regenerate components automatically.

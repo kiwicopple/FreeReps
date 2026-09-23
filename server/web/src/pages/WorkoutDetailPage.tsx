@@ -42,7 +42,7 @@ export default function WorkoutDetailPage() {
         <PageHeader kicker="Workout" title="Not found" />
         <p
           className="page-x"
-          style={{ color: "var(--color-neutral-600)", fontSize: 13 }}
+          style={{ color: "var(--muted-foreground)", fontSize: 13 }}
         >
           This workout is no longer in the database.
         </p>
@@ -116,8 +116,8 @@ export default function WorkoutDetailPage() {
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${isDesktop ? Math.min(stats.length, 6) : 3}, 1fr)`,
-          borderTop: "2px solid var(--color-text)",
-          borderBottom: "2px solid var(--color-text)",
+          borderTop: "2px solid var(--foreground)",
+          borderBottom: "2px solid var(--foreground)",
         }}
       >
         {stats.map((s) => (
@@ -127,7 +127,7 @@ export default function WorkoutDetailPage() {
             style={{
               paddingTop: isDesktop ? 24 : 14,
               paddingBottom: isDesktop ? 22 : 14,
-              borderRight: "1px solid var(--color-divider)",
+              borderRight: "1px solid var(--border)",
             }}
           >
             <div className="kick">{s.label}</div>
@@ -144,7 +144,7 @@ export default function WorkoutDetailPage() {
                 <span
                   style={{
                     font: `500 ${isDesktop ? 14 : 11}px var(--font-body)`,
-                    color: "var(--color-neutral-600)",
+                    color: "var(--muted-foreground)",
                     marginLeft: 5,
                   }}
                 >

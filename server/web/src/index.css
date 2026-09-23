@@ -1,235 +1,94 @@
 @import "tailwindcss";
-
-/* Archivo, self-hosted. The server is reachable over Tailscale only, so a
-   Google Fonts link would leave the UI on a fallback face whenever the client
-   has no route to the CDN. */
+@import "tw-animate-css";
 @import "@fontsource-variable/archivo/wght.css";
-
-/* ══════════════════════════════════════════════════════════════════════════
-   Modernist tokens — the source of truth for colour, type and spacing.
-   Ported from the design system's styles.css :root block.
-   ══════════════════════════════════════════════════════════════════════════ */
+@custom-variant dark (&:where(.dark, .dark *));
+:root {
+  --background: #fafafa; --foreground: #202020;
+  --card: #f4f4f4; --card-foreground: var(--foreground);
+  --popover: #ffffff; --popover-foreground: var(--foreground);
+  --primary: #18794e; --primary-foreground: #ffffff;
+  --secondary: #eeeeee; --secondary-foreground: var(--foreground);
+  --muted: #f0f0f0; --muted-foreground: #626262;
+  --accent: #e9e9e9; --accent-foreground: var(--foreground);
+  --border: #d8d8d8; --input: #c8c8c8; --ring: #18794e;
+  --destructive: #c22c38; --destructive-foreground: #b51e2b;
+  --success: #18794e; --success-soft: #e9f9ef; --success-foreground: #12633f;
+  --warning: #97601b; --warning-soft: #f7eee4; --warning-foreground: #8a5512;
+  --radius: .625rem;
+}
+.dark {
+  color-scheme: dark;
+  --background: #000000; --foreground: #ededed;
+  --card: #111111; --popover: #111111;
+  --primary: #3ecf8e; --primary-foreground: #052e1c;
+  --secondary: #1a1a1a; --muted: #191919; --muted-foreground: #a8a8a8;
+  --accent: #252525; --border: #303030; --input: #404040; --ring: #3ecf8e;
+  --destructive: #e5484d; --destructive-foreground: #ff8b90;
+  --success: #3ecf8e; --success-soft: #0d251a; --success-foreground: #85e0b3;
+  --warning: #e0a95c; --warning-soft: #2e2418; --warning-foreground: #e0a95c;
+}
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-foreground: var(--warning-foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
 
 :root {
-  --color-bg: #edf0f1;
-  --color-surface: #e3e7e9;
-  --color-text: #232c33;
-  --color-accent: #18794e;
-  --color-divider: color-mix(in srgb, #232c33 28%, transparent);
-
-  /* Tonal ramp — generated in OKLCH on one shared lightness scale, so the same
-     step of any role matches the others in visual value. */
-  --color-neutral-100: #f2f5f6;
-  --color-neutral-200: #e3e7e9;
-  --color-neutral-300: #cfd4d6;
-  --color-neutral-400: #b1b8bd;
-  --color-neutral-500: #939ca2;
-  --color-neutral-600: #79848c;
-  --color-neutral-700: #5e6a72;
-  --color-neutral-800: #414c54;
-  --color-neutral-900: #2b353d;
-
-  --color-accent-100: #e9f9ef;
-  --color-accent-200: #d3f4df;
-  --color-accent-300: #aaebc5;
-  --color-accent-400: #78dda6;
-  --color-accent-500: #3ecf8e;
-  --color-accent-600: #18794e;
-  --color-accent-700: #12633f;
-  --color-accent-800: #0d4f32;
-  --color-accent-900: #093c26;
-
-  /* A metric moving the right way and one moving the wrong way are two
-     statements, and the accent used to carry only the first — regression and
-     genuinely flat movement shared the neutral tone. Green against amber rather
-     than green against red: the pair stays distinguishable under the common
-     colour vision deficiencies, and both tones sit at the same lightness so
-     neither reads as louder than the other.
-
-     --color-positive matches --color-accent on light ground on purpose. It is
-     a token of its own so brand and improvement can part later without
-     touching a call site. */
-  --color-positive: #18794e;
-  --color-positive-100: #e9f9ef;
-  --color-positive-700: #12633f;
-  --color-negative: #b4741f;
-  --color-negative-100: #f7eee4;
-  --color-negative-700: #8a5512;
-
-  /* Data scale — sleep stages and heart rate zones. One hue, five steps, the
-     order carried by lightness alone: OKLCH hue 196 at chroma .044–.074, on the
-     same lightness scale as neutral-500 through -900. Lightness rather than hue
-     keeps the order readable in greyscale and under the common colour vision
-     deficiencies, where this petrol collapses to grey while the brand green keeps
-     its blueness and stays apart from it. Distinct from the brighter brand green and the negative amber, so a data
-     area stays separate from selection and status highlights. Plain hex on purpose: tokenColor() resolves these
-     for the uPlot canvas, and an alpha step would shift its lightness against
-     the ground and break the order. */
+  --font-heading: "Archivo Variable", "Archivo", system-ui, sans-serif;
+  --font-body: "Archivo Variable", "Archivo", system-ui, sans-serif;
+  --page-x: 40px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; --space-8: 32px;
   --color-data-1: #76a4a4;
   --color-data-2: #538e8e;
   --color-data-3: #337475;
   --color-data-4: #1b5454;
   --color-data-5: #133b3b;
-
-  /* Sleep stages take the ramp by absolute lightness — Deep at the dark end,
-     Awake at the light one — which reverses in index when the ramp mirrors on
-     dark ground. The aliases keep that reversal in CSS, so stageColors.ts stays
-     a static map. data-2 is unused here: the skipped step is what lifts Awake
-     out of the series without giving it a colour of its own. */
   --color-stage-deep: var(--color-data-5);
   --color-stage-core: var(--color-data-4);
   --color-stage-rem: var(--color-data-3);
   --color-stage-awake: var(--color-data-1);
-
-  /* The p25–p75 band behind a metric line. One step of its own rather than a
-     mix, so the uPlot path resolves it too; about half a neutral step from the
-     ground, which makes it visible without crowding the line on top of it. */
   --color-data-band: #dfeaea;
-
-  --font-heading: "Archivo Variable", "Archivo", system-ui, sans-serif;
-  --font-body: "Archivo Variable", "Archivo", system-ui, sans-serif;
-
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
-
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-
-  /* Page horizontal padding. Nav, headers, table cells and footers align to it. */
-  --page-x: 40px;
 }
-
-/* Below the phone breakpoint the page padding drops to 20px. Everything that
-   aligns to the page edge reads this token, so the change lands in one place. */
-@media (max-width: 767px) {
-  :root {
-    --page-x: 20px;
-  }
-}
-
-/* Dark ground: the same tokens re-pointed. Ink and ground swap, the neutral
-   ramp inverts, and the accent lifts so it holds contrast on the dark ground. */
-[data-theme="dark"] {
-  --color-bg: #000000;
-  --color-surface: #111111;
-  --color-text: #ededed;
-  --color-divider: color-mix(in srgb, #ededed 26%, transparent);
-  --color-neutral-100: #1a1a1a;
-  --color-neutral-200: #111111;
-  --color-neutral-300: #303030;
-  --color-neutral-400: #505050;
-  --color-neutral-500: #808080;
-  --color-neutral-600: #a0a0a0;
-  --color-neutral-700: #bababa;
-  --color-neutral-800: #d4d4d4;
-  --color-neutral-900: #e7e7e7;
-  --color-accent: #3ecf8e;
-  --color-accent-600: #34b27b;
-  --color-accent-100: #0d251a;
-  --color-accent-700: #85e0b3;
-  /* On dark ground the ramp reads the other way round, so -700 is lighter
-     than the base tone — the same inversion --color-accent-700 already uses. */
-  --color-positive: #3ecf8e;
-  --color-positive-100: #0d251a;
-  --color-positive-700: #85e0b3;
-  --color-negative: #e0a95c;
-  --color-negative-100: #2e2418;
-  --color-negative-700: #e0a95c;
+.dark {
   --color-data-1: #185455;
   --color-data-2: #307475;
   --color-data-3: #469091;
   --color-data-4: #63a8a8;
   --color-data-5: #8bc3c3;
-  /* Ramp mirrored, rule unchanged: Deep at the dark end, Awake at the light. */
   --color-stage-deep: var(--color-data-1);
   --color-stage-core: var(--color-data-2);
   --color-stage-rem: var(--color-data-3);
   --color-stage-awake: var(--color-data-5);
   --color-data-band: #192a2a;
 }
-
-@media (prefers-color-scheme: dark) {
-  [data-theme="auto"] {
-    --color-bg: #000000;
-    --color-surface: #111111;
-    --color-text: #ededed;
-    --color-divider: color-mix(in srgb, #ededed 26%, transparent);
-    --color-neutral-100: #1a1a1a;
-    --color-neutral-200: #111111;
-    --color-neutral-300: #303030;
-    --color-neutral-400: #505050;
-    --color-neutral-500: #808080;
-    --color-neutral-600: #a0a0a0;
-    --color-neutral-700: #bababa;
-    --color-neutral-800: #d4d4d4;
-    --color-neutral-900: #e7e7e7;
-    --color-accent: #3ecf8e;
-  --color-accent-600: #34b27b;
-    --color-accent-100: #0d251a;
-    --color-accent-700: #85e0b3;
-    --color-positive: #3ecf8e;
-    --color-positive-100: #0d251a;
-    --color-positive-700: #85e0b3;
-    --color-negative: #e0a95c;
-    --color-negative-100: #2e2418;
-    --color-negative-700: #e0a95c;
-    --color-data-1: #185455;
-    --color-data-2: #307475;
-    --color-data-3: #469091;
-    --color-data-4: #63a8a8;
-    --color-data-5: #8bc3c3;
-    --color-stage-deep: var(--color-data-1);
-    --color-stage-core: var(--color-data-2);
-    --color-stage-rem: var(--color-data-3);
-    --color-stage-awake: var(--color-data-5);
-    --color-data-band: #192a2a;
-  }
-}
-
-/* Expose the tokens to Tailwind so `bg-bg`, `text-neutral-600`, `border-ink`
-   and friends resolve to the same variables the plain CSS below uses. */
-@theme inline {
-  --color-bg: var(--color-bg);
-  --color-surface: var(--color-surface);
-  --color-ink: var(--color-text);
-  --color-accent: var(--color-accent);
-  --color-accent-100: var(--color-accent-100);
-  --color-accent-700: var(--color-accent-700);
-  --color-positive: var(--color-positive);
-  --color-positive-100: var(--color-positive-100);
-  --color-positive-700: var(--color-positive-700);
-  --color-negative: var(--color-negative);
-  --color-negative-100: var(--color-negative-100);
-  --color-negative-700: var(--color-negative-700);
-  --color-divider: var(--color-divider);
-  --color-neutral-100: var(--color-neutral-100);
-  --color-neutral-200: var(--color-neutral-200);
-  --color-neutral-300: var(--color-neutral-300);
-  --color-neutral-400: var(--color-neutral-400);
-  --color-neutral-500: var(--color-neutral-500);
-  --color-neutral-600: var(--color-neutral-600);
-  --color-neutral-700: var(--color-neutral-700);
-  --color-neutral-800: var(--color-neutral-800);
-  --color-neutral-900: var(--color-neutral-900);
-  --color-data-1: var(--color-data-1);
-  --color-data-2: var(--color-data-2);
-  --color-data-3: var(--color-data-3);
-  --color-data-4: var(--color-data-4);
-  --color-data-5: var(--color-data-5);
-  --color-data-band: var(--color-data-band);
-  --font-sans: var(--font-body);
-  --radius-md: 0px;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   Base
-   ══════════════════════════════════════════════════════════════════════════ */
-
+@media(max-width:767px) { :root { --page-x:20px; } }
+@theme inline { --font-sans:var(--font-body); --font-heading:var(--font-heading); }
 *,
 *::before,
 *::after {
@@ -237,13 +96,13 @@
 }
 
 html {
-  background: var(--color-bg);
+  background: var(--background);
 }
 
 body {
   margin: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.55;
@@ -265,26 +124,23 @@ h6 {
 }
 
 a {
-  color: var(--color-accent-700);
+  color: var(--success-foreground);
   text-decoration: none;
   text-underline-offset: 3px;
 }
 
 a:hover {
-  color: var(--color-accent);
+  color: var(--primary);
 }
 
-:focus {
-  outline: none;
-}
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 /* Every number that can change carries this. Without it the hero numbers
@@ -298,7 +154,7 @@ a:hover {
   font: 600 10px var(--font-body);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--color-neutral-600);
+  color: var(--muted-foreground);
 }
 
 .page-x {
@@ -321,7 +177,7 @@ a:hover {
   font-weight: 800;
   font-size: 14px;
   line-height: 1.2;
-  color: var(--color-text);
+  color: var(--foreground);
   background: transparent;
   border: 1px solid transparent;
   padding: var(--space-2) calc(var(--space-3) * 1.2);
@@ -334,42 +190,42 @@ a:hover {
 }
 
 .btn-primary {
-  background: var(--color-accent);
-  color: var(--color-bg);
+  background: var(--primary);
+  color: var(--background);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-accent-600);
+  background: var(--primary);
 }
 
 .btn-primary:active:not(:disabled) {
-  background: var(--color-accent-700);
+  background: var(--success-foreground);
 }
 
 .btn-secondary {
-  border-color: var(--color-divider);
+  border-color: var(--border);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-text) 7%, transparent);
+  background: color-mix(in srgb, var(--foreground) 7%, transparent);
 }
 
 .btn-secondary:active:not(:disabled) {
-  background: color-mix(in srgb, var(--color-text) 14%, transparent);
+  background: color-mix(in srgb, var(--foreground) 14%, transparent);
 }
 
 .btn-ghost {
-  color: var(--color-accent-700);
+  color: var(--success-foreground);
   padding-inline: var(--space-1);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-  color: var(--color-accent-700);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--success-foreground);
 }
 
 .btn-ghost:active:not(:disabled) {
-  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
 /* — forms — */
@@ -377,7 +233,7 @@ a:hover {
   display: block;
   font-size: 12px;
   margin-bottom: 5px;
-  color: var(--color-neutral-600);
+  color: var(--muted-foreground);
 }
 
 .input {
@@ -386,19 +242,19 @@ a:hover {
   padding: 6px 10px;
   font: inherit;
   font-size: 14px;
-  color: var(--color-text);
-  caret-color: var(--color-accent);
-  background: var(--color-surface);
-  border: 1px solid var(--color-divider);
+  color: var(--foreground);
+  caret-color: var(--primary);
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
 
 .input:hover {
-  border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+  border-color: color-mix(in srgb, var(--foreground) 45%, transparent);
 }
 
 .input:focus-visible {
-  border-color: var(--color-accent);
+  border-color: var(--primary);
   outline-offset: 0;
 }
 
@@ -406,7 +262,7 @@ a:hover {
 .seg {
   display: inline-flex;
   overflow: hidden;
-  border: 1px solid var(--color-divider);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
 
@@ -429,20 +285,20 @@ a:hover {
 }
 
 .seg-opt + .seg-opt {
-  border-left: 1px solid var(--color-divider);
+  border-left: 1px solid var(--border);
 }
 
 .seg-opt:has(input:checked) {
-  background: var(--color-accent);
-  color: var(--color-bg);
+  background: var(--primary);
+  color: var(--background);
 }
 
 .seg-opt:not(:has(input:checked)):hover {
-  background: color-mix(in srgb, var(--color-text) 7%, transparent);
+  background: color-mix(in srgb, var(--foreground) 7%, transparent);
 }
 
 .seg-opt:has(input:focus-visible) {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
 
@@ -457,33 +313,33 @@ a:hover {
 }
 
 .tag-accent {
-  background: var(--color-accent-100);
-  color: var(--color-accent-700);
+  background: var(--success-soft);
+  color: var(--success-foreground);
 }
 
 .tag-neutral {
-  background: var(--color-neutral-100);
-  color: var(--color-neutral-800);
+  background: var(--muted);
+  color: var(--foreground);
 }
 
 .tag-outline {
-  border: 1px solid var(--color-accent);
-  color: var(--color-accent-700);
+  border: 1px solid var(--primary);
+  color: var(--success-foreground);
 }
 
 /* — navigation — */
 /* The bar carries the one tonal step the system already has, so chrome and
    content stop sharing a surface. The edge then comes from the surface change
    and the rule drops to a hairline; without it the page read as a document
-   rather than an application. The page header stays on --color-bg on purpose:
+   rather than an application. The page header stays on --background on purpose:
    moved into the chrome, the page title sits at the rank of a nav link. */
 .nav {
   display: flex;
   align-items: center;
   gap: var(--space-6);
   padding: 16px var(--page-x);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-divider);
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
 }
 
 /* Qualified with `a` because .nav a below would otherwise win on specificity
@@ -494,26 +350,26 @@ a:hover {
   font-size: 19px;
   letter-spacing: -0.02em;
   margin-right: var(--space-4);
-  color: var(--color-text);
+  color: var(--foreground);
 }
 
 .nav a {
-  color: var(--color-neutral-700);
+  color: var(--muted-foreground);
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
 }
 
 .nav a:hover {
-  color: var(--color-text);
+  color: var(--foreground);
 }
 
 /* An inset shadow rather than a border, so the active mark does not shift the
    baseline. */
 .nav a[aria-current="page"] {
   font-weight: 600;
-  color: var(--color-text);
-  box-shadow: inset 0 -2px 0 var(--color-accent);
+  color: var(--foreground);
+  box-shadow: inset 0 -2px 0 var(--primary);
 }
 
 /* — tables — */
@@ -528,15 +384,15 @@ a:hover {
   font: 600 10px var(--font-body);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--color-neutral-600);
+  color: var(--muted-foreground);
   padding: 10px 16px;
-  border-bottom: 2px solid var(--color-text);
+  border-bottom: 2px solid var(--foreground);
   white-space: nowrap;
 }
 
 .table td {
   padding: 13px 16px;
-  border-bottom: 1px solid var(--color-neutral-300);
+  border-bottom: 1px solid var(--border);
 }
 
 .table th:first-child,
@@ -550,13 +406,13 @@ a:hover {
 }
 
 .table tbody tr:hover:not(.grp) {
-  background: var(--color-accent-100);
+  background: var(--success-soft);
 }
 
 /* Group header row — breaks a table into categories. Not hoverable. */
 .table tr.grp td {
-  background: var(--color-neutral-200);
-  border-bottom: 2px solid var(--color-text);
+  background: var(--secondary);
+  border-bottom: 2px solid var(--foreground);
   padding-top: 8px;
   padding-bottom: 8px;
 }
@@ -565,7 +421,7 @@ a:hover {
 .rail {
   width: 248px;
   flex: none;
-  border-right: 2px solid var(--color-text);
+  border-right: 2px solid var(--foreground);
 }
 
 .rail-item {
@@ -573,7 +429,7 @@ a:hover {
   width: 100%;
   text-align: left;
   font-size: 13px;
-  color: var(--color-neutral-700);
+  color: var(--muted-foreground);
   background: transparent;
   border: 0;
   border-left: 3px solid transparent;
@@ -582,14 +438,14 @@ a:hover {
 }
 
 .rail-item:hover {
-  background: color-mix(in srgb, var(--color-text) 5%, transparent);
-  color: var(--color-text);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  color: var(--foreground);
 }
 
 .rail-item[aria-selected="true"] {
-  border-left-color: var(--color-accent);
-  background: var(--color-accent-100);
-  color: var(--color-text);
+  border-left-color: var(--primary);
+  background: var(--success-soft);
+  color: var(--foreground);
   font-weight: 600;
 }
 
@@ -608,8 +464,8 @@ a:hover {
   z-index: 20;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  border-top: 1px solid var(--color-divider);
-  background: var(--color-surface);
+  border-top: 1px solid var(--border);
+  background: var(--card);
 }
 
 .tabs a {
@@ -619,13 +475,13 @@ a:hover {
   font: 600 10px var(--font-body);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-neutral-600);
+  color: var(--muted-foreground);
   min-height: 44px;
 }
 
 .tabs a[aria-current="page"] {
-  color: var(--color-text);
-  box-shadow: inset 0 3px 0 var(--color-accent);
+  color: var(--foreground);
+  box-shadow: inset 0 3px 0 var(--primary);
 }
 
 /* Record row — what a table row becomes below 768px. Identity left, number
@@ -635,14 +491,14 @@ a:hover {
   align-items: center;
   gap: 12px;
   padding: 14px var(--page-x);
-  border-bottom: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--border);
 }
 
 /* Group band — the table's group header row, carried over to the row layout. */
 .row-group {
   padding: 8px var(--page-x);
-  background: var(--color-neutral-200);
-  border-bottom: 1px solid var(--color-divider);
+  background: var(--secondary);
+  border-bottom: 1px solid var(--border);
 }
 
 /* Square chip — the mobile range control and the workout filters. */
@@ -651,9 +507,9 @@ a:hover {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 7px 12px;
-  border: 1px solid var(--color-neutral-400);
+  border: 1px solid var(--input);
   background: transparent;
-  color: var(--color-neutral-700);
+  color: var(--muted-foreground);
   white-space: nowrap;
   cursor: pointer;
   border-radius: 0;
@@ -661,14 +517,19 @@ a:hover {
 
 .chip[aria-pressed="true"],
 .chip[aria-current="true"] {
-  background: var(--color-text);
-  border-color: var(--color-text);
-  color: var(--color-bg);
+  background: var(--foreground);
+  border-color: var(--foreground);
+  color: var(--background);
 }
 
 /* — skeleton — reserves the value's height so nothing reflows on arrival — */
 .skel {
   display: inline-block;
-  background: var(--color-neutral-300);
+  background: var(--border);
   vertical-align: baseline;
 }
+
+
+
+@layer base { * { border-color: var(--border); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }

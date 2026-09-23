@@ -21,7 +21,7 @@ interface Props {
 export default function Scatter({ pairs }: Props) {
   if (pairs.length < 3) {
     return (
-      <p style={{ color: "var(--color-neutral-600)", fontSize: 13 }}>
+      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         Not enough paired days to plot.
       </p>
     );
@@ -64,7 +64,7 @@ export default function Scatter({ pairs }: Props) {
             x2={RIGHT}
             y1={t.y}
             y2={t.y}
-            stroke="var(--color-neutral-300)"
+            stroke="var(--border)"
             strokeWidth={1}
           />
           <text
@@ -72,7 +72,7 @@ export default function Scatter({ pairs }: Props) {
             y={t.y + 4}
             textAnchor="end"
             fontSize={12}
-            fill="var(--color-neutral-600)"
+            fill="var(--muted-foreground)"
           >
             {t.label}
           </text>
@@ -86,7 +86,7 @@ export default function Scatter({ pairs }: Props) {
           y={504}
           textAnchor="middle"
           fontSize={12}
-          fill="var(--color-neutral-600)"
+          fill="var(--muted-foreground)"
         >
           {t.label}
         </text>
@@ -98,7 +98,7 @@ export default function Scatter({ pairs }: Props) {
         y1={TOP}
         x2={LEFT}
         y2={BASELINE}
-        stroke="var(--color-text)"
+        stroke="var(--foreground)"
         strokeWidth={2}
       />
       <line
@@ -106,7 +106,7 @@ export default function Scatter({ pairs }: Props) {
         y1={BASELINE}
         x2={RIGHT}
         y2={BASELINE}
-        stroke="var(--color-text)"
+        stroke="var(--foreground)"
         strokeWidth={2}
       />
 

@@ -80,7 +80,7 @@ export default function FrontPageTab() {
 
   if (isLoading || !loaded) {
     return (
-      <p style={{ color: "var(--color-neutral-600)", fontSize: 13 }}>
+      <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         Loading metrics…
       </p>
     );
@@ -100,7 +100,7 @@ export default function FrontPageTab() {
         <p
           style={{
             font: "400 12px var(--font-body)",
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             margin: "6px 0 12px",
           }}
         >
@@ -115,9 +115,9 @@ export default function FrontPageTab() {
               type="button"
               onClick={() => toggleHero(name)}
               style={{
-                border: "1px solid var(--color-accent)",
-                background: "var(--color-accent-100)",
-                color: "var(--color-text)",
+                border: "1px solid var(--primary)",
+                background: "var(--success-soft)",
+                color: "var(--foreground)",
                 padding: "8px 12px",
                 font: "500 13px var(--font-body)",
                 borderRadius: 0,
@@ -130,8 +130,8 @@ export default function FrontPageTab() {
           {heroes.length < HERO_COUNT ? (
             <span
               style={{
-                border: "1px dashed var(--color-divider)",
-                color: "var(--color-neutral-600)",
+                border: "1px dashed var(--border)",
+                color: "var(--muted-foreground)",
                 padding: "8px 12px",
                 font: "500 13px var(--font-body)",
               }}
@@ -147,14 +147,14 @@ export default function FrontPageTab() {
         <p
           style={{
             font: "400 12px var(--font-body)",
-            color: "var(--color-neutral-600)",
+            color: "var(--muted-foreground)",
             margin: "6px 0 4px",
           }}
         >
           {visibleCount} of {options.length} listed
         </p>
 
-        <div style={{ borderTop: "2px solid var(--color-text)" }}>
+        <div style={{ borderTop: "2px solid var(--foreground)" }}>
           {options.map((m) => {
             const on = visible[m.value] ?? false;
             const isHero = heroes.includes(m.value);
@@ -166,7 +166,7 @@ export default function FrontPageTab() {
                   alignItems: "center",
                   gap: 14,
                   padding: "11px 0",
-                  borderBottom: "1px solid var(--color-neutral-300)",
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
                 {isDesktop ? (
@@ -185,7 +185,7 @@ export default function FrontPageTab() {
                 <span
                   style={{
                     font: "500 13.5px var(--font-body)",
-                    color: on ? "var(--color-text)" : "var(--color-neutral-600)",
+                    color: on ? "var(--foreground)" : "var(--muted-foreground)",
                     flex: 1,
                   }}
                 >
@@ -210,7 +210,7 @@ export default function FrontPageTab() {
       </div>
 
       {error ? (
-        <p style={{ color: "var(--color-accent-700)", fontSize: 13, marginTop: 14 }}>
+        <p style={{ color: "var(--success-foreground)", fontSize: 13, marginTop: 14 }}>
           {error}
         </p>
       ) : null}
