@@ -35,6 +35,9 @@ for (const path of [
         .toBeLessThanOrEqual(width);
     }
     if (process.env.PW_SCREENSHOTS === "1") {
+      // All traffic is fixture-backed; snapshots stay in ignored local output.
+      await page.waitForLoadState("networkidle");
+      await page.screenshot({ path: info.outputPath("synthetic-desktop.png") });
       await page.setViewportSize({ width: 390, height: 844 });
       await page.screenshot({ path: info.outputPath("synthetic-mobile.png") });
     }

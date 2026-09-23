@@ -115,12 +115,14 @@ test("uPlot resizes with viewport and the retained route map renders", async ({
   await expect(page.locator(".leaflet-container")).toBeVisible();
   for (const width of [768, 390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
-    await expect
-      .poll(async () => {
-        const b = await page.locator(".uplot").boundingBox();
-        return !!b && b.width > 0 && b.width <= width;
-      })
-      .toBe(true);
+    for (const selector of [".uplot", ".leaflet-container"]) {
+      await expect
+        .poll(async () => {
+          const b = await page.locator(selector).boundingBox();
+          return !!b && b.width > 0 && b.width <= width;
+        })
+        .toBe(true);
+    }
   }
 });
 // Imported strength sessions have no workout row; navigation must carry their metadata.
