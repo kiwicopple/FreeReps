@@ -1,3 +1,4 @@
+import PageSection from "../PageSection";
 import { Empty } from "@/components/ui/empty";
 import { useMemo } from "react";
 import uPlot from "uplot";
@@ -98,17 +99,10 @@ export default function HRTimelineChart({ hrData, maxHR }: Props) {
   }
 
   return (
-    <div style={{ marginTop: 30 }}>
-      <h2 style={{ fontSize: 19, fontWeight: 700 }}>Heart rate</h2>
-      <div
-        style={{
-          borderTop: "2px solid var(--foreground)",
-          marginTop: 12,
-          paddingTop: 12,
-        }}
-      >
+    <PageSection title={<>Heart rate</>}>
+      <div className="min-w-0">
         <AutoSizeUplot opts={opts} data={plotData} />
       </div>
-    </div>
+    </PageSection>
   );
 }

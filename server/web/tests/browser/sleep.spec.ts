@@ -44,7 +44,9 @@ test("night selection refreshes the HR window and excludes the selected night fr
   await expect(
     page.getByText("Duration = hours asleep", { exact: false }),
   ).toBeVisible();
-  await page.locator('input[aria-label="Night date"]').fill("2025-01-12");
+  await page.getByRole("button", { name: "Choose night date" }).click();
+  await page.getByLabel("Enter date", {exact: true}).fill("2025-01-12");
+  await page.getByRole("button", {name: "Apply", exact: true}).click();
   await expect(page).toHaveURL(/date=2025-01-12/);
   await expect(
     page.getByText("No sleep recorded for this date.", { exact: false }),

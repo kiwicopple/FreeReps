@@ -1,5 +1,7 @@
-import { Label } from "@/components/ui/label";
-import { Field } from "@/components/ui/field";
+import PageSection from "@/components/PageSection";
+import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
+
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Alert } from "@/components/ui/alert";
 import Choice from "@/components/Choice";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -133,83 +135,59 @@ export default function CorrelationPage() {
         }
       />
 
-      <div
-        className="page-x"
-        style={{
-          display: "flex",
-          gap: 32,
-          alignItems: "flex-end",
-          paddingBottom: 20,
-        }}
-      >
-        <Field style={{ width: 280 }}>
-          <Label htmlFor="corr-x">X axis</Label>
+      <div className="page-x mb-6 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_180px]">
+        <Field className="min-w-0">
+          <FieldLabel htmlFor="corr-x">X axis</FieldLabel>
           <Choice
             searchable
             id="corr-x"
-                        value={xMetric}
+            value={xMetric}
             onValueChange={(value) => setParam("x", value)}
-          >
-            {groups.map((g) => (
-              <optgroup key={g.label} label={g.label}>
-                {g.metrics.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </Choice>
+            options={groups.flatMap((group) =>
+              group.metrics.map((item) => ({
+                value: item.value,
+                label: item.label,
+                group: group.label,
+              })),
+            )}
+          />
         </Field>
 
-        <Field style={{ width: 280 }}>
-          <Label htmlFor="corr-y">Y axis</Label>
+        <Field className="min-w-0">
+          <FieldLabel htmlFor="corr-y">Y axis</FieldLabel>
           <Choice
             searchable
             id="corr-y"
-                        value={yMetric}
+            value={yMetric}
             onValueChange={(value) => setParam("y", value)}
-          >
-            {groups.map((g) => (
-              <optgroup key={g.label} label={g.label}>
-                {g.metrics.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </Choice>
+            options={groups.flatMap((group) =>
+              group.metrics.map((item) => ({
+                value: item.value,
+                label: item.label,
+                group: group.label,
+              })),
+            )}
+          />
         </Field>
 
-        <Field style={{ width: 200 }}>
-          <Label htmlFor="corr-lag">Lag</Label>
+        <Field className="min-w-0">
+          <FieldLabel htmlFor="corr-lag">Lag</FieldLabel>
           <Choice
             id="corr-lag"
-                        value={lag}
+            value={lag}
             onValueChange={(value) => setParam("lag", value)}
-          >
-            <option value={0}>Same day</option>
-            <option value={1}>1 day</option>
-            <option value={2}>2 days</option>
-            <option value={3}>3 days</option>
-          </Choice>
+            options={[
+              { value: "0", label: "Same day" },
+              { value: "1", label: "1 day" },
+              { value: "2", label: "2 days" },
+              { value: "3", label: "3 days" },
+            ]}
+          />
         </Field>
       </div>
 
-      <div
-        style={{ display: "flex", borderTop: "2px solid var(--foreground)" }}
-      >
-        <div
-          className="page-x"
-          style={{
-            flex: 1,
-            minWidth: 0,
-            borderRight: "2px solid var(--foreground)",
-            paddingTop: 26,
-            paddingBottom: 34,
-          }}
-        >
+      <div className="page-x grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(340px,440px)]">
+        <PageSection title="Metric relationship">
           {sameMetric ? (
             <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
               Pick two different metrics. A metric correlates with itself
@@ -249,45 +227,35 @@ export default function CorrelationPage() {
               </div>
             </>
           )}
-        </div>
+        </PageSection>
 
-        <div style={{ width: 440, flex: "none" }}>
+        <PageSection title="Analysis">
           <PearsonBlock
             r={sameMetric ? null : r}
             xLabel={xMeta?.label ?? xMetric}
             yLabel={yMeta?.label ?? yMetric}
           />
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              borderBottom: "2px solid var(--foreground)",
-            }}
-          >
-            <FitStat
+          <SummaryGrid>
+            <SummaryValue
               label="R²"
               value={r != null ? (r * r).toFixed(3) : "—"}
-              border
             />
-            <FitStat
+            <SummaryValue
               label="Slope"
               value={fit ? formatNumber(fit.slope, 3) : "—"}
             />
-            <FitStat
+            <SummaryValue
               label="Paired days"
               value={String(active?.pairs.length ?? 0)}
-              border
-              top
             />
-            <FitStat
+            <SummaryValue
               label="Lag applied"
               value={lag === 0 ? "Same day" : `${lag} day${lag > 1 ? "s" : ""}`}
-              top
             />
-          </div>
+          </SummaryGrid>
 
-          <div className="page-x" style={{ paddingTop: 22, paddingBottom: 10 }}>
+          <div className="mt-6 mb-3">
             <h3 style={{ fontSize: 15, fontWeight: 700 }}>
               Correlation by lag
             </h3>
@@ -379,7 +347,7 @@ export default function CorrelationPage() {
               Export pairs as CSV →
             </Button>
           </div>
-        </div>
+        </PageSection>
       </div>
     </>
   );
@@ -407,7 +375,7 @@ function PearsonBlock({
       style={{
         paddingTop: 26,
         paddingBottom: 22,
-        borderBottom: "2px solid var(--foreground)",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <div className="kick">Pearson r</div>
@@ -442,45 +410,6 @@ function PearsonBlock({
           ? "Pick two different metrics with overlapping days."
           : sentenceFor(r, xLabel, yLabel)}
       </p>
-    </div>
-  );
-}
-
-function FitStat({
-  label,
-  value,
-  border,
-  top,
-}: {
-  label: string;
-  value: string;
-  border?: boolean;
-  top?: boolean;
-}) {
-  return (
-    <div
-      style={{
-        paddingTop: 16,
-        paddingBottom: 16,
-        /* The left column aligns to the page edge; the right one only needs
-           clearance from the divider. */
-        paddingLeft: border ? "var(--page-x)" : 20,
-        paddingRight: border ? 20 : "var(--page-x)",
-        borderRight: border ? "1px solid var(--border)" : undefined,
-        borderTop: top ? "1px solid var(--border)" : undefined,
-      }}
-    >
-      <div className="kick">{label}</div>
-      <div
-        className="num"
-        style={{
-          font: "800 22px/1 var(--font-heading)",
-          letterSpacing: "-0.02em",
-          marginTop: 8,
-        }}
-      >
-        {value}
-      </div>
     </div>
   );
 }

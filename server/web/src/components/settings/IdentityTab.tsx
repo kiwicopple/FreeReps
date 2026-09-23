@@ -1,3 +1,4 @@
+import PageSection from "../PageSection";
 import SegmentedControl from "../SegmentedControl";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { useTheme, type ThemePreference } from "../../theme";
 import { formatNumber } from "../../utils/format";
 import BirthDateRow from "./BirthDateRow";
 import MaxHeartRateRow from "./MaxHeartRateRow";
-import { MONO, Row, TabHeader } from "./parts";
+import { MONO, Row } from "./parts";
 
 const THEMES: { value: ThemePreference; label: string }[] = [
   { value: "auto", label: "Auto" },
@@ -29,12 +30,15 @@ export default function IdentityTab() {
     : "—";
 
   return (
-    <>
-      <TabHeader title="Identity">
-        This server holds one person's data. Identity comes from the reverse
-        proxy, so there is nothing to log into.
-      </TabHeader>
-
+    <PageSection
+      title="Identity"
+      description={
+        <>
+          This server holds one person's data. Identity comes from the reverse
+          proxy, so there is nothing to log into.
+        </>
+      }
+    >
       {(me.isPending || version.isPending || stats.isPending) && (
         <Spinner className="my-4 size-5" />
       )}
@@ -91,6 +95,6 @@ export default function IdentityTab() {
           Auto follows the system setting. The choice is stored in this browser.
         </p>
       </Row>
-    </>
+    </PageSection>
   );
 }

@@ -1,3 +1,5 @@
+import { Field, FieldLabel, FieldDescription, FieldError } from "../ui/field";
+import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import NumericField from "../NumericField";
@@ -12,7 +14,7 @@ import {
   type AlertCondition,
   type AlertSettings,
 } from "../../api";
-import { MONO, Row, TabHeader } from "./parts";
+import { MONO, Row } from "./parts";
 
 /** Seconds as minutes and hours, for the two interval fields. */
 const MIN = 60;
@@ -145,18 +147,21 @@ export default function AlertsTab() {
   }
 
   return (
-    <>
-      <TabHeader title="Alerts">
-        A data source that stops delivering is reported to an{" "}
-        <a href="https://ntfy.sh" target="_blank" rel="noreferrer">
-          ntfy
-        </a>{" "}
-        topic, so a silent integration surfaces without anyone reading the
-        import log. The payload follows Uptime Kuma's webhook shape, and each
-        condition carries its own monitor id — a receiver can group by it.
-        Stored in the database, not in the config file.
-      </TabHeader>
-
+    <PageSection
+      title="Alerts"
+      description={
+        <>
+          A data source that stops delivering is reported to an{" "}
+          <a href="https://ntfy.sh" target="_blank" rel="noreferrer">
+            ntfy
+          </a>{" "}
+          topic, so a silent integration surfaces without anyone reading the
+          import log. The payload follows Uptime Kuma's webhook shape, and each
+          condition carries its own monitor id — a receiver can group by it.
+          Stored in the database, not in the config file.
+        </>
+      }
+    >
       {error ? (
         <Alert variant="error" className="mt-4">
           {error}{" "}
@@ -200,126 +205,150 @@ export default function AlertsTab() {
               </label>
             </Row>
 
-            <Row label="ntfy topic URL">
-              <Input
-                style={{ ...MONO, width: "100%" }}
-                type="url"
-                aria-label="ntfy topic URL"
-                value={settings.ntfy_url}
-                onChange={(e) => patch({ ntfy_url: e.target.value })}
-                placeholder="https://ntfy.example.com/freereps-alerts"
-              />
-              <p
-                style={{
-                  font: "400 12px/1.5 var(--font-body)",
-                  color: "var(--muted-foreground)",
-                  margin: "6px 0 0",
-                }}
-              >
-                The full topic URL, including the topic name — that name is what
-                a subscriber listens on. Any endpoint accepting an ntfy-style
-                POST works; the body is JSON either way.
-              </p>
-            </Row>
-
-            <Row label="Reported as">
-              <Input
-                style={{ ...MONO, width: 260, maxWidth: "100%" }}
-                aria-label="Reported as"
-                value={settings.hostname}
-                onChange={(e) => patch({ hostname: e.target.value })}
-                placeholder="freereps"
-              />
-              <p
-                style={{
-                  font: "400 12px/1.5 var(--font-body)",
-                  color: "var(--muted-foreground)",
-                  margin: "6px 0 0",
-                }}
-              >
-                Fills the payload's <code>hostname</code>, so a receiver can
-                tell a test instance from the production one.
-              </p>
-            </Row>
-
-            <Row label="Check every">
-              <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <NumericField
-                  required
-                  aria-label="Check interval in minutes"
-                  className="max-w-28"
-                  min={1}
-                  value={
-                    emptyFields.has("check_interval_sec")
-                      ? null
-                      : Math.round(settings.check_interval_sec / MIN)
-                  }
-                  onValueChange={(value) =>
-                    patchNumber("check_interval_sec", value, MIN, 1)
-                  }
+            <Field className="grid items-baseline gap-2.5 border-b py-4 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
+              <FieldLabel className="text-xs font-medium text-muted-foreground">
+                ntfy topic URL
+              </FieldLabel>
+              <div className="min-w-0 space-y-2">
+                <Input
+                  style={{ ...MONO, width: "100%" }}
+                  type="url"
+                  aria-label="ntfy topic URL"
+                  value={settings.ntfy_url}
+                  onChange={(e) => patch({ ntfy_url: e.target.value })}
+                  placeholder="https://ntfy.example.com/freereps-alerts"
                 />
-                <span style={{ font: "400 13px var(--font-body)" }}>
-                  minutes
-                </span>
-              </span>
-            </Row>
+                <FieldDescription>
+                  The full topic URL, including the topic name — that name is
+                  what a subscriber listens on. Any endpoint accepting an
+                  ntfy-style POST works; the body is JSON either way.
+                </FieldDescription>
+                <FieldError />
+              </div>
+            </Field>
 
-            <Row label="Failures before alert">
-              <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <NumericField
-                  required
-                  aria-label="Failures before alert"
-                  className="max-w-28"
-                  min={1}
-                  value={
-                    emptyFields.has("failure_threshold")
-                      ? null
-                      : settings.failure_threshold
-                  }
-                  onValueChange={(value) =>
-                    patchNumber("failure_threshold", value, 1, 1)
-                  }
+            <Field className="grid items-baseline gap-2.5 border-b py-4 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
+              <FieldLabel className="text-xs font-medium text-muted-foreground">
+                Reported as
+              </FieldLabel>
+              <div className="min-w-0 space-y-2">
+                <Input
+                  style={{ ...MONO, width: 260, maxWidth: "100%" }}
+                  aria-label="Reported as"
+                  value={settings.hostname}
+                  onChange={(e) => patch({ hostname: e.target.value })}
+                  placeholder="freereps"
                 />
+                <FieldDescription>
+                  Fills the payload's <code>hostname</code>, so a receiver can
+                  tell a test instance from the production one.
+                </FieldDescription>
+                <FieldError />
+              </div>
+            </Field>
+
+            <Field className="grid items-baseline gap-2.5 border-b py-4 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
+              <FieldLabel className="text-xs font-medium text-muted-foreground">
+                Check interval in minutes
+              </FieldLabel>
+              <div className="min-w-0 space-y-2">
                 <span
-                  style={{
-                    font: "400 12px/1.5 var(--font-body)",
-                    color: "var(--muted-foreground)",
-                  }}
+                  style={{ display: "flex", alignItems: "baseline", gap: 8 }}
                 >
-                  consecutive failed runs of one source for one user. At a
-                  30-minute sync interval, 3 means a defect is reported within
-                  two hours while a single DNS timeout is not.
+                  <NumericField
+                    required
+                    aria-label="Check interval in minutes"
+                    className="max-w-28"
+                    min={1}
+                    value={
+                      emptyFields.has("check_interval_sec")
+                        ? null
+                        : Math.round(settings.check_interval_sec / MIN)
+                    }
+                    onValueChange={(value) =>
+                      patchNumber("check_interval_sec", value, MIN, 1)
+                    }
+                  />
+                  <span style={{ font: "400 13px var(--font-body)" }}>
+                    minutes
+                  </span>
                 </span>
-              </span>
-            </Row>
+                <FieldError />
+              </div>
+            </Field>
 
-            <Row label="Apple Health silence">
-              <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <NumericField
-                  required
-                  aria-label="Apple Health silence in hours"
-                  className="max-w-28"
-                  min={0}
-                  value={
-                    emptyFields.has("apple_silence_sec")
-                      ? null
-                      : Math.round(settings.apple_silence_sec / HOUR)
-                  }
-                  onValueChange={(value) =>
-                    patchNumber("apple_silence_sec", value, HOUR, 0)
-                  }
-                />
+            <Field className="grid items-baseline gap-2.5 border-b py-4 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
+              <FieldLabel className="text-xs font-medium text-muted-foreground">
+                Failures before alert
+              </FieldLabel>
+              <div className="min-w-0 space-y-2">
                 <span
-                  style={{
-                    font: "400 12px/1.5 var(--font-body)",
-                    color: "var(--muted-foreground)",
-                  }}
+                  style={{ display: "flex", alignItems: "baseline", gap: 8 }}
                 >
-                  hours without a Health Auto Export delivery before the ingress
-                  counts as down. 0 turns the rule off.
+                  <NumericField
+                    required
+                    aria-label="Failures before alert"
+                    className="max-w-28"
+                    min={1}
+                    value={
+                      emptyFields.has("failure_threshold")
+                        ? null
+                        : settings.failure_threshold
+                    }
+                    onValueChange={(value) =>
+                      patchNumber("failure_threshold", value, 1, 1)
+                    }
+                  />
+                  <span
+                    style={{
+                      font: "400 12px/1.5 var(--font-body)",
+                      color: "var(--muted-foreground)",
+                    }}
+                  >
+                    consecutive failed runs of one source for one user. At a
+                    30-minute sync interval, 3 means a defect is reported within
+                    two hours while a single DNS timeout is not.
+                  </span>
                 </span>
-              </span>
-            </Row>
+                <FieldError />
+              </div>
+            </Field>
+
+            <Field className="grid items-baseline gap-2.5 border-b py-4 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
+              <FieldLabel className="text-xs font-medium text-muted-foreground">
+                Apple Health silence in hours
+              </FieldLabel>
+              <div className="min-w-0 space-y-2">
+                <span
+                  style={{ display: "flex", alignItems: "baseline", gap: 8 }}
+                >
+                  <NumericField
+                    required
+                    aria-label="Apple Health silence in hours"
+                    className="max-w-28"
+                    min={0}
+                    value={
+                      emptyFields.has("apple_silence_sec")
+                        ? null
+                        : Math.round(settings.apple_silence_sec / HOUR)
+                    }
+                    onValueChange={(value) =>
+                      patchNumber("apple_silence_sec", value, HOUR, 0)
+                    }
+                  />
+                  <span
+                    style={{
+                      font: "400 12px/1.5 var(--font-body)",
+                      color: "var(--muted-foreground)",
+                    }}
+                  >
+                    hours without a Health Auto Export delivery before the
+                    ingress counts as down. 0 turns the rule off.
+                  </span>
+                </span>
+                <FieldError />
+              </div>
+            </Field>
           </div>
 
           <div style={{ display: "flex", gap: 8, paddingTop: 20 }}>
@@ -353,6 +382,6 @@ export default function AlertsTab() {
           </div>
         </>
       )}
-    </>
+    </PageSection>
   );
 }

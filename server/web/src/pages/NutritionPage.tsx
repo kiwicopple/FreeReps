@@ -1,6 +1,10 @@
 import { Empty } from "@/components/ui/empty";
 import { Alert } from "@/components/ui/alert";
-import DateControl from "@/components/DateControl";
+import DateNavigator from "@/components/DateNavigator";
+import PageSection from "@/components/PageSection";
+import { Meter } from "@/components/ui/meter";
+import { Menu, MenuTrigger, MenuPopup, MenuItem } from "@/components/ui/menu";
+import { MoreHorizontal } from "lucide-react";
 import Choice from "@/components/Choice";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +15,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
@@ -96,6 +100,11 @@ export default function NutritionPage() {
   const count = range === "day" ? 1 : range === "7d" ? 7 : 30;
   const start = shiftDate(date, 1 - count),
     end = shiftDate(date, 1);
+  const editButton = useRef<HTMLButtonElement>(null);
+  function closeEditor() {
+    setEditing(false);
+    requestAnimationFrame(() => editButton.current?.focus());
+  }
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState("energy");
   const [error, setError] = useState("");
@@ -163,118 +172,140 @@ export default function NutritionPage() {
       range === "day"
         ? targetStatus(value, t, !!currentDay?.complete, covered)
         : `${avg.count}/${count} days with values`;
+    const meterTarget = t?.kind === "range" ? t.high : t?.value;
     return (
       <ResponsiveDetails
         title={nutrientLabel(key)}
         key={key}
         className={hero ? "nutrition-hero" : "nutrition-nutrient"}
-      >
-        <summary>
-          <span className="nutrition-label">{nutrientLabel(key)}</span>
-          <span className="nutrition-value">
-            {amount(value)}
-            {value != null && <small> {unit}</small>}
-          </span>
-          <span className="nutrition-muted">
-            {range === "day" ? targetText(t) : "Daily average of known intake"}
-          </span>
-          {range === "day" && value != null && t && t.kind !== "reference" && (
-            <progress
-              aria-label={`${nutrientLabel(key)} logged versus target`}
-              max={t.kind === "range" ? t.high! : t.value}
-              value={Math.min(value, t.kind === "range" ? t.high! : t.value)}
-            />
-          )}
-          {value != null && <span className="nutrition-status">{status}</span>}
-          {range === "day" && (
-            <span className="nutrition-muted">
-              {total?.known_items ?? 0}/{total?.total_items ?? 0} items have
-              values
-              {total?.estimated_items
-                ? ` · ${total.estimated_items} estimated`
-                : ""}
+        trigger={
+          <>
+            <span className="nutrition-label">{nutrientLabel(key)}</span>
+            <span className="nutrition-value">
+              {amount(value)}
+              {value != null && <small> {unit}</small>}
             </span>
-          )}
-        </summary>
-        <div className="nutrition-detail">
-          {nutrientInfo[key] && (
-            <section
-              className="nutrition-explainer"
-              aria-label={`About ${nutrientLabel(key)}`}
-            >
-              <p>{nutrientInfo[key].summary}</p>
-              <a
-                href={nutrientInfo[key].source}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Learn more about {nutrientLabel(key).toLowerCase()} ↗
-              </a>
-            </section>
-          )}
-          <Button
-            variant="outline"
-            data-sheet-close
-            onClick={() => {
-              setSelected(key);
-              if (range === "day") navigate(date, "7d");
-            }}
-          >
-            Show {nutrientLabel(key).toLowerCase()} trend
-          </Button>
-          {t && (
-            <p>
-              {targetText(t)} · {t.label}
-              <br />
-              <Source value={t.source} />
-              {t.upper != null && (
-                <>
-                  <br />
-                  Upper reference limit: {amount(t.upper)} {unit} (total intake)
-                </>
+            {(hero || (value != null && t)) && (
+              <span className="nutrition-muted col-span-full">
+                {range === "day"
+                  ? targetText(t)
+                  : "Daily average of known intake"}
+              </span>
+            )}
+            {range === "day" &&
+              value != null &&
+              t &&
+              t.kind !== "reference" &&
+              meterTarget != null &&
+              Number.isFinite(meterTarget) &&
+              meterTarget > 0 && (
+                <Meter
+                  className="col-span-full my-1"
+                  aria-label={`${nutrientLabel(key)} logged versus target`}
+                  value={Math.max(0, Math.min(value, meterTarget))}
+                  max={meterTarget}
+                  getAriaValueText={() =>
+                    `${amount(value)} ${unit} logged; ${targetText(t)}. Intake comparison, not logging completion.`
+                  }
+                />
               )}
+            {value != null && (
+              <span className="nutrition-status">{status}</span>
+            )}
+            {range === "day" && value != null && !covered && (
+              <span className="nutrition-muted">Partial data</span>
+            )}
+          </>
+        }
+      >
+        {(close) => (
+          <div className="nutrition-detail">
+            <p className="nutrition-muted">
+              {range === "day"
+                ? `${total?.known_items ?? 0}/${total?.total_items ?? 0} items have values${total?.estimated_items ? ` · ${total.estimated_items} estimated` : ""}`
+                : "Daily average of known intake"}
             </p>
-          )}
-          {key === "water" && (
-            <p>
-              Total-water reference includes food moisture. Logged drinks alone
-              cannot establish whether this reference is met.
-            </p>
-          )}
-          {["omega_3", "epa", "dha", "fat", "carbohydrate", "sugar"].includes(
-            key,
-          ) && (
-            <p>
-              These measures overlap with their components; do not add them
-              together.
-            </p>
-          )}
-          {records.flatMap((r) =>
-            r.entry.items.map((item, i) => {
-              const n = item.nutrients[key];
-              return (
-                <div className="nutrition-contribution" key={r.entry.id + i}>
-                  <strong>{item.name}</strong>
-                  <span>{n ? `${amount(n.value)} ${unit}` : "Unknown"}</span>
-                  <small>
-                    {r.entry.local_date} · {item.portion}
-                    {n ? ` · ${n.basis}, ${n.confidence} confidence` : ""}
-                  </small>
-                  {n?.low != null && (
+            {nutrientInfo[key] && (
+              <section
+                className="nutrition-explainer"
+                aria-label={`About ${nutrientLabel(key)}`}
+              >
+                <p>{nutrientInfo[key].summary}</p>
+                <a
+                  href={nutrientInfo[key].source}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Learn more about {nutrientLabel(key).toLowerCase()} ↗
+                </a>
+              </section>
+            )}
+            <Button
+              variant="outline"
+              onClick={() => {
+                close();
+                setSelected(key);
+                if (range === "day") navigate(date, "7d");
+              }}
+            >
+              Show {nutrientLabel(key).toLowerCase()} trend
+            </Button>
+            {t && (
+              <p>
+                {targetText(t)} · {t.label}
+                <br />
+                <Source value={t.source} />
+                {t.upper != null && (
+                  <>
+                    <br />
+                    Upper reference limit: {amount(t.upper)} {unit} (total
+                    intake)
+                  </>
+                )}
+              </p>
+            )}
+            {key === "water" && (
+              <p>
+                Total-water reference includes food moisture. Logged drinks
+                alone cannot establish whether this reference is met.
+              </p>
+            )}
+            {["omega_3", "epa", "dha", "fat", "carbohydrate", "sugar"].includes(
+              key,
+            ) && (
+              <p>
+                These measures overlap with their components; do not add them
+                together.
+              </p>
+            )}
+            {records.flatMap((r) =>
+              r.entry.items.map((item, i) => {
+                const n = item.nutrients[key];
+                return (
+                  <div className="nutrition-contribution" key={r.entry.id + i}>
+                    <strong>{item.name}</strong>
+                    <span>{n ? `${amount(n.value)} ${unit}` : "Unknown"}</span>
                     <small>
-                      Assumption range: {amount(n.low)}–{amount(n.high)} {unit}
+                      {r.entry.local_date} · {item.portion}
+                      {n ? ` · ${n.basis}, ${n.confidence} confidence` : ""}
                     </small>
-                  )}
-                  {n && (
-                    <small>
-                      <Source value={n.reference} />
-                    </small>
-                  )}
-                </div>
-              );
-            }),
-          )}
-        </div>
+                    {n?.low != null && (
+                      <small>
+                        Assumption range: {amount(n.low)}–{amount(n.high)}{" "}
+                        {unit}
+                      </small>
+                    )}
+                    {n && (
+                      <small>
+                        <Source value={n.reference} />
+                      </small>
+                    )}
+                  </div>
+                );
+              }),
+            )}
+          </div>
+        )}
       </ResponsiveDetails>
     );
   }
@@ -284,56 +315,53 @@ export default function NutritionPage() {
         kicker="Food, supplements & daily intake"
         title="Nutrition"
         actions={
-          <RangeControl
-            options={["day", "7d", "30d"]}
-            value={range}
-            onChange={(r) => navigate(date, r)}
-            name="nutrition-range"
-          />
+          <>
+            <RangeControl
+              options={["day", "7d", "30d"]}
+              value={range}
+              onChange={(r) => navigate(date, r)}
+              name="nutrition-range"
+            />
+            <Menu>
+              <MenuTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    aria-label="Nutrition page actions"
+                  />
+                }
+              >
+                <MoreHorizontal />
+              </MenuTrigger>
+              <MenuPopup align="end">
+                <MenuItem
+                  disabled={query.isFetching}
+                  onClick={() =>
+                    void refresh().catch((e) => setError(String(e)))
+                  }
+                >
+                  Refresh
+                </MenuItem>
+              </MenuPopup>
+            </Menu>
+          </>
         }
       />
-      <div className="page-x nutrition-page">
-        <div className="nutrition-toolbar">
-          <Button
-            variant="outline"
-            aria-label="Previous date"
-            onClick={() => navigate(shiftDate(date, -1))}
-          >
-            ←
-          </Button>
-          <DateControl
-            aria-label="End date"
-
+      <div className="page-x nutrition-page space-y-6">
+        <div className="space-y-2">
+          <DateNavigator
+            label="End date"
             value={date}
-            onValueChange={(value) => {
-              if (validDate(value)) navigate(value);
-            }}
+            onValueChange={(value) => navigate(value)}
+            onPrevious={() => navigate(shiftDate(date, -1))}
+            onNext={() => navigate(shiftDate(date, 1))}
+            onReset={() => navigate(localToday())}
+            resetLabel="Today"
           />
-          <Button
-            variant="outline"
-            aria-label="Next date"
-            onClick={() => navigate(shiftDate(date, 1))}
-          >
-            →
-          </Button>
-          <Button variant="outline" onClick={() => navigate(localToday())}>
-            Today
-          </Button>
-          <span className="nutrition-muted">
+          <p className="nutrition-muted">
             Asia/Singapore{range !== "day" ? ` · ${start} to ${date}` : ""}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => void refresh().catch((e) => setError(String(e)))}
-            disabled={query.isFetching}
-          >
-            Refresh
-          </Button>
-          {protocol && (
-            <Button variant="outline" onClick={() => setEditing(!editing)}>
-              Edit targets
-            </Button>
-          )}
+          </p>
         </div>
         {error && (
           <Alert variant="error" role="alert">
@@ -354,46 +382,38 @@ export default function NutritionPage() {
         ) : (
           data && (
             <>
-              {editing && protocol && (
-                <ProtocolEditor
-                  record={protocol}
-                  date={date}
-                  version={Math.max(0, ...protocols.map((p) => p.version))}
-                  catalog={data.catalog}
-                  onClose={() => setEditing(false)}
-                  onSave={refresh}
-                />
-              )}
-              <div className="nutrition-intro">
-                <div>
-                  <strong>
-                    {range === "day"
-                      ? currentDay?.complete
-                        ? "Day marked complete"
-                        : "Day in progress"
-                      : `${completeDays} of ${count} days marked complete`}
-                  </strong>
-                  <p className="nutrition-muted">
-                    {range === "day"
-                      ? "Log everything you consume, then mark the day complete."
-                      : "Averages include days with values, including partial days. Missing days are excluded."}{" "}
-                    Unknown nutrients are never counted as zero.
-                  </p>
+              <PageSection title="Logging status">
+                <div className="nutrition-intro">
+                  <div>
+                    <strong>
+                      {range === "day"
+                        ? currentDay?.complete
+                          ? "Day marked complete"
+                          : "Day in progress"
+                        : `${completeDays} of ${count} days marked complete`}
+                    </strong>
+                    <p className="nutrition-muted">
+                      {range === "day"
+                        ? "Log everything you consume, then mark the day complete."
+                        : "Averages include days with values, including partial days. Missing days are excluded."}{" "}
+                      Unknown nutrients are never counted as zero.
+                    </p>
+                  </div>
+                  {range === "day" && (
+                    <Button
+                      variant="outline"
+                      disabled={saving || query.isError}
+                      onClick={() => void toggle()}
+                    >
+                      {saving
+                        ? "Saving…"
+                        : currentDay?.complete
+                          ? "Reopen day"
+                          : "Mark day complete"}
+                    </Button>
+                  )}
                 </div>
-                {range === "day" && (
-                  <Button
-                    variant="outline"
-                    disabled={saving || query.isError}
-                    onClick={() => void toggle()}
-                  >
-                    {saving
-                      ? "Saving…"
-                      : currentDay?.complete
-                        ? "Reopen day"
-                        : "Mark day complete"}
-                  </Button>
-                )}
-              </div>
+              </PageSection>
               {!protocol && (
                 <p className="nutrition-notice">
                   No protocol applies to this date. Intake is still available;
@@ -413,29 +433,27 @@ export default function NutritionPage() {
               >
                 {HERO.map((k) => nutrient(k, true))}
               </section>
-              <section
-                className="nutrition-secondary"
-                aria-label="Fiber and water"
-              >
-                {SECONDARY.map((k) => nutrient(k, true))}
-              </section>
+              <PageSection title="Fiber and water">
+                <div className="nutrition-secondary">
+                  {SECONDARY.map((k) => nutrient(k))}
+                </div>
+              </PageSection>
               {range !== "day" && (
-                <section className="nutrition-section">
-                  <div className="nutrition-toolbar">
-                    <h2>Daily trend</h2>
+                <PageSection
+                  title="Daily trend"
+                  actions={
                     <Choice
                       searchable
                       aria-label="Trend nutrient"
                       value={selected}
                       onValueChange={(value) => setSelected(value)}
-                    >
-                      {Object.keys(data.catalog).map((k) => (
-                        <option key={k} value={k}>
-                          {nutrientLabel(k)}
-                        </option>
-                      ))}
-                    </Choice>
-                  </div>
+                      options={Object.keys(data.catalog).map((k) => ({
+                        value: k,
+                        label: nutrientLabel(k),
+                      }))}
+                    />
+                  }
+                >
                   <Trend
                     days={days}
                     nutrient={selected}
@@ -495,10 +513,9 @@ export default function NutritionPage() {
                       </TableBody>
                     </Table>
                   </div>
-                </section>
+                </PageSection>
               )}
-              <section className="nutrition-section">
-                <h2>Vitamins & minerals</h2>
+              <PageSection title={<>Vitamins & minerals</>}>
                 <p className="nutrition-muted">
                   Food and supplements combined. A complete day can still have
                   incomplete nutrient information.
@@ -506,9 +523,8 @@ export default function NutritionPage() {
                 <div className="nutrition-grid">
                   {MICRO.map((k) => nutrient(k))}
                 </div>
-              </section>
-              <section className="nutrition-section">
-                <h2>Supplements</h2>
+              </PageSection>
+              <PageSection title={<>Supplements</>}>
                 {records.flatMap((r) =>
                   r.entry.items
                     .filter((i) => i.kind === "supplement")
@@ -549,14 +565,16 @@ export default function NutritionPage() {
                 <p className="nutrition-muted">
                   Recorded consumption, not a recommended supplement schedule.
                 </p>
-              </section>
+              </PageSection>
               <ResponsiveDetails
                 title="Other nutrients"
                 className="nutrition-section"
+                trigger={
+                  <>
+                    <h2 style={{ display: "inline" }}>Other nutrients</h2>
+                  </>
+                }
               >
-                <summary>
-                  <h2 style={{ display: "inline" }}>Other nutrients</h2>
-                </summary>
                 <div className="nutrition-grid">
                   {Object.keys(data.catalog)
                     .filter(
@@ -566,26 +584,27 @@ export default function NutritionPage() {
                     .map((k) => nutrient(k))}
                 </div>
               </ResponsiveDetails>
-              <section className="nutrition-section">
-                <h2>Food log</h2>
+              <PageSection title={<>Food log</>}>
                 {records.map((r) => (
                   <ResponsiveDetails
                     title={r.entry.meal || "Food entry"}
                     key={r.entry.id}
                     className="nutrition-log"
+                    trigger={
+                      <>
+                        <span>
+                          <strong>{r.entry.meal || "Food entry"}</strong>
+                          <small>
+                            {r.entry.local_date}
+                            {r.entry.eaten_at
+                              ? ` · ${new Date(r.entry.eaten_at).toLocaleTimeString("en-SG", { timeZone: r.entry.timezone, hour: "2-digit", minute: "2-digit" })}${r.entry.time_precision === "approximate" ? " (approx.)" : ""}`
+                              : " · Time not specified"}
+                          </small>
+                        </span>
+                        <span>{r.entry.items.length} items</span>
+                      </>
+                    }
                   >
-                    <summary>
-                      <span>
-                        <strong>{r.entry.meal || "Food entry"}</strong>
-                        <small>
-                          {r.entry.local_date}
-                          {r.entry.eaten_at
-                            ? ` · ${new Date(r.entry.eaten_at).toLocaleTimeString("en-SG", { timeZone: r.entry.timezone, hour: "2-digit", minute: "2-digit" })}${r.entry.time_precision === "approximate" ? " (approx.)" : ""}`
-                            : " · Time not specified"}
-                        </small>
-                      </span>
-                      <span>{r.entry.items.length} items</span>
-                    </summary>
                     {r.entry.items.map((i, index) => (
                       <div className="nutrition-detail" key={index}>
                         <strong>{i.name}</strong> · {i.portion}
@@ -609,15 +628,32 @@ export default function NutritionPage() {
                     <p className="nutrition-muted">{r.entry.notes}</p>
                   </ResponsiveDetails>
                 ))}
-              </section>
+              </PageSection>
               {protocol && (
-                <ResponsiveDetails
+                <PageSection
                   title="Your protocol"
-                  className="nutrition-section"
+                  description={`Effective ${protocol.effective_date}`}
+                  actions={
+                    <Button
+                      ref={editButton}
+                      variant="outline"
+                      disabled={editing}
+                      onClick={() => setEditing(true)}
+                    >
+                      Edit targets
+                    </Button>
+                  }
                 >
-                  <summary>
-                    Your protocol · effective {protocol.effective_date}
-                  </summary>
+                  {editing && protocol && (
+                    <ProtocolEditor
+                      record={protocol}
+                      date={date}
+                      version={Math.max(0, ...protocols.map((p) => p.version))}
+                      catalog={data.catalog}
+                      onClose={closeEditor}
+                      onSave={refresh}
+                    />
+                  )}
                   <p>
                     {protocol.profile.goal} · {protocol.profile.activity}
                   </p>
@@ -630,7 +666,7 @@ export default function NutritionPage() {
                       {p.protocol.effective_date} · {p.reason}
                     </p>
                   ))}
-                </ResponsiveDetails>
+                </PageSection>
               )}
               <p className="nutrition-muted nutrition-footer">
                 Send meal photos in the connected conversation. FreeReps stores

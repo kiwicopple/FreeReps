@@ -1,9 +1,4 @@
-import {
-  Children,
-  isValidElement,
-  type ReactNode,
-  type CSSProperties,
-} from "react";
+import type { ReactNode, CSSProperties } from "react";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -12,19 +7,16 @@ import {
 import { Button } from "./ui/button";
 /** Independent disclosure; content stays mounted to preserve form drafts. */
 export default function Disclosure({
+  trigger,
   children,
   className,
   style,
 }: {
+  trigger: ReactNode;
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
 }) {
-  const parts = Children.toArray(children);
-  const first = parts[0];
-  const label = isValidElement<{ children?: ReactNode }>(first)
-    ? first.props.children
-    : first;
   return (
     <Collapsible className={className} style={style}>
       <CollapsibleTrigger
@@ -35,9 +27,9 @@ export default function Disclosure({
           />
         }
       >
-        {label}
+        {trigger}
       </CollapsibleTrigger>
-      <CollapsiblePanel keepMounted>{parts.slice(1)}</CollapsiblePanel>
+      <CollapsiblePanel keepMounted>{children}</CollapsiblePanel>
     </Collapsible>
   );
 }

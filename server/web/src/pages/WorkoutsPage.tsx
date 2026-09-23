@@ -1,3 +1,5 @@
+import PageSection from "@/components/PageSection";
+import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
 import {
   Pagination,
   PaginationContent,
@@ -136,245 +138,224 @@ export default function WorkoutsPage() {
         }
       />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isDesktop
-            ? "repeat(5, minmax(0,1fr))"
-            : "repeat(3, minmax(0,1fr))",
-          borderTop: "2px solid var(--foreground)",
-          borderBottom: "2px solid var(--foreground)",
-        }}
-      >
-        <SummaryCell
-          label="Sessions"
-          value={String(summary.count)}
-          meta={`${summary.perWeek.toFixed(1)} per week`}
-          isDesktop={isDesktop}
-        />
-        <SummaryCell
-          label="Total time"
-          value={formatDuration(summary.totalSeconds)}
-          meta={
-            summary.count > 0
-              ? `avg ${formatDuration(summary.totalSeconds / summary.count)} per session`
-              : ""
-          }
-          isDesktop={isDesktop}
-        />
-        <SummaryCell
-          label="Energy"
-          value={formatNumber(summary.energy)}
-          unit="kcal"
-          meta={
-            summary.count > 0
-              ? `avg ${formatNumber(summary.energy / summary.count)} per session`
-              : ""
-          }
-          isDesktop={isDesktop}
-        />
-        {isDesktop ? (
-          <>
-            <SummaryCell
-              label="Avg heart rate"
-              value={summary.avgHR ? formatNumber(summary.avgHR) : "—"}
-              unit="bpm"
-              meta={
-                summary.peakHR ? `peak ${formatNumber(summary.peakHR)}` : ""
-              }
-              isDesktop
-            />
-            <SummaryCell
-              label="Distance"
-              value={formatNumber(summary.distance, 1)}
-              unit="km"
-              meta={`${summary.withDistance} sessions with GPS`}
-              isDesktop
-            />
-          </>
-        ) : null}
-      </div>
-
-      <div
-        className="page-x"
-        style={{
-          display: "flex",
-          gap: 8,
-          paddingTop: isDesktop ? 24 : 14,
-          paddingBottom: 14,
-          /* A real history has more workout types than the design's six, so the
-             row wraps rather than pushing the note off the page. On the phone
-             it stays one non-wrapping scroll row. */
-          flexWrap: isDesktop ? "wrap" : "nowrap",
-          overflowX: isDesktop ? undefined : "auto",
-          alignItems: "center",
-        }}
-      >
-        <FilterPill
-          label="All"
-          count={all.length}
-          active={typeFilter === ""}
-          onClick={() => setParam("type", null)}
-        />
-        {typeCounts.map(([type, count]) => (
-          <FilterPill
-            key={type}
-            label={type}
-            count={count}
-            active={typeFilter === type}
-            onClick={() => setParam("type", type)}
+      <div className="page-x space-y-6">
+        <SummaryGrid>
+          <SummaryValue
+            label="Sessions"
+            value={String(summary.count)}
+            detail={`${summary.perWeek.toFixed(1)} per week`}
           />
-        ))}
-        {isDesktop ? (
-          <span
+          <SummaryValue
+            label="Total time"
+            value={formatDuration(summary.totalSeconds)}
+            detail={
+              summary.count > 0
+                ? `avg ${formatDuration(summary.totalSeconds / summary.count)} per session`
+                : ""
+            }
+          />
+          <SummaryValue
+            label="Energy"
+            value={formatNumber(summary.energy)}
+            unit="kcal"
+            detail={
+              summary.count > 0
+                ? `avg ${formatNumber(summary.energy / summary.count)} per session`
+                : ""
+            }
+          />
+          {isDesktop ? (
+            <>
+              <SummaryValue
+                label="Avg heart rate"
+                value={summary.avgHR ? formatNumber(summary.avgHR) : "—"}
+                unit="bpm"
+                detail={
+                  summary.peakHR ? `peak ${formatNumber(summary.peakHR)}` : ""
+                }
+              />
+              <SummaryValue
+                label="Distance"
+                value={formatNumber(summary.distance, 1)}
+                unit="km"
+                detail={`${summary.withDistance} sessions with GPS`}
+              />
+            </>
+          ) : null}
+        </SummaryGrid>
+
+        <div
+          className="flex items-center gap-2 overflow-x-auto md:flex-wrap"
+          role="group"
+          aria-label="Workout type filters"
+        >
+          <FilterPill
+            label="All"
+            count={all.length}
+            active={typeFilter === ""}
+            onClick={() => setParam("type", null)}
+          />
+          {typeCounts.map(([type, count]) => (
+            <FilterPill
+              key={type}
+              label={type}
+              count={count}
+              active={typeFilter === type}
+              onClick={() => setParam("type", type)}
+            />
+          ))}
+          {isDesktop ? (
+            <span
+              style={{
+                marginLeft: "auto",
+                font: "400 11.5px var(--font-body)",
+                color: "var(--muted-foreground)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {typeFilter ? `Filtered to ${typeFilter}` : "All types"} · newest
+              first
+            </span>
+          ) : null}
+        </div>
+
+        <PageSection title="Sessions" flush>
+          {message ? (
+            <Alert
+              variant="error"
+              className="page-x"
+              style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+            >
+              {message}
+              <Button variant="outline" onClick={() => workoutsQuery.refetch()}>
+                Retry
+              </Button>
+            </Alert>
+          ) : state === "loading" ? (
+            <Spinner className="mx-auto my-6 size-6" />
+          ) : filtered.length === 0 ? (
+            <Empty
+              className="page-x"
+              style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+            >
+              No workouts in this window.
+            </Empty>
+          ) : isDesktop ? (
+            <WorkoutTable
+              groups={groups}
+              zonesById={zonesById}
+              onOpen={(id) =>
+                navigate(`/workouts/${id}`, {
+                  state: { workout: all.find((w) => w.ID === id) },
+                })
+              }
+            />
+          ) : (
+            <WorkoutCards
+              groups={groups}
+              zonesById={zonesById}
+              onOpen={(id) =>
+                navigate(`/workouts/${id}`, {
+                  state: { workout: all.find((w) => w.ID === id) },
+                })
+              }
+            />
+          )}
+
+          <div
+            className="page-x flex items-center gap-4"
             style={{
-              marginLeft: "auto",
-              font: "400 11.5px var(--font-body)",
-              color: "var(--muted-foreground)",
-              whiteSpace: "nowrap",
+              borderTop: "1px solid var(--border)",
+              paddingTop: 14,
+              paddingBottom: 14,
+              marginTop: "auto",
             }}
           >
-            {typeFilter ? `Filtered to ${typeFilter}` : "All types"} · newest
-            first
-          </span>
-        ) : null}
-      </div>
-
-      {message ? (
-        <Alert
-          variant="error"
-          className="page-x"
-          style={{ color: "var(--muted-foreground)", fontSize: 13 }}
-        >
-          {message}
-          <Button variant="outline" onClick={() => workoutsQuery.refetch()}>
-            Retry
-          </Button>
-        </Alert>
-      ) : state === "loading" ? (
-        <Spinner className="mx-auto my-6 size-6" />
-      ) : filtered.length === 0 ? (
-        <Empty
-          className="page-x"
-          style={{ color: "var(--muted-foreground)", fontSize: 13 }}
-        >
-          No workouts in this window.
-        </Empty>
-      ) : isDesktop ? (
-        <WorkoutTable
-          groups={groups}
-          zonesById={zonesById}
-          onOpen={(id) =>
-            navigate(`/workouts/${id}`, {
-              state: { workout: all.find((w) => w.ID === id) },
-            })
-          }
-        />
-      ) : (
-        <WorkoutCards
-          groups={groups}
-          zonesById={zonesById}
-          onOpen={(id) =>
-            navigate(`/workouts/${id}`, {
-              state: { workout: all.find((w) => w.ID === id) },
-            })
-          }
-        />
-      )}
-
-      <div
-        className="page-x flex items-center gap-4"
-        style={{
-          borderTop: "2px solid var(--foreground)",
-          paddingTop: 14,
-          paddingBottom: 14,
-          marginTop: "auto",
-        }}
-      >
-        <span
-          className="num"
-          style={{
-            font: "400 12px var(--font-body)",
-            color: "var(--muted-foreground)",
-          }}
-        >
-          Showing {filtered.length === 0 ? 0 : page * PAGE_SIZE + 1}–
-          {Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
-          {filtered.length}
-        </span>
-        <Pagination className="ml-auto w-auto">
-          <PaginationContent>
-            <PaginationItem>
-              <Button
-                variant="outline"
-                type="button"
-
-                style={{ marginLeft: "auto", fontSize: 12 }}
-                disabled={page === 0}
-                onClick={() => setParam("page", String(page - 1))}
-              >
-                Prev
-              </Button>
-            </PaginationItem>
-            <PaginationItem>
-              <Button
-                variant="outline"
-                type="button"
-
-                style={{ fontSize: 12 }}
-                disabled={(page + 1) * PAGE_SIZE >= filtered.length}
-                onClick={() => setParam("page", String(page + 1))}
-              >
-                Next
-              </Button>
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>{" "}
-      </div>
-
-      {isDesktop && maxHR > 0 ? (
-        <div
-          className="page-x flex items-center gap-6 flex-wrap"
-          style={{
-            borderTop: "1px solid var(--border)",
-            paddingTop: 14,
-            paddingBottom: 40,
-          }}
-        >
-          {zoneBands(maxHR).map((band, i) => (
             <span
-              key={i}
+              className="num"
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                font: "400 11.5px var(--font-body)",
+                font: "400 12px var(--font-body)",
                 color: "var(--muted-foreground)",
               }}
             >
-              <span
-                style={{ width: 11, height: 11, background: ZONE_COLORS[i] }}
-              />
-              Zone {i + 1}
-              <span
-                className="num"
-                style={{ color: "var(--muted-foreground)" }}
-              >
-                {band}
-              </span>
+              Showing {filtered.length === 0 ? 0 : page * PAGE_SIZE + 1}–
+              {Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
+              {filtered.length}
             </span>
-          ))}
-          <span
+            <Pagination className="ml-auto w-auto">
+              <PaginationContent>
+                <PaginationItem>
+                  <Button
+                    variant="outline"
+                    type="button"
+
+                    style={{ marginLeft: "auto", fontSize: 12 }}
+                    disabled={page === 0}
+                    onClick={() => setParam("page", String(page - 1))}
+                  >
+                    Prev
+                  </Button>
+                </PaginationItem>
+                <PaginationItem>
+                  <Button
+                    variant="outline"
+                    type="button"
+
+                    style={{ fontSize: 12 }}
+                    disabled={(page + 1) * PAGE_SIZE >= filtered.length}
+                    onClick={() => setParam("page", String(page + 1))}
+                  >
+                    Next
+                  </Button>
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>{" "}
+          </div>
+        </PageSection>
+        {isDesktop && maxHR > 0 ? (
+          <div
+            className="page-x flex items-center gap-6 flex-wrap"
             style={{
-              marginLeft: "auto",
-              font: "400 11px var(--font-body)",
-              color: "var(--muted-foreground)",
+              borderTop: "1px solid var(--border)",
+              paddingTop: 14,
+              paddingBottom: 40,
             }}
           >
-            Bands from a maximum of {formatNumber(maxHR)} bpm
-          </span>
-        </div>
-      ) : null}
+            {zoneBands(maxHR).map((band, i) => (
+              <span
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  font: "400 11.5px var(--font-body)",
+                  color: "var(--muted-foreground)",
+                }}
+              >
+                <span
+                  style={{ width: 11, height: 11, background: ZONE_COLORS[i] }}
+                />
+                Zone {i + 1}
+                <span
+                  className="num"
+                  style={{ color: "var(--muted-foreground)" }}
+                >
+                  {band}
+                </span>
+              </span>
+            ))}
+            <span
+              style={{
+                marginLeft: "auto",
+                font: "400 11px var(--font-body)",
+                color: "var(--muted-foreground)",
+              }}
+            >
+              Bands from a maximum of {formatNumber(maxHR)} bpm
+            </span>
+          </div>
+        ) : null}
+      </div>
     </>
   );
 }
@@ -509,7 +490,7 @@ function WorkoutCards({
   onOpen: (id: string) => void;
 }) {
   return (
-    <div style={{ borderTop: "2px solid var(--foreground)" }}>
+    <div style={{ borderTop: "1px solid var(--border)" }}>
       {groups.map((group) => (
         <div key={group.key}>
           <div className="kick row-group">{group.label}</div>
@@ -619,66 +600,6 @@ function FilterPill({
         {count}
       </span>
     </Button>
-  );
-}
-
-function SummaryCell({
-  label,
-  value,
-  unit,
-  meta,
-  isDesktop,
-}: {
-  label: string;
-  value: string;
-  unit?: string;
-  meta?: string;
-  isDesktop: boolean;
-}) {
-  return (
-    <div
-      className="page-x"
-      style={{
-        paddingTop: isDesktop ? 24 : 14,
-        paddingInline: "clamp(12px, 2vw, 32px)",
-        paddingBottom: isDesktop ? 22 : 14,
-        borderRight: "1px solid var(--border)",
-      }}
-    >
-      <div className="kick">{label}</div>
-      <div
-        className="num"
-        style={{
-          font: `800 ${isDesktop ? "clamp(24px, 3vw, 44px)" : "26px"}/1 var(--font-heading)`,
-          letterSpacing: "-0.03em",
-          marginTop: isDesktop ? 14 : 8,
-        }}
-      >
-        {value}
-        {unit ? (
-          <span
-            style={{
-              font: `500 ${isDesktop ? 14 : 11}px var(--font-body)`,
-              color: "var(--muted-foreground)",
-              marginLeft: isDesktop ? 6 : 3,
-            }}
-          >
-            {unit}
-          </span>
-        ) : null}
-      </div>
-      {isDesktop && meta ? (
-        <div
-          style={{
-            font: "400 12px var(--font-body)",
-            color: "var(--muted-foreground)",
-            marginTop: 12,
-          }}
-        >
-          {meta}
-        </div>
-      ) : null}
-    </div>
   );
 }
 

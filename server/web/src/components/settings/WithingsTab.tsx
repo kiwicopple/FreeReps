@@ -1,7 +1,8 @@
+import { Field, FieldLabel } from "../ui/field";
+import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
-import { Field } from "@/components/ui/field";
 import ConfirmAction from "../ConfirmAction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ import {
   triggerWithingsSync,
   type WithingsStatus,
 } from "../../api";
-import { MONO, RedirectURIRow, TabHeader } from "./parts";
+import { MONO, RedirectURIRow } from "./parts";
 
 export default function WithingsTab() {
   const [status, setStatus] = useState<WithingsStatus | null>(null);
@@ -103,15 +104,18 @@ export default function WithingsTab() {
   }
 
   return (
-    <>
-      <TabHeader title="Withings">
-        Weight, body composition and blood pressure are read directly on a
-        schedule. Register an app at developer.withings.com, save its
-        credentials here, then authorize once. The same measurements keep
-        arriving through Apple Health; where both cover a day, Withings wins by
-        source priority.
-      </TabHeader>
-
+    <PageSection
+      title="Withings"
+      description={
+        <>
+          Weight, body composition and blood pressure are read directly on a
+          schedule. Register an app at developer.withings.com, save its
+          credentials here, then authorize once. The same measurements keep
+          arriving through Apple Health; where both cover a day, Withings wins
+          by source priority.
+        </>
+      }
+    >
       {status?.redirect_uri ? (
         <RedirectURIRow uri={status.redirect_uri} />
       ) : null}
@@ -132,7 +136,7 @@ export default function WithingsTab() {
       ) : !status.configured ? (
         <div style={{ paddingTop: 20, maxWidth: 520 }}>
           <Field style={{ marginBottom: 14 }}>
-            <Label htmlFor="withings-id">Client ID</Label>
+            <FieldLabel htmlFor="withings-id">Client ID</FieldLabel>
             <Input
               id="withings-id"
 
@@ -143,7 +147,7 @@ export default function WithingsTab() {
             />
           </Field>
           <Field style={{ marginBottom: 16 }}>
-            <Label htmlFor="withings-secret">Client secret</Label>
+            <FieldLabel htmlFor="withings-secret">Client secret</FieldLabel>
             <Input
               id="withings-secret"
 
@@ -173,7 +177,7 @@ export default function WithingsTab() {
           onDisconnect={handleDisconnect}
         />
       )}
-    </>
+    </PageSection>
   );
 }
 
@@ -196,7 +200,7 @@ function StatusPanel({
     <>
       <div
         style={{
-          border: "2px solid var(--foreground)",
+          border: "1px solid var(--border)",
           padding: "22px 24px",
           marginTop: 20,
         }}

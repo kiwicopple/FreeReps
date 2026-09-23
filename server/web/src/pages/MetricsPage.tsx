@@ -1,3 +1,5 @@
+import PageSection from "@/components/PageSection";
+import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
 import { Label } from "@/components/ui/label";
 import Choice from "../components/Choice";
 import { Alert } from "@/components/ui/alert";
@@ -105,14 +107,8 @@ export default function MetricsPage() {
         }
       />
 
-      <div
-        style={{
-          display: "flex",
-          borderTop: "2px solid var(--foreground)",
-          minHeight: 760,
-        }}
-      >
-        <aside className="w-72 shrink-0 border-r p-5">
+      <div className="page-x grid min-w-0 gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="min-w-0">
           <Label
             className="mb-3 block text-sm font-medium"
             htmlFor="metric-choice"
@@ -125,125 +121,88 @@ export default function MetricsPage() {
             aria-label="Metric"
             value={metric}
             onValueChange={(value) => setParam("metric", value)}
-          >
-            {groups.map((group) => (
-              <optgroup key={group.label} label={group.label}>
-                {group.metrics.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </Choice>
+            options={groups.flatMap((group) =>
+              group.metrics.map((item) => ({
+                value: item.value,
+                label: item.label,
+                group: group.label,
+              })),
+            )}
+          />
         </aside>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            className="flex items-baseline justify-between gap-5 page-x"
-            style={{ paddingTop: 22, paddingBottom: 18 }}
-          >
-            <div>
-              <h2 style={{ fontSize: 26, letterSpacing: "-0.02em" }}>
-                {selected?.label ?? (metric ? metricLabel(metric) : "—")}
-              </h2>
-              <div
-                style={{
-                  font: "400 12px var(--font-body)",
-                  color: "var(--muted-foreground)",
-                  marginTop: 7,
-                }}
+        <div className="min-w-0 space-y-6">
+          <PageSection
+            title={selected?.label ?? (metric ? metricLabel(metric) : "—")}
+            description={[selected?.unit, `${days} days`, `${agg} aggregate`]
+              .filter(Boolean)
+              .join(" · ")}
+            actions={
+              <Button
+                variant="outline"
+                type="button"
+
+                style={{ fontSize: 12 }}
+                onClick={() => exportCSV(points, multiplier, metric)}
+                disabled={points.length === 0}
               >
-                {[selected?.unit, `${days} days`, `${agg} aggregate`]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              type="button"
-
-              style={{ fontSize: 12 }}
-              onClick={() => exportCSV(points, multiplier, metric)}
-              disabled={points.length === 0}
-            >
-              Export CSV
-            </Button>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(6, 1fr)",
-              borderTop: "2px solid var(--foreground)",
-              borderBottom: "2px solid var(--foreground)",
-            }}
+                Export CSV
+              </Button>
+            }
           >
-            <Stat label="Latest" value={scale(latest, multiplier)} />
-            <Stat
-              label={isCumulative ? "Total" : "Mean"}
-              value={scale(stats?.avg ?? null, multiplier)}
-            />
-            <Stat label="Min" value={scale(stats?.min ?? null, multiplier)} />
-            <Stat label="Max" value={scale(stats?.max ?? null, multiplier)} />
-            <Stat
-              label="Std dev"
-              value={scale(stats?.stddev ?? null, multiplier)}
-            />
-            {/* Samples tells you when a gap in the data explains a weird mean. */}
-            <Stat
-              label="Samples"
-              value={stats ? formatNumber(stats.count) : "—"}
-            />
-          </div>
-
-          <div className="page-x" style={{ paddingTop: 26, paddingBottom: 34 }}>
-            {message ? (
-              <Alert
-                variant="error"
-                style={{ color: "var(--muted-foreground)", fontSize: 13 }}
-              >
-                {message}
-                <Button variant="outline" onClick={() => seriesQuery.refetch()}>
-                  Retry
-                </Button>
-              </Alert>
-            ) : state === "loading" ? (
-              <Skeleton style={{ width: "100%", height: 420 }} />
-            ) : (
-              <MetricChart
-                points={points}
-                multiplier={multiplier}
-                unit={selected?.unit ?? ""}
+            <SummaryGrid>
+              <SummaryValue label="Latest" value={scale(latest, multiplier)} />
+              <SummaryValue
+                label={isCumulative ? "Total" : "Mean"}
+                value={scale(stats?.avg ?? null, multiplier)}
               />
-            )}
-          </div>
+              <SummaryValue
+                label="Min"
+                value={scale(stats?.min ?? null, multiplier)}
+              />
+              <SummaryValue
+                label="Max"
+                value={scale(stats?.max ?? null, multiplier)}
+              />
+              <SummaryValue
+                label="Std dev"
+                value={scale(stats?.stddev ?? null, multiplier)}
+              />
+              {/* Samples tells you when a gap in the data explains a weird mean. */}
+              <SummaryValue
+                label="Samples"
+                value={stats ? formatNumber(stats.count) : "—"}
+              />
+            </SummaryGrid>
+
+            <div className="mt-6 min-w-0">
+              {message ? (
+                <Alert
+                  variant="error"
+                  style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+                >
+                  {message}
+                  <Button
+                    variant="outline"
+                    onClick={() => seriesQuery.refetch()}
+                  >
+                    Retry
+                  </Button>
+                </Alert>
+              ) : state === "loading" ? (
+                <Skeleton style={{ width: "100%", height: 420 }} />
+              ) : (
+                <MetricChart
+                  points={points}
+                  multiplier={multiplier}
+                  unit={selected?.unit ?? ""}
+                />
+              )}
+            </div>
+          </PageSection>
         </div>
       </div>
     </>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div
-      style={{
-        padding: "18px 20px 16px",
-        borderRight: "1px solid var(--border)",
-      }}
-    >
-      <div className="kick">{label}</div>
-      <div
-        className="num"
-        style={{
-          font: "800 26px/1 var(--font-heading)",
-          letterSpacing: "-0.03em",
-          marginTop: 11,
-        }}
-      >
-        {value}
-      </div>
-    </div>
   );
 }
 

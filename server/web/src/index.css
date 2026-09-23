@@ -322,6 +322,6 @@ p a {
 }
 
 /* The shared picker is the only visible calendar trigger on editable dates. */
-.date-entry::-webkit-calendar-picker-indicator {
+.date-entry input::-webkit-calendar-picker-indicator {
   display: none;
 }

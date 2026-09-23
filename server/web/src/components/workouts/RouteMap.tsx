@@ -1,3 +1,4 @@
+import PageSection from "../PageSection";
 import { MapContainer, TileLayer, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { WorkoutRoute } from "../../api";
@@ -40,15 +41,8 @@ export default function RouteMap({ route }: Props) {
   if (positions.length === 0 || !bounds) return null;
 
   return (
-    <div style={{ marginTop: 30 }}>
-      <h2 style={{ fontSize: 19, fontWeight: 700 }}>Route</h2>
-      <div
-        style={{
-          borderTop: "2px solid var(--foreground)",
-          marginTop: 12,
-          paddingTop: 12,
-        }}
-      >
+    <PageSection title={<>Route</>}>
+      <div className="min-w-0">
         <div style={{ height: 320 }}>
           <MapContainer
             bounds={bounds}
@@ -75,6 +69,6 @@ export default function RouteMap({ route }: Props) {
           </MapContainer>
         </div>
       </div>
-    </div>
+    </PageSection>
   );
 }

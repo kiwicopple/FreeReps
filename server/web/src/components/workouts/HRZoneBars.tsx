@@ -1,5 +1,5 @@
+import PageSection from "../PageSection";
 import { Empty } from "@/components/ui/empty";
-import type { ReactNode } from "react";
 import type { WorkoutHR } from "../../api";
 import { ZONE_BOUNDS, ZONE_COLORS, zoneBands } from "../../utils/stageColors";
 
@@ -17,13 +17,13 @@ interface Props {
 export default function HRZoneBars({ hrData, maxHR }: Props) {
   if (!hrData || hrData.length < 5) {
     return (
-      <Section>
+      <PageSection title="Time in heart rate zones">
         <Empty
           style={{ color: "var(--muted-foreground)", fontSize: 13, margin: 0 }}
         >
           Not enough heart rate data for zone analysis.
         </Empty>
-      </Section>
+      </PageSection>
     );
   }
 
@@ -58,20 +58,20 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
   const total = zoneSecs.reduce((a, b) => a + b, 0);
   if (total === 0) {
     return (
-      <Section>
+      <PageSection title="Time in heart rate zones">
         <p
           style={{ color: "var(--muted-foreground)", fontSize: 13, margin: 0 }}
         >
           Samples are too sparse to measure time in zones.
         </p>
-      </Section>
+      </PageSection>
     );
   }
 
   const bands = zoneBands(peak);
 
   return (
-    <Section>
+    <PageSection title="Time in heart rate zones">
       {zoneSecs.map((secs, i) => {
         const pct = (secs / total) * 100;
         const mins = Math.round(secs / 60);
@@ -135,25 +135,6 @@ export default function HRZoneBars({ hrData, maxHR }: Props) {
           </div>
         );
       })}
-    </Section>
-  );
-}
-
-function Section({ children }: { children: ReactNode }) {
-  return (
-    <div style={{ marginTop: 30 }}>
-      <h2 style={{ fontSize: 19, fontWeight: 700 }}>
-        Time in heart rate zones
-      </h2>
-      <div
-        style={{
-          borderTop: "2px solid var(--foreground)",
-          marginTop: 12,
-          paddingTop: 8,
-        }}
-      >
-        {children}
-      </div>
-    </div>
+    </PageSection>
   );
 }

@@ -25,7 +25,7 @@ test("sleep date and recovery remain available", async ({ safePage: page }) => {
     page.getByText("Protocol recovery · experimental v1"),
   ).toBeVisible();
   await expect(page.getByText("Provisional · sleep-only")).toBeVisible();
-  await page.getByRole("button", { name: "Previous night" }).click();
+  await page.getByRole("button", { name: "Previous day" }).click();
   await expect(page).toHaveURL(/date=2025-01-13/);
   await expect(
     page.getByText("No sleep recorded for this date.", { exact: false }),

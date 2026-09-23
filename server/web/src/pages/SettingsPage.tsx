@@ -52,20 +52,9 @@ export default function SettingsPage() {
         <div className="page-x" style={{ paddingBottom: 16 }}>
           <Link to="/trends">View trends →</Link>
         </div>
-        <div style={{ borderTop: "2px solid var(--foreground)" }}>
+        <div className="page-x space-y-6">
           {TABS.map((tab) => (
-            <section
-              key={tab.id}
-              aria-label={tab.label}
-              className="page-x"
-              style={{
-                paddingTop: 20,
-                paddingBottom: 24,
-                borderBottom: "2px solid var(--foreground)",
-              }}
-            >
-              {tab.render()}
-            </section>
+            <div key={tab.id}>{tab.render()}</div>
           ))}
         </div>
       </>
@@ -80,11 +69,11 @@ export default function SettingsPage() {
         orientation="vertical"
         value={active}
         onValueChange={(id) => setTab(id as TabID)}
-        className="min-h-[640px] border-t p-6"
+        className="page-x min-h-[640px] gap-6"
       >
         <TabsList
           aria-label="Settings sections"
-          className="w-56 shrink-0 self-start"
+          className="w-44 shrink-0 self-start lg:w-56"
         >
           {TABS.map((tab) => (
             <TabsTab key={tab.id} value={tab.id}>
@@ -93,11 +82,7 @@ export default function SettingsPage() {
           ))}
         </TabsList>
         {TABS.map((tab) => (
-          <TabsPanel
-            key={tab.id}
-            value={tab.id}
-            className="min-w-0 max-w-5xl flex-1 px-6 pb-10"
-          >
+          <TabsPanel key={tab.id} value={tab.id} className="min-w-0 flex-1">
             {tab.render()}
           </TabsPanel>
         ))}

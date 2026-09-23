@@ -1,3 +1,4 @@
+import PageSection from "../PageSection";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
@@ -12,7 +13,6 @@ import {
 } from "../../api";
 import { formatNumber, formatTimeAgo } from "../../utils/format";
 import { sourceLabelLong } from "../../utils/sourceLabel";
-import { TabHeader } from "./parts";
 
 const DEFAULT_CATEGORY = "_default";
 
@@ -89,12 +89,15 @@ export default function SourcesTab() {
   }
 
   return (
-    <>
-      <TabHeader title="Sources">
-        When two devices report the same metric, the source higher in this list
-        wins. Move an entry up to prefer it.
-      </TabHeader>
-
+    <PageSection
+      title="Sources"
+      description={
+        <>
+          When two devices report the same metric, the source higher in this
+          list wins. Move an entry up to prefer it.
+        </>
+      }
+    >
       {config.isPending && <Spinner className="my-4 size-5" />}
       {config.error && (
         <Alert variant="error">
@@ -237,9 +240,7 @@ export default function SourcesTab() {
             These categories ignore the order above and use their own. Without
             this list the order above would look like it governed everything.
           </p>
-          <div
-            style={{ borderTop: "2px solid var(--foreground)", marginTop: 12 }}
-          >
+          <div style={{ borderTop: "1px solid var(--border)", marginTop: 12 }}>
             {overrides.map((rule) => (
               <div
                 key={rule.category}
@@ -285,6 +286,6 @@ export default function SourcesTab() {
           </div>
         </div>
       ) : null}
-    </>
+    </PageSection>
   );
 }

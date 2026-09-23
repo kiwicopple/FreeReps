@@ -14,7 +14,7 @@ export default function DesktopOnly({ title }: { title: string }) {
       <PageHeader kicker="Desktop only" title={title} />
       <div
         className="page-x"
-        style={{ borderTop: "2px solid var(--foreground)", paddingTop: 20 }}
+        style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}
       >
         <p
           style={{

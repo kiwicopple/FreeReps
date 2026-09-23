@@ -1,7 +1,8 @@
+import { Field, FieldLabel } from "../ui/field";
+import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
-import { Field } from "@/components/ui/field";
 import ConfirmAction from "../ConfirmAction";
 import DateControl from "@/components/DateControl";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import {
   triggerHevySync,
   type HevyStatus,
 } from "../../api";
-import { MONO, TabHeader } from "./parts";
+import { MONO } from "./parts";
 
 /** Today as YYYY-MM-DD, the default ingest cutoff. */
 function today(): string {
@@ -81,12 +82,15 @@ export default function HevyTab() {
   }
 
   return (
-    <>
-      <TabHeader title="Hevy">
-        Hevy's event feed is polled on a schedule. API access needs an active
-        Hevy Pro subscription; create a key at hevy.com/settings.
-      </TabHeader>
-
+    <PageSection
+      title="Hevy"
+      description={
+        <>
+          Hevy's event feed is polled on a schedule. API access needs an active
+          Hevy Pro subscription; create a key at hevy.com/settings.
+        </>
+      }
+    >
       {error ? (
         <Alert variant="error" className="mt-4">
           {error}{" "}
@@ -103,7 +107,7 @@ export default function HevyTab() {
       ) : !status.configured ? (
         <div style={{ paddingTop: 20, maxWidth: 520 }}>
           <Field style={{ marginBottom: 14 }}>
-            <Label htmlFor="hevy-key">API key</Label>
+            <FieldLabel htmlFor="hevy-key">API key</FieldLabel>
             <Input
               id="hevy-key"
 
@@ -115,7 +119,7 @@ export default function HevyTab() {
             />
           </Field>
           <Field style={{ marginBottom: 16 }}>
-            <Label htmlFor="hevy-from">Import from</Label>
+            <FieldLabel htmlFor="hevy-from">Import from</FieldLabel>
             <DateControl
               id="hevy-from"
               aria-label="Import from"
@@ -150,7 +154,7 @@ export default function HevyTab() {
         <>
           <div
             style={{
-              border: "2px solid var(--foreground)",
+              border: "1px solid var(--border)",
               padding: "22px 24px",
               marginTop: 20,
             }}
@@ -239,6 +243,6 @@ export default function HevyTab() {
           </div>
         </>
       )}
-    </>
+    </PageSection>
   );
 }

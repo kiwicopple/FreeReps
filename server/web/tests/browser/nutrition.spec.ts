@@ -125,7 +125,7 @@ test("calendar selection preserves the local day", async ({
   await page.getByRole("button", { name: "Choose end date" }).click();
   await page.getByRole("button", { name: /January 10th, 2025/ }).click();
   await expect(page).toHaveURL(/date=2025-01-10/);
-  await expect(page.locator('input[aria-label="End date"]')).toHaveValue(
+  await expect(page.getByRole("button", {name: "Choose end date"})).toContainText(
     "2025-01-10",
   );
 });
@@ -238,12 +238,9 @@ test("nutrition period totals, trend selection, food details and protocol histor
   await expect(nutrient).toHaveValue("Protein");
   await page.getByRole("button", { name: "2025-01-15", exact: true }).click();
   await expect(page).toHaveURL(/range=day/);
-  await page.getByRole("button", { name: /Your protocol · effective/ }).click();
   await expect(
     page.getByText("Version 1 · effective 2025-01-01 · Synthetic"),
   ).toBeVisible();
-  if (isMobile)
-    await page.getByRole("button", { name: "Close Your protocol" }).click();
   await page.getByRole("button", { name: /Breakfast/ }).click();
   await expect(
     page.getByText("Synthetic fixture", { exact: true }),

@@ -1,3 +1,4 @@
+import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { Empty } from "@/components/ui/empty";
@@ -11,7 +12,6 @@ import HRZoneBars from "../components/workouts/HRZoneBars";
 import RouteMap from "../components/workouts/RouteMap";
 import WorkoutSets from "../components/workouts/WorkoutSets";
 import { getWorkoutDisplayName } from "../components/workouts/workoutNames";
-import { useIsDesktop } from "../hooks/useMediaQuery";
 import {
   distanceKm,
   formatDistance,
@@ -21,7 +21,6 @@ import {
 
 export default function WorkoutDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const isDesktop = useIsDesktop();
   const location = useLocation();
   const routeWorkout = (location.state as { workout?: Workout } | null)
     ?.workout;
@@ -149,54 +148,19 @@ export default function WorkoutDetailPage() {
         }
       />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isDesktop
-            ? `repeat(${Math.min(stats.length, 6)}, minmax(0,1fr))`
-            : "repeat(auto-fit, minmax(140px,1fr))",
-          borderTop: "2px solid var(--foreground)",
-          borderBottom: "2px solid var(--foreground)",
-        }}
-      >
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="page-x"
-            style={{
-              paddingTop: isDesktop ? 24 : 14,
-              paddingInline: "clamp(12px, 2vw, 32px)",
-              paddingBottom: isDesktop ? 22 : 14,
-              borderRight: "1px solid var(--border)",
-            }}
-          >
-            <div className="kick">{s.label}</div>
-            <div
-              className="num"
-              style={{
-                font: `800 ${isDesktop ? "clamp(24px, 3vw, 44px)" : "26px"}/1 var(--font-heading)`,
-                letterSpacing: "-0.035em",
-                marginTop: isDesktop ? 14 : 8,
-              }}
-            >
-              {s.value}
-              {s.unit ? (
-                <span
-                  style={{
-                    font: `500 ${isDesktop ? 14 : 11}px var(--font-body)`,
-                    color: "var(--muted-foreground)",
-                    marginLeft: 5,
-                  }}
-                >
-                  {s.unit}
-                </span>
-              ) : null}
-            </div>
-          </div>
-        ))}
+      <div className="page-x mb-6">
+        <SummaryGrid>
+          {stats.map((s) => (
+            <SummaryValue
+              key={s.label}
+              label={s.label}
+              value={s.value}
+              unit={s.unit}
+            />
+          ))}
+        </SummaryGrid>
       </div>
-
-      <div className="page-x" style={{ paddingTop: 26, paddingBottom: 40 }}>
+      <div className="page-x space-y-6">
         <WorkoutSets
           workoutId={id!}
           workoutName={w.Name}

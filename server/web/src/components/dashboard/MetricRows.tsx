@@ -24,7 +24,7 @@ interface Props {
 export default function MetricRows({ groups, loading }: Props) {
   if (loading && groups.length === 0) {
     return (
-      <div style={{ borderTop: "2px solid var(--foreground)" }}>
+      <div style={{ borderTop: "1px solid var(--border)" }}>
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="row">
             <div className="flex-1">
@@ -49,7 +49,7 @@ export default function MetricRows({ groups, loading }: Props) {
   }
 
   return (
-    <div style={{ borderTop: "2px solid var(--foreground)" }}>
+    <div style={{ borderTop: "1px solid var(--border)" }}>
       {groups.map((group) => (
         <div key={group.category}>
           <div className="kick row-group">{group.label}</div>

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import Disclosure from "@/components/Disclosure";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { NutritionProtocol, NutritionTarget } from "../../nutritionApi";
 import { saveProtocol } from "../../nutritionApi";
 import { nutrientLabel, unitLabel } from "../../utils/nutrition";
@@ -44,6 +44,10 @@ export default function ProtocolEditor({
   onClose: () => void;
   onSave: () => Promise<void>;
 }) {
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    heading.current?.focus();
+  }, []);
   const [draft, setDraft] = useState<DraftProtocol>(() => ({
     ...structuredClone(record),
     effective_date: date,
@@ -101,7 +105,13 @@ export default function ProtocolEditor({
   }
   return (
     <section className="nutrition-editor" aria-label="Edit nutrition targets">
-      <h2>Edit targets</h2>
+      <h3
+        ref={heading}
+        tabIndex={-1}
+        className="text-lg font-semibold outline-none"
+      >
+        Edit targets
+      </h3>
       <p className="nutrition-muted">
         Changes apply from the date below. Previous versions remain available.
         Targets are planning references.
@@ -131,8 +141,7 @@ export default function ProtocolEditor({
               />
             </Field>
           </div>
-          <Disclosure>
-            <summary>Profile and preferences</summary>
+          <Disclosure trigger={<> Profile and preferences </>}>
             <div className="nutrition-form-grid">
               {(["age", "height_cm", "weight_kg"] as const).map((key) => (
                 <Field key={key}>
@@ -162,10 +171,11 @@ export default function ProtocolEditor({
                       profile: { ...draft.profile, sex: value },
                     })
                   }
-                >
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </Choice>
+                  options={[
+                    { value: "male", label: "Male" },
+                    { value: "female", label: "Female" },
+                  ]}
+                />
               </Field>
               <Field>
                 <FieldLabel>Activity</FieldLabel>
@@ -210,10 +220,14 @@ export default function ProtocolEditor({
             </p>
           </Disclosure>
           {Object.entries(draft.targets).map(([key, t]) => (
-            <Disclosure key={key}>
-              <summary>
-                {nutrientLabel(key)} · {t.value} {unitLabel(t.unit)}
-              </summary>
+            <Disclosure
+              key={key}
+              trigger={
+                <>
+                  {nutrientLabel(key)} · {t.value} {unitLabel(t.unit)}
+                </>
+              }
+            >
               <div className="nutrition-form-grid">
                 <Field>
                   <FieldLabel>Target ({unitLabel(t.unit)})</FieldLabel>
@@ -237,12 +251,13 @@ export default function ProtocolEditor({
                         high: undefined,
                       })
                     }
-                  >
-                    <option value="goal">Goal</option>
-                    <option value="range">Range</option>
-                    <option value="maximum">Planning maximum</option>
-                    <option value="reference">Reference only</option>
-                  </Choice>
+                    options={[
+                      { value: "goal", label: "Goal" },
+                      { value: "range", label: "Range" },
+                      { value: "maximum", label: "Planning maximum" },
+                      { value: "reference", label: "Reference only" },
+                    ]}
+                  />
                 </Field>
                 {t.kind === "range" && (
                   <>
@@ -341,17 +356,14 @@ export default function ProtocolEditor({
               aria-label="Nutrient to add"
               value={add}
               onValueChange={(value) => setAdd(value)}
-            >
-              <option value="">Add a target…</option>
-              {Object.keys(catalog)
-                .filter((k) => !draft.targets[k])
-                .sort()
-                .map((k) => (
-                  <option key={k} value={k}>
-                    {nutrientLabel(k)}
-                  </option>
-                ))}
-            </Choice>
+              options={[
+                { value: "", label: "Add a target…" },
+                ...Object.keys(catalog)
+                  .filter((k) => !draft.targets[k])
+                  .sort()
+                  .map((k) => ({ value: k, label: nutrientLabel(k) })),
+              ]}
+            />
             <Button
               variant="outline"
               type="button"

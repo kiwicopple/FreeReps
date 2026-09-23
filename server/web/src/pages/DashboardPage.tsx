@@ -1,3 +1,4 @@
+import PageSection from "@/components/PageSection";
 import { Button } from "@/components/ui/button";
 import { Empty } from "@/components/ui/empty";
 import { Alert } from "@/components/ui/alert";
@@ -116,96 +117,93 @@ export default function DashboardPage() {
         }
       />
 
-      <HeroStrip metrics={heroes} loading={state === "loading"} />
+      <div className="page-x space-y-6">
+        <HeroStrip metrics={heroes} loading={state === "loading"} />
 
-      <div
-        className="flex items-baseline justify-between page-x"
-        style={{
-          paddingTop: isDesktop ? 26 : 14,
-          paddingBottom: isDesktop ? 12 : 8,
-        }}
-      >
-        <h2 style={{ fontSize: isDesktop ? 19 : 15, fontWeight: 700 }}>
-          All metrics
-        </h2>
-        <RangeControl
-          options={RANGES}
-          value={range}
-          onChange={setRange}
-          name="dashboard-range"
-        />
-      </div>
+        <PageSection
+          title="All metrics"
+          flush
+          actions={
+            <RangeControl
+              options={RANGES}
+              value={range}
+              onChange={setRange}
+              name="dashboard-range"
+            />
+          }
+        >
+          {message ? (
+            <Alert
+              variant="error"
+              className="page-x"
+              style={{
+                color: "var(--muted-foreground)",
+                fontSize: 13,
+                paddingTop: 4,
+              }}
+            >
+              {message}
+              <Button variant="outline" onClick={() => query.refetch()}>
+                Retry
+              </Button>
+            </Alert>
+          ) : isDesktop ? (
+            <MetricsTable
+              groups={groups}
+              range={range}
+              loading={state === "loading"}
+            />
+          ) : (
+            <MetricRows groups={groups} loading={state === "loading"} />
+          )}
 
-      {message ? (
-        <Alert
-          variant="error"
-          className="page-x"
-          style={{
-            color: "var(--muted-foreground)",
-            fontSize: 13,
-            paddingTop: 4,
-          }}
-        >
-          {message}
-          <Button variant="outline" onClick={() => query.refetch()}>
-            Retry
-          </Button>
-        </Alert>
-      ) : isDesktop ? (
-        <MetricsTable
-          groups={groups}
-          range={range}
-          loading={state === "loading"}
-        />
-      ) : (
-        <MetricRows groups={groups} loading={state === "loading"} />
-      )}
-
-      <div
-        className="page-x flex items-center gap-6 flex-wrap"
-        style={{
-          borderTop: "2px solid var(--foreground)",
-          paddingTop: 16,
-          paddingBottom: 16,
-          marginTop: "auto",
-        }}
-      >
-        <Link
-          to="/settings?tab=front-page"
-          className={buttonVariants({ variant: "ghost" })}
-          style={{ fontSize: 12.5 }}
-        >
-          Show {hidden} more metrics →
-        </Link>
-        <Link
-          to="/trends"
-          className={buttonVariants({ variant: "ghost" })}
-          style={{ fontSize: 12.5 }}
-        >
-          Open in Trends →
-        </Link>
-        {/* Correlations needs width the phone does not have, so its entry
-            point falls away below the breakpoint. */}
-        {isDesktop ? (
-          <>
+          <div
+            className="page-x flex items-center gap-6 flex-wrap"
+            style={{
+              borderTop: "1px solid var(--border)",
+              paddingTop: 16,
+              paddingBottom: 16,
+              marginTop: "auto",
+            }}
+          >
             <Link
-              to="/correlations"
+              to="/settings?tab=front-page"
               className={buttonVariants({ variant: "ghost" })}
               style={{ fontSize: 12.5 }}
             >
-              Correlate two metrics →
+              Show {hidden} more metrics →
             </Link>
-            <span
-              style={{
-                marginLeft: "auto",
-                font: "400 11.5px var(--font-body)",
-                color: "var(--muted-foreground)",
-              }}
+            <Link
+              to="/trends"
+              className={buttonVariants({ variant: "ghost" })}
+              style={{ fontSize: 12.5 }}
             >
-              {shown} of {total} metrics shown · edit visibility in Settings
-            </span>
-          </>
-        ) : null}
+              Open in Trends →
+            </Link>
+            {/* Correlations needs width the phone does not have, so its entry
+            point falls away below the breakpoint. */}
+            {isDesktop ? (
+              <>
+                <Link
+                  to="/correlations"
+                  className={buttonVariants({ variant: "ghost" })}
+                  style={{ fontSize: 12.5 }}
+                >
+                  Correlate two metrics →
+                </Link>
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    font: "400 11.5px var(--font-body)",
+                    color: "var(--muted-foreground)",
+                  }}
+                >
+                  {shown} of {total} metrics shown · edit visibility in Settings
+                </span>
+              </>
+            ) : null}
+          </div>
+        </PageSection>
       </div>
     </>
   );

@@ -1,3 +1,4 @@
+import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Empty } from "@/components/ui/empty";
@@ -13,7 +14,6 @@ import {
 } from "../../api";
 import { useAvailableMetrics } from "../../hooks/useMetrics";
 import { useIsDesktop } from "../../hooks/useMediaQuery";
-import { TabHeader } from "./parts";
 
 const HERO_COUNT = 4;
 
@@ -87,38 +87,49 @@ export default function FrontPageTab() {
 
   if (!loaded && (metrics.error || frontPage.error))
     return (
-      <Alert variant="error">
-        {metrics.error?.message || frontPage.error?.message}
-        <Button
-          variant="ghost"
-          onClick={() => {
-            void metrics.refetch();
-            void frontPage.refetch();
-          }}
-        >
-          Retry
-        </Button>
-      </Alert>
+      <PageSection title="Front page">
+        <Alert variant="error">
+          {metrics.error?.message || frontPage.error?.message}
+          <Button
+            variant="ghost"
+            onClick={() => {
+              void metrics.refetch();
+              void frontPage.refetch();
+            }}
+          >
+            Retry
+          </Button>
+        </Alert>
+      </PageSection>
     );
   if (metrics.isSuccess && options.length === 0)
     return (
-      <Empty>
-        No metrics available yet. Import health data to configure the front
-        page.
-      </Empty>
+      <PageSection title="Front page">
+        <Empty>
+          No metrics available yet. Import health data to configure the front
+          page.
+        </Empty>
+      </PageSection>
     );
   if (isLoading || !loaded)
-    return <Spinner className="my-4 size-5" aria-label="Loading metrics" />;
+    return (
+      <PageSection title="Front page">
+        <Spinner className="my-4 size-5" aria-label="Loading metrics" />
+      </PageSection>
+    );
 
   const visibleCount = Object.values(visible).filter(Boolean).length;
 
   return (
-    <>
-      <TabHeader title="Front page">
-        Pick the four hero numbers and which metrics the table lists. Fewer
-        metrics means a smaller first request.
-      </TabHeader>
-
+    <PageSection
+      title="Front page"
+      description={
+        <>
+          Pick the four hero numbers and which metrics the table lists. Fewer
+          metrics means a smaller first request.
+        </>
+      }
+    >
       <div style={{ paddingTop: 20 }}>
         <h3 style={{ fontSize: 15, fontWeight: 700 }}>Hero numbers</h3>
         <p
@@ -179,7 +190,7 @@ export default function FrontPageTab() {
           {visibleCount} of {options.length} listed
         </p>
 
-        <div style={{ borderTop: "2px solid var(--foreground)" }}>
+        <div style={{ borderTop: "1px solid var(--border)" }}>
           {options.map((m) => {
             const on = visible[m.value] ?? false;
             const isHero = heroes.includes(m.value);
@@ -258,6 +269,6 @@ export default function FrontPageTab() {
           Reset to defaults
         </Button>
       </div>
-    </>
+    </PageSection>
   );
 }

@@ -77,7 +77,8 @@ test("nutrition retains loaded totals when refresh fails and recovers on retry",
       .first(),
   ).toBeVisible();
   fail = true;
-  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await page.getByRole("button", { name: "Nutrition page actions" }).click();
+  await page.getByRole("menuitem", { name: "Refresh", exact: true }).click();
   await expect(
     page.getByRole("alert").filter({ hasText: "Showing the last loaded data" }),
   ).toBeVisible({ timeout: 15000 });

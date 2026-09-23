@@ -1,13 +1,15 @@
 import { Empty } from "@/components/ui/empty";
 import { Alert } from "@/components/ui/alert";
-import DateControl from "@/components/DateControl";
+import DateNavigator from "@/components/DateNavigator";
+import PageSection from "@/components/PageSection";
+import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import RecoveryScore from "../components/sleep/RecoveryScore";
 import { localToday, shiftDate, validDate } from "../utils/nutrition";
 import SleepHeartRate from "../components/sleep/SleepHeartRate";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, type ReactNode } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fetchSleep, type SleepSession, type SleepStage } from "../api";
 import PageHeader from "../components/PageHeader";
@@ -108,60 +110,27 @@ export default function SleepPage() {
         }
       />
 
-      <div
-        className="page-x"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 10,
-          paddingBottom: 20,
-        }}
-      >
-        <Button
-          variant="outline"
-          aria-label="Previous night"
-          onClick={() => navigateDate(shiftDate(date, -1))}
-          style={{ minWidth: 44, minHeight: 44 }}
-        >
-          ←
-        </Button>
-        <DateControl
-          aria-label="Night date"
+      <div className="page-x mb-6 space-y-2">
+        <DateNavigator
+          label="Night date"
           value={date}
           max={today}
-          onValueChange={(value) => {
-            if (validDate(value) && value <= today) navigateDate(value);
-          }}
+          onValueChange={navigateDate}
+          onPrevious={() => navigateDate(shiftDate(date, -1))}
+          onNext={() => navigateDate(shiftDate(date, 1))}
+          nextDisabled={date >= today}
+          onReset={() => navigateDate(null)}
+          resetLabel="Latest"
         />
-        <Button
-          variant="outline"
-          aria-label="Next night"
-          disabled={date >= today}
-          onClick={() => navigateDate(shiftDate(date, 1))}
-          style={{ minWidth: 44, minHeight: 44 }}
-        >
-          →
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => navigateDate(null)}
-          style={{ minHeight: 44 }}
-        >
-          Latest
-        </Button>
-        <span
-          style={{
-            fontSize: 12,
-            color: "var(--muted-foreground)",
-            flexBasis: "100%",
-          }}
-        >
+        <p className="text-xs text-muted-foreground">
           Choose the date the night is recorded under.
-        </span>
+        </p>
       </div>
-
-      {last && <RecoveryScore session={last} />}
+      {last && (
+        <div className="page-x mb-6">
+          <RecoveryScore session={last} />
+        </div>
+      )}
 
       {message ? (
         <Alert
@@ -177,7 +146,7 @@ export default function SleepPage() {
       ) : state === "loading" ? (
         <div
           className="page-x"
-          style={{ borderTop: "2px solid var(--foreground)", paddingTop: 24 }}
+          style={{ borderTop: "1px solid var(--border)", paddingTop: 24 }}
         >
           <Skeleton style={{ width: 180, height: 44 }} />
         </div>
@@ -232,60 +201,53 @@ function DesktopSleep({
     session.InBed > 0 ? (session.Asleep / session.InBed) * 100 : null;
 
   return (
-    <>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, minmax(0,1fr))",
-          borderTop: "2px solid var(--foreground)",
-          borderBottom: "2px solid var(--foreground)",
-        }}
-      >
-        <HeroCell
+    <div className="page-x space-y-6">
+      <SummaryGrid>
+        <SummaryValue
           label="Total sleep"
           value={formatHoursMinutes(session.TotalSleep)}
-          meta={
+          detail={
             averageHours != null
               ? `${formatHoursMinutes(averageHours)} on average`
               : ""
           }
         />
-        <HeroCell
+        <SummaryValue
           label="Time in bed"
           value={formatHoursMinutes(session.InBed)}
-          meta={`${formatClock(session.InBedStart)} → ${formatClock(session.InBedEnd)}`}
+          detail={`${formatClock(session.InBedStart)} → ${formatClock(session.InBedEnd)}`}
         />
-        <HeroCell
+        <SummaryValue
           label="Efficiency"
           value={efficiency != null ? `${efficiency.toFixed(0)}%` : "—"}
-          meta={`${formatHoursMinutes(totals.Awake)} awake`}
+          detail={`${formatHoursMinutes(totals.Awake)} awake`}
         />
-        <HeroCell
+        <SummaryValue
           label="Deep"
           value={formatHoursMinutes(totals.Deep)}
-          meta={pctOf(totals.Deep, session.TotalSleep)}
+          detail={pctOf(totals.Deep, session.TotalSleep)}
         />
-        <HeroCell
+        <SummaryValue
           label="REM"
           value={formatHoursMinutes(totals.REM)}
-          meta={pctOf(totals.REM, session.TotalSleep)}
+          detail={pctOf(totals.REM, session.TotalSleep)}
         />
-      </div>
+      </SummaryGrid>
 
-      <Section title="Stage composition">
+      <PageSection title="Stage composition">
         <StageComposition totals={totals} />
-      </Section>
+      </PageSection>
 
-      <Section
+      <PageSection
         title="Hypnogram"
-        aside={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)} · ${awakenings} awakening${awakenings === 1 ? "" : "s"}`}
+        description={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)} · ${awakenings} awakening${awakenings === 1 ? "" : "s"}`}
       >
         <SleepHeartRate stages={stages} />
-      </Section>
+      </PageSection>
 
-      <Section
+      <PageSection
         title={`Last ${sessions.length} nights`}
-        aside={
+        description={
           averageHours != null ? (
             <>
               {formatDayMonth(new Date(sessions[sessions.length - 1].Date))} –{" "}
@@ -298,8 +260,8 @@ function DesktopSleep({
         }
       >
         <NightsChart sessions={sessions} stages={allStages} />
-      </Section>
-    </>
+      </PageSection>
+    </div>
   );
 }
 
@@ -322,77 +284,43 @@ function MobileSleep({
     60000;
 
   return (
-    <>
-      <div className="page-x" style={{ paddingBottom: 16 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-          <span
-            className="num"
-            style={{
-              font: "800 44px/1 var(--font-heading)",
-              letterSpacing: "-0.035em",
-            }}
-          >
-            {formatHoursMinutes(session.TotalSleep)}
-          </span>
-          <span
-            style={{
-              font: "500 13px var(--font-body)",
-              color: "var(--muted-foreground)",
-            }}
-          >
-            in bed {formatHoursMinutes(session.InBed)}
-            {efficiency != null ? ` · ${efficiency.toFixed(0)}% eff.` : ""}
-          </span>
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          borderTop: "2px solid var(--foreground)",
-          borderBottom: "2px solid var(--foreground)",
-        }}
-      >
-        <MobileStat label="Deep" value={formatHoursMinutes(totals.Deep)} />
-        <MobileStat
+    <div className="page-x space-y-6">
+      <SummaryGrid>
+        <SummaryValue
+          label="Total sleep"
+          value={formatHoursMinutes(session.TotalSleep)}
+          detail={
+            <>
+              in bed {formatHoursMinutes(session.InBed)}
+              {efficiency != null ? ` · ${efficiency.toFixed(0)}% eff.` : ""}
+            </>
+          }
+        />
+        <SummaryValue label="Deep" value={formatHoursMinutes(totals.Deep)} />
+        <SummaryValue
           label="Efficiency"
           value={efficiency != null ? `${efficiency.toFixed(0)}%` : "—"}
         />
-        <MobileStat
+        <SummaryValue
           label="Latency"
           value={latency > 0 ? `${Math.round(latency)}m` : "—"}
         />
-      </div>
-
-      <div className="kick page-x" style={{ paddingTop: 16, paddingBottom: 6 }}>
-        Hypnogram · {formatClock(session.SleepStart)} →{" "}
-        {formatClock(session.SleepEnd)}
-      </div>
-      <div className="page-x" style={{ paddingBottom: 14 }}>
-        <SleepHeartRate stages={stages} compact />
-      </div>
-
-      <div className="page-x" style={{ paddingBottom: 16 }}>
-        <StageComposition totals={totals} compact />
-      </div>
-
-      <div
-        className="kick page-x"
-        style={{
-          borderTop: "2px solid var(--foreground)",
-          paddingTop: 12,
-          paddingBottom: 6,
-        }}
+      </SummaryGrid>
+      <PageSection
+        title="Hypnogram"
+        description={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)}`}
       >
-        Last {Math.min(sessions.length, 10)} nights
-      </div>
-      <div>
+        <SleepHeartRate stages={stages} compact />
+      </PageSection>
+      <PageSection title="Stage composition">
+        <StageComposition totals={totals} compact />
+      </PageSection>
+      <PageSection title={`Last ${Math.min(sessions.length, 10)} nights`} flush>
         {sessions.slice(0, 10).map((s) => (
           <NightRow key={s.Date} session={s} />
         ))}
-      </div>
-    </>
+      </PageSection>
+    </div>
   );
 }
 
@@ -434,108 +362,6 @@ function NightRow({ session }: { session: SleepSession }) {
       >
         {formatHoursMinutes(session.TotalSleep)}
       </span>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  aside,
-  children,
-}: {
-  title: string;
-  aside?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <div style={{ borderTop: "2px solid var(--foreground)", marginTop: 26 }}>
-      <div
-        className="flex items-baseline justify-between gap-5 page-x"
-        style={{ paddingTop: 20, paddingBottom: 16 }}
-      >
-        <h2 style={{ fontSize: 19, fontWeight: 700 }}>{title}</h2>
-        {aside ? (
-          <span
-            style={{
-              font: "400 12px var(--font-body)",
-              color: "var(--muted-foreground)",
-            }}
-          >
-            {aside}
-          </span>
-        ) : null}
-      </div>
-      <div className="page-x" style={{ paddingBottom: 30 }}>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function HeroCell({
-  label,
-  value,
-  meta,
-}: {
-  label: string;
-  value: string;
-  meta: string;
-}) {
-  return (
-    <div
-      className="min-w-0"
-      style={{
-        paddingTop: 24,
-        paddingInline: "clamp(12px, 2vw, 32px)",
-        paddingBottom: 22,
-        borderRight: "1px solid var(--border)",
-      }}
-    >
-      <div className="kick">{label}</div>
-      <div
-        className="num"
-        style={{
-          font: "800 clamp(24px, 3vw, 44px)/1 var(--font-heading)",
-          letterSpacing: "-0.035em",
-          marginTop: 14,
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          font: "400 12px var(--font-body)",
-          color: "var(--muted-foreground)",
-          marginTop: 12,
-        }}
-      >
-        {meta}
-      </div>
-    </div>
-  );
-}
-
-function MobileStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div
-      className="page-x"
-      style={{
-        paddingTop: 12,
-        paddingBottom: 12,
-        borderRight: "1px solid var(--border)",
-      }}
-    >
-      <div className="kick">{label}</div>
-      <div
-        className="num"
-        style={{
-          font: "700 22px/1 var(--font-heading)",
-          letterSpacing: "-0.02em",
-          marginTop: 8,
-        }}
-      >
-        {value}
-      </div>
     </div>
   );
 }

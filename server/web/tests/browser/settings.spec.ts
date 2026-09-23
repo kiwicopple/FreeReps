@@ -62,12 +62,12 @@ test("identity saves and clears birth date and overrides and resets maximum HR",
   await page.getByLabel("Date of birth", { exact: true }).fill("1990-01-15");
   const birthRow = page
     .getByLabel("Date of birth", { exact: true })
-    .locator('xpath=ancestor::*[@data-slot="setting-row"][1]');
+    .locator('xpath=ancestor::*[@data-slot="field"][1]');
   await birthRow.getByRole("button", { name: "Save", exact: true }).click();
   await birthRow.getByRole("button", { name: "Clear", exact: true }).click();
   const max = page.getByLabel("Maximum heart rate in bpm");
   await max.fill("190");
-  const maxRow = max.locator('xpath=ancestor::*[@data-slot="setting-row"][1]');
+  const maxRow = max.locator('xpath=ancestor::*[@data-slot="field"][1]');
   await maxRow.getByRole("button", { name: "Save", exact: true }).click();
   await maxRow
     .getByRole("button", { name: "Use automatic", exact: true })

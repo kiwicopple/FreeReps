@@ -1,3 +1,5 @@
+import PageSection from "@/components/PageSection";
+import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
@@ -96,87 +98,73 @@ export default function TrendsPage() {
         }
       />
 
-      <div
-        className="page-x"
-        style={{
-          display: isDesktop ? "flex" : "grid",
-          gridTemplateColumns: isDesktop ? undefined : "repeat(3, 1fr)",
-          gap: isDesktop ? 56 : 0,
-          alignItems: isDesktop ? "flex-start" : undefined,
-          borderTop: "2px solid var(--foreground)",
-          borderBottom: "2px solid var(--foreground)",
-          paddingTop: isDesktop ? 20 : 14,
-          paddingBottom: isDesktop ? 20 : 14,
-        }}
-      >
-        <VerdictCount
-          label="Improving"
-          value={counts.improving}
-          color="var(--success)"
-        />
-        <VerdictCount label="Flat" value={counts.flat} />
-        <VerdictCount
-          label="Declining"
-          value={counts.declining}
-          color="var(--warning)"
-        />
-        {isDesktop ? (
-          <p
-            style={{
-              marginLeft: "auto",
-              maxWidth: "46ch",
-              font: "400 12.5px/1.5 var(--font-body)",
-              color: "var(--muted-foreground)",
-              textAlign: "right",
-            }}
+      <div className="page-x space-y-6">
+        <SummaryGrid>
+          <VerdictCount
+            label="Improving"
+            value={counts.improving}
+            color="var(--success)"
+          />
+          <VerdictCount label="Flat" value={counts.flat} />
+          <VerdictCount
+            label="Declining"
+            value={counts.declining}
+            color="var(--warning)"
+          />
+        </SummaryGrid>
+        <PageSection title="Metric trends" description={FLAT_RULE} flush>
+          {message ? (
+            <Alert
+              variant="error"
+              className="page-x"
+              style={{
+                color: "var(--muted-foreground)",
+                fontSize: 13,
+                paddingTop: 16,
+              }}
+            >
+              {message}
+              <Button variant="outline" onClick={() => query.refetch()}>
+                Retry
+              </Button>
+            </Alert>
+          ) : state === "loading" ? (
+            <Spinner
+              className="mx-auto my-6 size-6"
+              aria-label="Fitting trends"
+            />
+          ) : items.length === 0 ? (
+            <Empty>Not enough samples in this window to fit a trend.</Empty>
+          ) : isDesktop ? (
+            <SmallMultiples
+              items={items}
+              start={start}
+              end={end}
+              range={range}
+            />
+          ) : (
+            <TrendRows items={items} />
+          )}
+
+          <div
+            className="page-x flex items-center gap-6 flex-wrap"
+            style={{ paddingTop: 18, paddingBottom: 40, marginTop: "auto" }}
           >
-            {FLAT_RULE}
-          </p>
-        ) : null}
-      </div>
-
-      {message ? (
-        <Alert
-          variant="error"
-          className="page-x"
-          style={{
-            color: "var(--muted-foreground)",
-            fontSize: 13,
-            paddingTop: 16,
-          }}
-        >
-          {message}
-          <Button variant="outline" onClick={() => query.refetch()}>
-            Retry
-          </Button>
-        </Alert>
-      ) : state === "loading" ? (
-        <Spinner className="mx-auto my-6 size-6" aria-label="Fitting trends" />
-      ) : items.length === 0 ? (
-        <Empty>Not enough samples in this window to fit a trend.</Empty>
-      ) : isDesktop ? (
-        <SmallMultiples items={items} start={start} end={end} range={range} />
-      ) : (
-        <TrendRows items={items} />
-      )}
-
-      <div
-        className="page-x flex items-center gap-6 flex-wrap"
-        style={{ paddingTop: 18, paddingBottom: 40, marginTop: "auto" }}
-      >
-        <LegendLine color="var(--color-data-3)" label="Daily value" />
-        {/* The fitted line is drawn in one of three colours, so one swatch
+            <LegendLine color="var(--color-data-3)" label="Daily value" />
+            {/* The fitted line is drawn in one of three colours, so one swatch
             labelled "Fitted trend" would state a colour the chart never uses. */}
-        <LegendLine color={VERDICT_COLOR.improving} label="Improving" />
-        <LegendLine color={VERDICT_COLOR.flat} label="Flat" />
-        <LegendLine color={VERDICT_COLOR.declining} label="Declining" />
-        <Link
-          to="/settings?tab=front-page"
-          className={buttonVariants({ variant: "ghost" })}
-          style={{ marginLeft: "auto", fontSize: 12.5 }}
-        >
-          Choose metrics →
-        </Link>
+            <LegendLine color={VERDICT_COLOR.improving} label="Improving" />
+            <LegendLine color={VERDICT_COLOR.flat} label="Flat" />
+            <LegendLine color={VERDICT_COLOR.declining} label="Declining" />
+            <Link
+              to="/settings?tab=front-page"
+              className={buttonVariants({ variant: "ghost" })}
+              style={{ marginLeft: "auto", fontSize: 12.5 }}
+            >
+              Choose metrics →
+            </Link>
+          </div>
+        </PageSection>
       </div>
     </>
   );
@@ -194,8 +182,8 @@ function SmallMultiples({
   range: string;
 }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)" }}>
-      {items.map(({ metric, fit }, i) => (
+    <div className="grid min-w-0 grid-cols-2 xl:grid-cols-4">
+      {items.map(({ metric, fit }) => (
         <div
           key={metric.metric_name}
           style={{
@@ -203,8 +191,8 @@ function SmallMultiples({
             paddingBottom: 20,
             /* Cells are 24px inside, but the outer columns align to the page
                edge like every other strip on the screen. */
-            paddingLeft: i % 5 === 0 ? "var(--page-x)" : 24,
-            paddingRight: i % 5 === 4 ? "var(--page-x)" : 24,
+            paddingLeft: 24,
+            paddingRight: 24,
             borderRight: "1px solid var(--border)",
             borderBottom: "1px solid var(--border)",
           }}
@@ -458,20 +446,10 @@ function VerdictCount({
   color?: string;
 }) {
   return (
-    <div>
-      <div className="kick">{label}</div>
-      <div
-        className="num"
-        style={{
-          font: "800 34px/1 var(--font-heading)",
-          letterSpacing: "-0.03em",
-          marginTop: 8,
-          color: color ?? "var(--foreground)",
-        }}
-      >
-        {value}
-      </div>
-    </div>
+    <SummaryValue
+      label={label}
+      value={<span style={{ color }}>{value}</span>}
+    />
   );
 }
 

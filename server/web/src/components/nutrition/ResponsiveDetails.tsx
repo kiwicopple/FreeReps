@@ -1,6 +1,6 @@
 import {
-  Children,
-  isValidElement,
+  createContext,
+  useContext,
   useEffect,
   useState,
   type ReactNode,
@@ -22,23 +22,27 @@ import {
   DrawerFooter,
   DrawerClose,
 } from "../ui/drawer";
+const CloseDetails = createContext<() => void>(() => {});
+
 /** Nutrition content expands independently on desktop and stacks in scrolling mobile drawers. */
 export default function ResponsiveDetails({
   title,
   className,
+  trigger: label,
   children,
 }: {
   title: string;
   className?: string;
-  children: ReactNode;
+  trigger: ReactNode;
+  children: ReactNode | ((close: () => void) => ReactNode);
 }) {
+  const closeParent = useContext(CloseDetails);
+  const closeStack = () => {
+    setOpen(false);
+    closeParent();
+  };
   const desktop = useIsDesktop();
   const [open, setOpen] = useState(false);
-  const parts = Children.toArray(children);
-  const summary = parts[0];
-  const label = isValidElement<{ children?: ReactNode }>(summary)
-    ? summary.props.children
-    : summary;
   useEffect(() => {
     setOpen(false);
   }, [desktop]);
@@ -49,14 +53,9 @@ export default function ResponsiveDetails({
     />
   );
   const content = (
-    <div
-      onClick={(event) => {
-        if ((event.target as HTMLElement).closest("[data-sheet-close]"))
-          setOpen(false);
-      }}
-    >
-      {parts.slice(1)}
-    </div>
+    <CloseDetails.Provider value={closeStack}>
+      {typeof children === "function" ? children(closeStack) : children}
+    </CloseDetails.Provider>
   );
   if (desktop)
     return (

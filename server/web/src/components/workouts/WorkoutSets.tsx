@@ -1,3 +1,4 @@
+import PageSection from "../PageSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -102,9 +103,8 @@ export default function WorkoutSets({
   }
 
   return (
-    <div>
-      <h2 style={{ fontSize: 19, fontWeight: 700 }}>Exercises</h2>
-      <div style={{ borderTop: "2px solid var(--foreground)", marginTop: 12 }}>
+    <PageSection title={<>Exercises</>}>
+      <div className="space-y-4">
         {exercises.map((ex) => (
           <div key={ex.name} style={{ paddingTop: 18, paddingBottom: 6 }}>
             <div
@@ -209,6 +209,6 @@ export default function WorkoutSets({
           </div>
         ))}
       </div>
-    </div>
+    </PageSection>
   );
 }

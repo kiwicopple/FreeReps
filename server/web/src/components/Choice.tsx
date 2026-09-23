@@ -1,10 +1,4 @@
-import {
-  Children,
-  isValidElement,
-  useMemo,
-  type ReactNode,
-  type CSSProperties,
-} from "react";
+import { useMemo, type CSSProperties } from "react";
 import {
   Select,
   SelectTrigger,
@@ -25,41 +19,15 @@ import {
   ComboboxGroupLabel,
   ComboboxCollection,
 } from "./ui/combobox";
-type Option = {
+export type ChoiceOption = {
   value: string;
   label: string;
-  group: string;
+  group?: string;
   disabled?: boolean;
 };
-function optionsFrom(children: ReactNode, group = ""): Option[] {
-  return Children.toArray(children).flatMap((child) => {
-    if (
-      !isValidElement<{
-        value?: string | number;
-        children?: ReactNode;
-        label?: string;
-        disabled?: boolean;
-      }>(child)
-    )
-      return [];
-    if (child.type === "option")
-      return [
-        {
-          value: String(child.props.value ?? ""),
-          label: Children.toArray(child.props.children).join(""),
-          group,
-          disabled: child.props.disabled,
-        },
-      ];
-    return optionsFrom(
-      child.props.children,
-      child.type === "optgroup" ? (child.props.label ?? "") : group,
-    );
-  });
-}
 /** A common composition for short choices and searchable, grouped metric lists. */
 export default function Choice({
-  children,
+  options,
   value,
   onValueChange,
   searchable = false,
@@ -71,7 +39,7 @@ export default function Choice({
   name,
   ...label
 }: {
-  children: ReactNode;
+  options: readonly ChoiceOption[];
   value: string | number;
   onValueChange: (value: string) => void;
   searchable?: boolean;
@@ -83,12 +51,11 @@ export default function Choice({
   name?: string;
   "aria-label"?: string;
 }) {
-  const options = useMemo(() => optionsFrom(children), [children]);
   const groups = useMemo(
     () =>
-      [...new Set(options.map((o) => o.group))].map((value) => ({
+      [...new Set(options.map((o) => o.group ?? ""))].map((value) => ({
         value,
-        items: options.filter((o) => o.group === value),
+        items: options.filter((o) => (o.group ?? "") === value),
       })),
     [options],
   );
@@ -116,13 +83,13 @@ export default function Choice({
           <ComboboxPopup>
             <ComboboxEmpty>No matching options.</ComboboxEmpty>
             <ComboboxList>
-              {(group: { value: string; items: Option[] }) => (
+              {(group: { value: string; items: ChoiceOption[] }) => (
                 <ComboboxGroup key={group.value} items={group.items}>
                   {group.value && (
                     <ComboboxGroupLabel>{group.value}</ComboboxGroupLabel>
                   )}
                   <ComboboxCollection>
-                    {(item: Option) => (
+                    {(item: ChoiceOption) => (
                       <ComboboxItem
                         key={item.value}
                         value={item}

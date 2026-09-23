@@ -1,7 +1,8 @@
+import { Field, FieldLabel } from "../ui/field";
+import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
-import { Field } from "@/components/ui/field";
 import ConfirmAction from "../ConfirmAction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ import {
   triggerOuraSync,
   type OuraStatus,
 } from "../../api";
-import { MONO, RedirectURIRow, TabHeader } from "./parts";
+import { MONO, RedirectURIRow } from "./parts";
 
 export default function OuraTab() {
   const [status, setStatus] = useState<OuraStatus | null>(null);
@@ -100,12 +101,15 @@ export default function OuraTab() {
   }
 
   return (
-    <>
-      <TabHeader title="Oura">
-        Oura is polled on a schedule. Register an app at cloud.ouraring.com,
-        save its credentials here, then authorize once.
-      </TabHeader>
-
+    <PageSection
+      title="Oura"
+      description={
+        <>
+          Oura is polled on a schedule. Register an app at cloud.ouraring.com,
+          save its credentials here, then authorize once.
+        </>
+      }
+    >
       {status?.redirect_uri ? (
         <RedirectURIRow uri={status.redirect_uri} />
       ) : null}
@@ -126,7 +130,7 @@ export default function OuraTab() {
       ) : !status.configured ? (
         <div style={{ paddingTop: 20, maxWidth: 520 }}>
           <Field style={{ marginBottom: 14 }}>
-            <Label htmlFor="oura-id">Client ID</Label>
+            <FieldLabel htmlFor="oura-id">Client ID</FieldLabel>
             <Input
               id="oura-id"
 
@@ -137,7 +141,7 @@ export default function OuraTab() {
             />
           </Field>
           <Field style={{ marginBottom: 16 }}>
-            <Label htmlFor="oura-secret">Client secret</Label>
+            <FieldLabel htmlFor="oura-secret">Client secret</FieldLabel>
             <Input
               id="oura-secret"
 
@@ -167,7 +171,7 @@ export default function OuraTab() {
           onDisconnect={handleDisconnect}
         />
       )}
-    </>
+    </PageSection>
   );
 }
 
@@ -190,7 +194,7 @@ function StatusPanel({
     <>
       <div
         style={{
-          border: "2px solid var(--foreground)",
+          border: "1px solid var(--border)",
           padding: "22px 24px",
           marginTop: 20,
         }}

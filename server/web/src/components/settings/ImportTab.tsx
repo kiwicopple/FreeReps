@@ -1,3 +1,4 @@
+import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { uploadAlphaCSV } from "../../api";
 import { formatNumber } from "../../utils/format";
-import { TabHeader } from "./parts";
 
 function invalidateAllData(queryClient: ReturnType<typeof useQueryClient>) {
   queryClient.invalidateQueries({ queryKey: ["workouts"] });
@@ -61,12 +61,15 @@ export default function ImportTab() {
   }
 
   return (
-    <>
-      <TabHeader title="Import">
-        Upload an Alpha Progression CSV export to bring in set, rep and weight
-        data for strength sessions. Rows already stored are skipped.
-      </TabHeader>
-
+    <PageSection
+      title="Import"
+      description={
+        <>
+          Upload an Alpha Progression CSV export to bring in set, rep and weight
+          data for strength sessions. Rows already stored are skipped.
+        </>
+      }
+    >
       <div
         role="button"
         tabIndex={0}
@@ -187,6 +190,6 @@ export default function ImportTab() {
           </p>
         </Alert>
       ) : null}
-    </>
+    </PageSection>
   );
 }

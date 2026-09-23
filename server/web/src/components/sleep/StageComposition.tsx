@@ -41,7 +41,7 @@ export default function StageComposition({ totals, compact = false }: Props) {
         style={{
           display: "flex",
           height: compact ? 16 : 36,
-          border: compact ? undefined : "2px solid var(--foreground)",
+          border: compact ? undefined : "1px solid var(--border)",
           gap: 1,
           background: "var(--background)",
         }}

@@ -1,5 +1,4 @@
 import { Label } from "@/components/ui/label";
-import { useIsDesktop } from "../../hooks/useMediaQuery";
 import { Input } from "@/components/ui/input";
 import { useId, type ReactNode } from "react";
 
@@ -13,57 +12,19 @@ export function Row({
   labelWidth?: number;
   children: ReactNode;
 }) {
-  const desktop = useIsDesktop();
   return (
     <div
       data-slot="setting-row"
-      style={{
-        display: "grid",
-        gridTemplateColumns: desktop
-          ? `${labelWidth}px minmax(0,1fr)`
-          : "minmax(0,1fr)",
-        alignItems: "baseline",
-        gap: desktop ? 24 : 10,
-        padding: "15px 0",
-        borderBottom: "1px solid var(--border)",
-      }}
+      className="grid items-baseline gap-2.5 border-b py-4 md:grid-cols-[var(--setting-label-width)_minmax(0,1fr)] md:gap-6"
+      style={
+        { "--setting-label-width": `${labelWidth}px` } as React.CSSProperties
+      }
     >
       <Label render={<span />} className="kick">
         {label}
       </Label>
       <div className="w-full min-w-0">{children}</div>
     </div>
-  );
-}
-
-/** Tab heading, explanatory paragraph, then content under a 2px rule. */
-export function TabHeader({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <>
-      <h2 style={{ fontSize: 22 }}>{title}</h2>
-      <p
-        style={{
-          font: "400 13px/1.55 var(--font-body)",
-          color: "var(--muted-foreground)",
-          maxWidth: "62ch",
-          margin: "10px 0 0",
-        }}
-      >
-        {children}
-      </p>
-      <div
-        style={{
-          borderTop: "2px solid var(--foreground)",
-          marginTop: 20,
-        }}
-      />
-    </>
   );
 }
 

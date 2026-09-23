@@ -1,3 +1,4 @@
+import PageSection from "../PageSection";
 import { Alert } from "../ui/alert";
 import { Spinner } from "../ui/spinner";
 import { Badge } from "../ui/badge";
@@ -50,18 +51,7 @@ export default function RecoveryScore({ session }: { session: SleepSession }) {
   });
   const result = query.data;
   return (
-    <section
-      className="page-x"
-      style={{
-        borderTop: "1px solid var(--border)",
-        borderBottom: "1px solid var(--border)",
-        paddingTop: 18,
-        paddingBottom: 18,
-        marginBottom: 20,
-      }}
-      aria-label="Protocol recovery score"
-    >
-      <div className="kick">Protocol recovery · experimental v1</div>
+    <PageSection title="Protocol recovery · experimental v1">
       {query.isLoading ? (
         <p role="status" className="flex items-center gap-2">
           <Spinner />
@@ -109,10 +99,10 @@ export default function RecoveryScore({ session }: { session: SleepSession }) {
               Data coverage: {result.coverage}% of the model. A personal trend
               indicator, not a medical assessment or clearance to train.
             </p>
-            <Disclosure style={{ marginTop: 12 }}>
-              <summary style={{ cursor: "pointer" }}>
-                Contributors &amp; how it works
-              </summary>
+            <Disclosure
+              style={{ marginTop: 12 }}
+              trigger={<>Contributors &amp; how it works</>}
+            >
               {result.parts.map((p) => (
                 <div
                   key={p.name}
@@ -200,6 +190,6 @@ export default function RecoveryScore({ session }: { session: SleepSession }) {
           </>
         )
       )}
-    </section>
+    </PageSection>
   );
 }

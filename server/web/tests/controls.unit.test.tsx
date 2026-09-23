@@ -51,8 +51,7 @@ describe("coss control contracts", () => {
   });
   it("retains a draft across disclosure close and reopen", async () => {
     render(
-      <Disclosure>
-        <summary>Profile</summary>
+      <Disclosure trigger="Profile">
         <Input aria-label="Draft" defaultValue="" />
       </Disclosure>,
     );
@@ -66,4 +65,22 @@ describe("coss control contracts", () => {
     expect(calendarDay(new Date(2025, 0, 15, 0, 0))).toBe("2025-01-15");
     expect(calendarDay(new Date(2025, 8, 30, 23, 59))).toBe("2025-09-30");
   });
+});
+
+// Separate expanders must not acquire accordion-style exclusivity during consolidation.
+it("allows independent disclosures to remain expanded", async () => {
+  render(
+    <>
+      <Disclosure trigger="First">
+        <Input aria-label="First draft" />
+      </Disclosure>
+      <Disclosure trigger="Second">
+        <Input aria-label="Second draft" />
+      </Disclosure>
+    </>,
+  );
+  await userEvent.click(screen.getByRole("button", { name: "First" }));
+  await userEvent.click(screen.getByRole("button", { name: "Second" }));
+  expect(screen.getByLabelText("First draft")).toBeVisible();
+  expect(screen.getByLabelText("Second draft")).toBeVisible();
 });

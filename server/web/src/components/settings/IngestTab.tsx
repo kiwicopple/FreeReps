@@ -1,3 +1,4 @@
+import PageSection from "../PageSection";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { fetchImportLogs, type ImportLog } from "../../api";
 import { formatNumber } from "../../utils/format";
-import { MONO, TabHeader } from "./parts";
+import { MONO } from "./parts";
 
 export default function IngestTab() {
   const logs = useQuery({
@@ -22,12 +23,15 @@ export default function IngestTab() {
       : `${window.location.origin}/api/v1/ingest`;
 
   return (
-    <>
-      <TabHeader title="Ingest">
-        Point Health Auto Export at this URL. Requests arrive over the tailnet,
-        so the reverse proxy is what authenticates them.
-      </TabHeader>
-
+    <PageSection
+      title="Ingest"
+      description={
+        <>
+          Point Health Auto Export at this URL. Requests arrive over the
+          tailnet, so the reverse proxy is what authenticates them.
+        </>
+      }
+    >
       <div style={{ paddingTop: 20 }}>
         <Label className="kick" htmlFor="ingest-url">
           Server URL
@@ -46,7 +50,7 @@ export default function IngestTab() {
         <h3 style={{ fontSize: 15, fontWeight: 700 }}>Recent ingests</h3>
         <div
           style={{
-            borderTop: "2px solid var(--foreground)",
+            borderTop: "1px solid var(--border)",
             marginTop: 12,
           }}
         >
@@ -66,7 +70,7 @@ export default function IngestTab() {
           ) : null}
         </div>
       </div>
-    </>
+    </PageSection>
   );
 }
 
