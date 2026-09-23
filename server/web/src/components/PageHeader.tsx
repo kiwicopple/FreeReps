@@ -1,47 +1,27 @@
 import type { ReactNode } from "react";
-import { useIsDesktop } from "../hooks/useMediaQuery";
 
-interface Props {
-  /** The active date or range, e.g. "Monday, 16 March 2026". */
+export default function PageHeader({
+  kicker,
+  title,
+  actions,
+}: {
   kicker: ReactNode;
   title: string;
-  /** The range control, or on the dashboard the sync status and button. */
   actions?: ReactNode;
-}
-
-/**
- * Kicker line, then the h1, with the actions right-aligned on the same
- * baseline. The h1 drops from 34px to 30px below the phone breakpoint.
- */
-export default function PageHeader({ kicker, title, actions }: Props) {
-  const isDesktop = useIsDesktop();
-
+}) {
   return (
-    <div
-      className="flex flex-wrap items-end justify-between gap-6 page-x"
-      style={{
-        paddingTop: isDesktop ? 22 : 16,
-        paddingBottom: isDesktop ? 18 : 14,
-      }}
-    >
-      <div>
+    <header className="page-x flex flex-wrap items-end justify-between gap-4 py-6">
+      <div className="min-w-0">
         <div className="kick">{kicker}</div>
-        <h1
-          style={{
-            fontSize: isDesktop ? 34 : 30,
-            lineHeight: 1.05,
-            letterSpacing: isDesktop ? "-0.025em" : "-0.03em",
-            marginTop: 8,
-          }}
-        >
+        <h1 className="mt-2 text-3xl leading-tight tracking-tight md:text-[34px]">
           {title}
         </h1>
       </div>
-      {actions ? (
-        <div className="flex min-w-0 flex-wrap items-baseline gap-3.5">
+      {actions && (
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           {actions}
         </div>
-      ) : null}
-    </div>
+      )}
+    </header>
   );
 }

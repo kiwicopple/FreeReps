@@ -89,7 +89,7 @@
 :root {
   --font-heading: "Archivo Variable", "Archivo", system-ui, sans-serif;
   --font-body: "Archivo Variable", "Archivo", system-ui, sans-serif;
-  --page-x: 40px;
+  --page-x: 32px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -128,57 +128,59 @@
   --font-sans: var(--font-body);
   --font-heading: var(--font-heading);
 }
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-html {
-  background: var(--background);
-}
+  html {
+    background: var(--background);
+  }
 
-body {
-  margin: 0;
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.55;
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-}
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-heading);
-  font-weight: 800;
-  line-height: 1.12;
-  letter-spacing: -0.015em;
-  margin: 0;
-}
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    margin: 0;
+  }
 
-a {
-  color: var(--success-foreground);
-  text-decoration: none;
-  text-underline-offset: 3px;
-}
+  a {
+    color: var(--success-foreground);
+    text-decoration: none;
+    text-underline-offset: 3px;
+  }
 
-a:hover {
-  color: var(--primary);
-}
+  a:hover {
+    color: var(--primary);
+  }
 
-:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
 
-::selection {
-  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 30%, transparent);
+  }
 }
 
 /* Every number that can change carries this. Without it the hero numbers
@@ -317,4 +319,9 @@ a:hover {
 
 p a {
   text-decoration: underline;
+}
+
+/* The shared picker is the only visible calendar trigger on editable dates. */
+.date-entry::-webkit-calendar-picker-indicator {
+  display: none;
 }
