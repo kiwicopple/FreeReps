@@ -53,7 +53,11 @@ test("today and trends retain values, sources, sparklines and metric links", asy
   isMobile,
 }) => {
   await page.goto("/");
-  await expect(page.getByText("60bpm", { exact: true })).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Key metrics" })
+      .getByText("60 bpm", { exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByText("Synthetic Watch", { exact: false }).first(),
   ).toBeVisible();

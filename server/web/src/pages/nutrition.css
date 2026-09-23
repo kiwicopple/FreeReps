@@ -1,4 +1,4 @@
-.nutrition-page {
+main > .nutrition-page {
   padding-bottom: 36px;
 }
 .nutrition-page a,
@@ -33,18 +33,14 @@
 .nutrition-intro button {
   flex-shrink: 0;
 }
-.nutrition-heroes {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
 .nutrition-hero {
   min-width: 0;
 }
-.nutrition-hero .nutrition-detail-trigger {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.summary-card.nutrition-detail-trigger {
+  align-items: stretch;
+}
+.nutrition-hero [data-slot="summary-label"] {
+  padding-right: 20px;
 }
 .nutrition-label {
   font-size: 13px;
@@ -103,7 +99,6 @@
 @media (min-width: 768px) {
   .nutrition-heroes {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 24px;
   }
   .nutrition-secondary,
   .nutrition-grid {

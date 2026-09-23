@@ -11,11 +11,17 @@ API payload or preference changes.
   consistent row. Sleep and Nutrition place their date navigation directly
   beneath it. Subtitle lines, sync metadata and the nutrition timezone line
   are omitted; workout timestamps remain in the detail content.
+  The full-width secondary bar sticks below desktop navigation, or to the
+  top of the mobile screen. Its measured height reserves scroll clearance
+  for keyboard focus and forms, including wrapped date controls and safe areas.
 - `PageSection` supplies a semantic heading, description, actions, padded or
   flush content and optional footer using coss CardFrame/Card. Table rows and
   secondary nutrient values remain rows, rather than individual cards.
-- `SummaryGrid` and `SummaryValue` own spacing and typography. Callers retain
-  calculations and formatting, including missing versus zero values.
+- `SummaryGrid`, `SummaryValue` and `SummaryContent` own the shared key-metric
+  card layout, typography and subtle green accent. Cards precede the detail
+  sections on Today, Nutrition, Sleep, Workouts/detail, Metrics, Correlations
+  and Trends. Callers retain calculations and formatting, including missing
+  versus zero values. Secondary nutrient values remain compact rows.
 - `DateNavigator` groups Previous/date/Next and keeps Today or Latest adjacent.
   `DatePicker` owns the shared Calendar, Popover/Drawer and validated direct
   entry. Calendar selection applies immediately; Apply/Enter validates typed
@@ -26,6 +32,9 @@ API payload or preference changes.
   trigger and content or content callback. A callback can close the current
   detail and its ancestors when navigating to a trend; ordinary Close actions
   only close the current sheet. No markup inspection or delegated DOM clicks.
+  The four nutrition macro cards open a right-side sheet on desktop and a
+  bottom sheet on mobile, with independent scrolling and visible Close actions.
+  Secondary nutrients retain desktop disclosure/mobile sheet behavior.
 - Editable settings use coss Field/FieldLabel/FieldDescription/FieldError;
   read-only rows and separate save operations remain distinct.
   Identity fields wait for their initial preferences before allowing edits,
@@ -49,7 +58,7 @@ coss component have been removed.
 
 | Area | Retained contract | Acceptance coverage |
 | --- | --- | --- |
-| Shell and all pages | Routes, back/forward, active navigation, responsive boundaries, themes, reduced motion | `parity.spec.ts`, `sleep.spec.ts`, `controls.spec.ts`, `accessibility.spec.ts` |
+| Shell and all pages | Routes, back/forward, active navigation, sticky secondary bar, responsive boundaries, themes, reduced motion | `parity.spec.ts`, `sleep.spec.ts`, `controls.spec.ts`, `accessibility.spec.ts`, `cards.spec.ts` |
 | Today | Hero order, values, categories, sources, dates, deltas, sparklines, links | `parity.spec.ts`, `states.spec.ts`, existing metric-display unit tests |
 | Nutrition | Day/7d/30d, four macros, compact secondary rows, unknown/zero/partial values, contributors and education | `nutrition.spec.ts`, `layout.spec.ts`, unchanged numerical suite |
 | Nutrition meters | Actual value/target accessible text, visually clamped fill, no absent/invalid target meter, completion stays separate | `layout.spec.ts` |
@@ -61,7 +70,7 @@ coss component have been removed.
 | Trends | Classification, direction, fitted charts and links | `parity.spec.ts`, existing trend unit tests |
 | Nine settings sections | URL tabs/mobile sections, credentials/OAuth, priorities, imports, alerts, identity, saves/resets, exact requests and retries | `settings.spec.ts` |
 | Feedback and actions | Automatic nutrition refresh, visible errors/retries, loading/empty/stale states | `states.spec.ts` |
-| Details | Independent disclosure drafts, grouped/searchable choices, nested closure/focus, scroll/backdrop/Escape | `controls.unit.test.tsx`, `controls.spec.ts`, `nutrition.spec.ts`, `layout.spec.ts` |
+| Details | Independent disclosure drafts, grouped/searchable choices, nested closure/focus, scroll/backdrop/Escape, four macro sheets on both viewports | `controls.unit.test.tsx`, `controls.spec.ts`, `nutrition.spec.ts`, `layout.spec.ts`, `cards.spec.ts` |
 
 Existing behavioral assertions remain; only locators tied to replaced markup
 were updated. Browser tests cover 320, 390, 767, 768 and 1440px with intercepted,
@@ -83,8 +92,8 @@ focused commits to the existing GitHub fork and confirm Web parity CI before
 one app-only Docker deployment. Preserve the previously deployed image for
 rollback and leave data volumes untouched. Live smoke checks are read-only.
 
-The image preceding header simplification is preserved as
-`freereps-local-app:pre-headers-20260923`; recreating only the app from this image
+The image preceding the sticky headers and metric cards is preserved as
+`freereps-local-app:pre-cards-20260923`; recreating only the app from this image
 (without a build) provides rollback without changing data volumes.
 
 Removed per-page section/stat helpers, summary/option child parsing, native
@@ -92,7 +101,7 @@ nutrition progress bars, delegated `data-sheet-close`, redundant dividers and
 obsolete nutrition grid/progress styling. Specialized chart geometry and domain
 presentation remain intentionally. There is no migration flag or dual layout.
 
-Automated local results: 176 browser cases passed, with 6 intentional viewport
+Automated local results: 180 browser cases passed, with 6 intentional viewport
 skips; 10 Vitest cases and the existing nutrition/recovery numerical suites passed.
 Type checking, production build, Go build/vet/tests, golangci-lint (zero issues),
 the document check and whitespace check passed.
@@ -105,5 +114,6 @@ WebKit emulation is separate from these checks, which require an actual iPhone:
 - Swipe down to dismiss and verify scrolling does not dismiss accidentally.
 - Pick and type a date, dismiss the keyboard, and navigate to Today/Latest.
 - Open the home-screen app and check the notch, bottom navigation and safe areas.
+- Scroll past the key-metric cards and check the sticky page bar stays usable.
 
 Do not mark these complete based on emulated screenshots or desktop keyboard tests.

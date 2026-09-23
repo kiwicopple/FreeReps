@@ -2,6 +2,7 @@ import { Empty } from "@/components/ui/empty";
 import { Alert } from "@/components/ui/alert";
 import DateNavigator from "@/components/DateNavigator";
 import PageSection from "@/components/PageSection";
+import { SummaryContent, SummaryGrid } from "@/components/SummaryValue";
 import { Meter } from "@/components/ui/meter";
 import Choice from "@/components/Choice";
 import { Button } from "@/components/ui/button";
@@ -171,49 +172,60 @@ export default function NutritionPage() {
         ? targetStatus(value, t, !!currentDay?.complete, covered)
         : `${avg.count}/${count} days with values`;
     const meterTarget = t?.kind === "range" ? t.high : t?.value;
+    const comparison = (
+      <>
+        {(hero || (value != null && t)) && (
+          <span className="nutrition-muted col-span-full">
+            {range === "day" ? targetText(t) : "Daily average of known intake"}
+          </span>
+        )}
+        {range === "day" &&
+          value != null &&
+          t &&
+          t.kind !== "reference" &&
+          meterTarget != null &&
+          Number.isFinite(meterTarget) &&
+          meterTarget > 0 && (
+            <Meter
+              className="col-span-full my-1"
+              aria-label={`${nutrientLabel(key)} logged versus target`}
+              value={Math.max(0, Math.min(value, meterTarget))}
+              max={meterTarget}
+              getAriaValueText={() =>
+                `${amount(value)} ${unit} logged; ${targetText(t)}. Intake comparison, not logging completion.`
+              }
+            />
+          )}
+        {value != null && <span className="nutrition-status">{status}</span>}
+        {range === "day" && value != null && !covered && (
+          <span className="nutrition-muted">Partial data</span>
+        )}
+      </>
+    );
     return (
       <ResponsiveDetails
         title={nutrientLabel(key)}
         key={key}
         className={hero ? "nutrition-hero" : "nutrition-nutrient"}
+        card={hero}
         trigger={
-          <>
-            <span className="nutrition-label">{nutrientLabel(key)}</span>
-            <span className="nutrition-value">
-              {amount(value)}
-              {value != null && <small> {unit}</small>}
-            </span>
-            {(hero || (value != null && t)) && (
-              <span className="nutrition-muted col-span-full">
-                {range === "day"
-                  ? targetText(t)
-                  : "Daily average of known intake"}
+          hero ? (
+            <SummaryContent
+              label={nutrientLabel(key)}
+              value={amount(value)}
+              unit={value != null ? unit : undefined}
+              status={comparison}
+            />
+          ) : (
+            <>
+              <span className="nutrition-label">{nutrientLabel(key)}</span>
+              <span className="nutrition-value">
+                {amount(value)}
+                {value != null && <small> {unit}</small>}
               </span>
-            )}
-            {range === "day" &&
-              value != null &&
-              t &&
-              t.kind !== "reference" &&
-              meterTarget != null &&
-              Number.isFinite(meterTarget) &&
-              meterTarget > 0 && (
-                <Meter
-                  className="col-span-full my-1"
-                  aria-label={`${nutrientLabel(key)} logged versus target`}
-                  value={Math.max(0, Math.min(value, meterTarget))}
-                  max={meterTarget}
-                  getAriaValueText={() =>
-                    `${amount(value)} ${unit} logged; ${targetText(t)}. Intake comparison, not logging completion.`
-                  }
-                />
-              )}
-            {value != null && (
-              <span className="nutrition-status">{status}</span>
-            )}
-            {range === "day" && value != null && !covered && (
-              <span className="nutrition-muted">Partial data</span>
-            )}
-          </>
+              {comparison}
+            </>
+          )
         }
       >
         {(close) => (
@@ -350,6 +362,12 @@ export default function NutritionPage() {
         ) : (
           data && (
             <>
+              <SummaryGrid
+                label="Calories and macros"
+                className="nutrition-heroes"
+              >
+                {HERO.map((k) => nutrient(k, true))}
+              </SummaryGrid>
               <PageSection title="Logging status">
                 <div className="nutrition-intro">
                   <div>
@@ -395,12 +413,7 @@ export default function NutritionPage() {
                   supplements.
                 </Empty>
               )}
-              <section
-                className="nutrition-heroes"
-                aria-label="Calories and macros"
-              >
-                {HERO.map((k) => nutrient(k, true))}
-              </section>
+
               <PageSection title="Fiber and water">
                 <div className="nutrition-secondary">
                   {SECONDARY.map((k) => nutrient(k))}

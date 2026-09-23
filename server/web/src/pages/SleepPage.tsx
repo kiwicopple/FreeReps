@@ -112,12 +112,6 @@ export default function SleepPage() {
           resetLabel="Latest"
         />
       </PageHeader>
-      {last && (
-        <div className="page-x mb-6">
-          <RecoveryScore session={last} />
-        </div>
-      )}
-
       {message ? (
         <Alert
           variant="error"
@@ -219,6 +213,7 @@ function DesktopSleep({
           detail={pctOf(totals.REM, session.TotalSleep)}
         />
       </SummaryGrid>
+      <RecoveryScore session={session} />
 
       <PageSection title="Stage composition">
         <StageComposition totals={totals} />
@@ -292,6 +287,7 @@ function MobileSleep({
           value={latency > 0 ? `${Math.round(latency)}m` : "—"}
         />
       </SummaryGrid>
+      <RecoveryScore session={session} />
       <PageSection
         title="Hypnogram"
         description={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)}`}

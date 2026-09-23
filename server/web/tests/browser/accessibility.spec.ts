@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { test, expect, metric } from "./fixtures";
 import AxeBuilder from "@axe-core/playwright";
 for (const path of [
   "/",
@@ -12,6 +12,43 @@ for (const path of [
   "/settings",
 ])
   test(`responsive layout ${path}`, async ({ safePage: page }, info) => {
+    // Four invented highlights exercise the card grid and long units at narrow widths.
+    if (path === "/") {
+      const highlights = [
+        metric,
+        {
+          ...metric,
+          metric_name: "steps",
+          label: "Steps",
+          unit: "count",
+          latest: 8640,
+        },
+        {
+          ...metric,
+          metric_name: "heart_rate_variability",
+          label: "HRV",
+          unit: "ms",
+          latest: 42,
+        },
+        {
+          ...metric,
+          metric_name: "vo2_max",
+          label: "VO₂ Max",
+          unit: "mL/kg/min",
+          latest: 48,
+        },
+      ];
+      await page.route("**/api/v1/metrics/latest?*", (route) =>
+        route.fulfill({
+          json: {
+            metrics: highlights,
+            heroes: highlights.map((item) => item.metric_name),
+            total_available: 4,
+            window_days: 30,
+          },
+        }),
+      );
+    }
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -37,9 +74,28 @@ for (const path of [
     if (process.env.PW_SCREENSHOTS === "1") {
       // All traffic is fixture-backed; snapshots stay in ignored local output.
       await page.waitForLoadState("networkidle");
-      await page.screenshot({ path: info.outputPath("synthetic-desktop.png") });
-      await page.setViewportSize({ width: 390, height: 844 });
-      await page.screenshot({ path: info.outputPath("synthetic-mobile.png") });
+      for (const width of [1440, 390]) {
+        await page.setViewportSize({
+          width,
+          height: width === 390 ? 844 : 900,
+        });
+        await expect(page.locator(".nav")).toHaveCount(width < 768 ? 0 : 1);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await expect
+          .poll(() =>
+            page
+              .locator(".page-header")
+              .evaluate((el) => Math.round(el.getBoundingClientRect().top)),
+          )
+          .toBe(width < 768 ? 0 : 64);
+        await page.screenshot({
+          path: info.outputPath(
+            `synthetic-${width < 768 ? "mobile" : "desktop"}.png`,
+          ),
+          animations: "disabled",
+          scale: "css",
+        });
+      }
     }
   });
 for (const path of [

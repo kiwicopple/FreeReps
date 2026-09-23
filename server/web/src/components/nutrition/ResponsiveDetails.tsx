@@ -7,6 +7,8 @@ import {
 } from "react";
 import { useIsDesktop } from "../../hooks/useMediaQuery";
 import { Button } from "../ui/button";
+import { Card } from "../ui/card";
+import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -24,17 +26,19 @@ import {
 } from "../ui/drawer";
 const CloseDetails = createContext<() => void>(() => {});
 
-/** Nutrition content expands independently on desktop and stacks in scrolling mobile drawers. */
+/** Metric cards use sheets at every width; compact rows keep independent desktop expansion. */
 export default function ResponsiveDetails({
   title,
   className,
   trigger: label,
   children,
+  card = false,
 }: {
   title: string;
   className?: string;
   trigger: ReactNode;
   children: ReactNode | ((close: () => void) => ReactNode);
+  card?: boolean;
 }) {
   const closeParent = useContext(CloseDetails);
   const closeStack = () => {
@@ -46,7 +50,17 @@ export default function ResponsiveDetails({
   useEffect(() => {
     setOpen(false);
   }, [desktop]);
-  const trigger = (
+  const trigger = card ? (
+    <Card
+      className="summary-card nutrition-detail-trigger"
+      render={
+        <Button
+          variant="ghost"
+          className="h-auto w-full whitespace-normal text-left"
+        />
+      }
+    />
+  ) : (
     <Button
       variant="ghost"
       className="nutrition-detail-trigger h-auto w-full justify-start whitespace-normal p-0 text-left"
@@ -57,7 +71,7 @@ export default function ResponsiveDetails({
       {typeof children === "function" ? children(closeStack) : children}
     </CloseDetails.Provider>
   );
-  if (desktop)
+  if (desktop && !card)
     return (
       <Collapsible className={className} open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger render={trigger}>{label}</CollapsibleTrigger>
@@ -65,11 +79,30 @@ export default function ResponsiveDetails({
       </Collapsible>
     );
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
+    <Drawer
+      position={desktop ? "right" : "bottom"}
+      open={open}
+      onOpenChange={setOpen}
+    >
       <div className={className}>
-        <DrawerTrigger render={trigger}>{label}</DrawerTrigger>
+        <DrawerTrigger render={trigger}>
+          {label}
+          {card && (
+            <ChevronRight
+              aria-hidden
+              className="absolute right-4 top-4 size-4 text-muted-foreground md:right-5 md:top-5"
+            />
+          )}
+        </DrawerTrigger>
       </div>
-      <DrawerPopup showBar className="nutrition-page max-h-[90dvh]">
+      <DrawerPopup
+        showBar={!desktop}
+        className={
+          desktop
+            ? "nutrition-page h-full max-h-dvh max-w-lg"
+            : "nutrition-page max-h-[90dvh]"
+        }
+      >
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>

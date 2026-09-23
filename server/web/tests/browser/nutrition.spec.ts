@@ -198,7 +198,7 @@ test("nutrition period totals, trend selection, food details and protocol histor
   });
   await page.goto("/nutrition");
   await expect(
-    page.locator(".nutrition-hero .nutrition-value").first(),
+    page.locator(".nutrition-hero [data-slot=summary-value]").first(),
   ).toHaveText("300 kcal");
   await page.getByText("Calories", { exact: true }).first().click();
   await expect(

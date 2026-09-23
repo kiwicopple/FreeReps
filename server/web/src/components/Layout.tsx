@@ -56,17 +56,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </nav>
       ) : null}
 
-      <main
-        className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col pb-6"
-        // Leave breathing room below the iPhone status bar and notch.
-        style={{
-          paddingTop: isDesktop
-            ? undefined
-            : "calc(env(safe-area-inset-top, 0px) + 24px)",
-        }}
-      >
-        {children}
-      </main>
+      <main className="flex w-full flex-1 flex-col pb-6">{children}</main>
 
       {!isDesktop ? (
         <>

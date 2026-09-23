@@ -185,6 +185,26 @@ export default function CorrelationPage() {
         </Field>
       </div>
 
+      <div className="page-x mb-6">
+        <SummaryGrid>
+          <SummaryValue
+            label="R²"
+            value={r != null ? (r * r).toFixed(3) : "—"}
+          />
+          <SummaryValue
+            label="Slope"
+            value={fit ? formatNumber(fit.slope, 3) : "—"}
+          />
+          <SummaryValue
+            label="Paired days"
+            value={String(active?.pairs.length ?? 0)}
+          />
+          <SummaryValue
+            label="Lag applied"
+            value={lag === 0 ? "Same day" : `${lag} day${lag > 1 ? "s" : ""}`}
+          />
+        </SummaryGrid>
+      </div>
       <div className="page-x grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(340px,440px)]">
         <PageSection title="Metric relationship">
           {sameMetric ? (
@@ -234,25 +254,6 @@ export default function CorrelationPage() {
             xLabel={xMeta?.label ?? xMetric}
             yLabel={yMeta?.label ?? yMetric}
           />
-
-          <SummaryGrid>
-            <SummaryValue
-              label="R²"
-              value={r != null ? (r * r).toFixed(3) : "—"}
-            />
-            <SummaryValue
-              label="Slope"
-              value={fit ? formatNumber(fit.slope, 3) : "—"}
-            />
-            <SummaryValue
-              label="Paired days"
-              value={String(active?.pairs.length ?? 0)}
-            />
-            <SummaryValue
-              label="Lag applied"
-              value={lag === 0 ? "Same day" : `${lag} day${lag > 1 ? "s" : ""}`}
-            />
-          </SummaryGrid>
 
           <div className="mt-6 mb-3">
             <h3 style={{ fontSize: 15, fontWeight: 700 }}>

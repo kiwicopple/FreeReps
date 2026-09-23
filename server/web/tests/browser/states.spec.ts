@@ -73,7 +73,7 @@ test("nutrition retains loaded totals when automatic refresh fails and recovers 
   await page.goto("/nutrition");
   await expect(
     page
-      .locator(".nutrition-hero .nutrition-value")
+      .locator(".nutrition-hero [data-slot=summary-value]")
       .filter({ hasText: "300" })
       .first(),
   ).toBeVisible();
@@ -87,7 +87,7 @@ test("nutrition retains loaded totals when automatic refresh fails and recovers 
   ).toBeVisible({ timeout: 15000 });
   await expect(
     page
-      .locator(".nutrition-hero .nutrition-value")
+      .locator(".nutrition-hero [data-slot=summary-value]")
       .filter({ hasText: "300" })
       .first(),
   ).toBeVisible();
