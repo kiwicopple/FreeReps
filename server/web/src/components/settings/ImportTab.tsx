@@ -71,24 +71,16 @@ export default function ImportTab() {
       }
     >
       <div
-        role="button"
-        tabIndex={0}
-        aria-label="Choose CSV file"
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            fileRef.current?.click();
-          }
-        }}
+        aria-label="CSV drop zone"
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        onClick={() => fileRef.current?.click()}
         style={{
-          border: `2px dashed ${dragOver || selectedFile ? "var(--primary)" : "var(--border)"}`,
+          borderRadius: 12,
+          border: `1px dashed ${dragOver || selectedFile ? "var(--primary)" : "var(--border)"}`,
           background: dragOver ? "var(--success-soft)" : "transparent",
           padding: 30,
           textAlign: "center",
@@ -140,9 +132,16 @@ export default function ImportTab() {
               margin: 0,
             }}
           >
-            Drop a CSV file here, or click to browse
+            Drop a CSV file here
           </p>
         )}
+        <Button
+          variant="outline"
+          className="mt-3"
+          onClick={() => fileRef.current?.click()}
+        >
+          Browse CSV files
+        </Button>
       </div>
 
       {selectedFile ? (

@@ -8,13 +8,6 @@ main > .nutrition-page {
 .nutrition-page .nutrition-detail-trigger {
   cursor: pointer;
 }
-.nutrition-toolbar {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin: 16px 0;
-}
 .nutrition-muted {
   color: var(--muted-foreground);
   font-size: 13px;
@@ -128,18 +121,6 @@ main > .nutrition-page {
   grid-column: 1/-1;
   color: var(--muted-foreground);
 }
-.nutrition-supplement {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--input);
-  font-size: 14px;
-}
-.nutrition-supplement > span {
-  max-width: 40%;
-  font-size: 13px;
-}
 .nutrition-log {
   border-bottom: 1px solid var(--input);
   padding: 16px 0;
@@ -198,16 +179,9 @@ main > .nutrition-page {
   .nutrition-form-grid {
     grid-template-columns: 1fr;
   }
-  .nutrition-supplement {
-    flex-direction: column;
-    gap: 6px;
-  }
-  .nutrition-supplement > span {
-    max-width: none;
-  }
 }
 .nutrition-label::after {
-  content: " +";
+  content: " ›";
   color: var(--muted-foreground);
 }
 .nutrition-explainer {

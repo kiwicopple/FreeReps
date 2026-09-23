@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type RefObject } from "react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -15,13 +15,21 @@ export default function ConfirmAction({
   title,
   description,
   onConfirm,
+  open: controlledOpen,
+  onOpenChange,
+  finalFocus,
 }: {
   title: string;
   description: string;
   onConfirm: () => void | Promise<void>;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  finalFocus?: RefObject<HTMLButtonElement | null>;
 }) {
-  const [open, setOpen] = useState(false),
+  const [internalOpen, setInternalOpen] = useState(false),
     [busy, setBusy] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const running = useRef(false);
   async function confirm() {
     if (running.current) return;
@@ -42,10 +50,12 @@ export default function ConfirmAction({
         if (!running.current) setOpen(next);
       }}
     >
-      <AlertDialogTrigger render={<Button variant="destructive-outline" />}>
-        Disconnect
-      </AlertDialogTrigger>
-      <AlertDialogPopup>
+      {controlledOpen === undefined && (
+        <AlertDialogTrigger render={<Button variant="destructive-outline" />}>
+          Disconnect
+        </AlertDialogTrigger>
+      )}
+      <AlertDialogPopup finalFocus={finalFocus}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>

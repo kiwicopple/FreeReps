@@ -1,6 +1,8 @@
-import { buttonVariants } from "../components/ui/button";
-import { Tabs, TabsList, TabsTab, TabsPanel } from "../components/ui/tabs";
-import { Link, useSearchParams } from "react-router-dom";
+import PageContent from "@/components/PageContent";
+import Choice from "@/components/Choice";
+import VisitedTabPanel from "@/components/VisitedTabPanel";
+import { Tabs, TabsList, TabsTab } from "../components/ui/tabs";
+import { useSearchParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import AlertsTab from "../components/settings/AlertsTab";
 import FrontPageTab from "../components/settings/FrontPageTab";
@@ -11,11 +13,7 @@ import IngestTab from "../components/settings/IngestTab";
 import OuraTab from "../components/settings/OuraTab";
 import SourcesTab from "../components/settings/SourcesTab";
 import WithingsTab from "../components/settings/WithingsTab";
-import { useIsDesktop } from "../hooks/useMediaQuery";
 
-/* Hevy and Import are absent from the design's five-tab rail, but both drive
-   working integrations, so they stay rather than being dropped along with the
-   old layout. */
 const TABS = [
   { id: "identity", label: "Identity", render: () => <IdentityTab /> },
   { id: "sources", label: "Sources", render: () => <SourcesTab /> },
@@ -33,7 +31,6 @@ type TabID = (typeof TABS)[number]["id"];
 const VALID = new Set<string>(TABS.map((t) => t.id));
 
 export default function SettingsPage() {
-  const isDesktop = useIsDesktop();
   const [params, setParams] = useSearchParams();
   const raw = params.get("tab");
   const active: TabID = raw && VALID.has(raw) ? (raw as TabID) : "identity";
@@ -44,57 +41,54 @@ export default function SettingsPage() {
     setParams(p, { replace: true });
   };
 
-  if (!isDesktop) {
-    // One scrolling page rather than a rail: the phone has no room beside the
-    // content, and the sections are short enough to read in sequence.
-    return (
-      <>
-        <PageHeader
-          title="Settings"
-          actions={
-            <Link
-              to="/trends"
-              className={buttonVariants({ variant: "outline" })}
-            >
-              View trends →
-            </Link>
-          }
-        />
-        <div className="page-x space-y-6">
-          {TABS.map((tab) => (
-            <div key={tab.id}>{tab.render()}</div>
-          ))}
-        </div>
-      </>
-    );
-  }
-
   return (
     <>
       <PageHeader title="Settings" />
-
-      <Tabs
-        orientation="vertical"
-        value={active}
-        onValueChange={(id) => setTab(id as TabID)}
-        className="page-x min-h-[640px] gap-6"
-      >
-        <TabsList
-          aria-label="Settings sections"
-          className="w-44 shrink-0 self-start lg:w-56"
+      <PageContent>
+        <Tabs
+          orientation="vertical"
+          value={active}
+          onValueChange={(id) => setTab(id as TabID)}
+          className="settings-layout gap-6"
         >
+          <div className="settings-picker">
+            <label
+              htmlFor="settings-section"
+              className="mb-2 block text-sm font-medium"
+            >
+              Section
+            </label>
+            <Choice
+              id="settings-section"
+              aria-label="Settings section"
+              value={active}
+              onValueChange={(id) => setTab(id as TabID)}
+              options={TABS.map((tab) => ({ value: tab.id, label: tab.label }))}
+            />
+          </div>
+          <TabsList
+            aria-label="Settings sections"
+            className="settings-sections w-44 shrink-0 self-start"
+          >
+            {TABS.map((tab) => (
+              <TabsTab key={tab.id} value={tab.id}>
+                {tab.label}
+              </TabsTab>
+            ))}
+          </TabsList>
           {TABS.map((tab) => (
-            <TabsTab key={tab.id} value={tab.id}>
-              {tab.label}
-            </TabsTab>
+            <VisitedTabPanel
+              key={tab.id}
+              active={active}
+              value={tab.id}
+              label={tab.label}
+              className="min-w-0 flex-1"
+            >
+              {tab.render()}
+            </VisitedTabPanel>
           ))}
-        </TabsList>
-        {TABS.map((tab) => (
-          <TabsPanel key={tab.id} value={tab.id} className="min-w-0 flex-1">
-            {tab.render()}
-          </TabsPanel>
-        ))}
-      </Tabs>
+        </Tabs>
+      </PageContent>
     </>
   );
 }

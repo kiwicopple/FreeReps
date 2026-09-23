@@ -1,3 +1,10 @@
+import { Search, X } from "lucide-react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import PageContent from "@/components/PageContent";
 import PageSection from "@/components/PageSection";
 import { Button } from "@/components/ui/button";
 import { Empty } from "@/components/ui/empty";
@@ -13,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { fetchFrontPage, type FrontPageMetric } from "../api";
 import PageHeader from "../components/PageHeader";
@@ -51,9 +58,17 @@ export default function DashboardPage() {
   const state = queryState(query);
   const message = queryMessage(state, query.error);
 
+  const [search, setSearch] = useState("");
   const groups = useMemo(
-    () => groupByCategory(data?.metrics ?? []),
-    [data?.metrics],
+    () =>
+      groupByCategory(
+        (data?.metrics ?? []).filter((m) =>
+          `${m.label} ${m.metric_name}`
+            .toLowerCase()
+            .includes(search.trim().toLowerCase()),
+        ),
+      ),
+    [data?.metrics, search],
   );
 
   const heroes = useMemo(() => {
@@ -70,10 +85,6 @@ export default function DashboardPage() {
     setParams(p, { replace: true });
   };
 
-  const shown = data?.metrics.length ?? 0;
-  const total = data?.total_available ?? 0;
-  const hidden = Math.max(total - shown, 0);
-
   return (
     <>
       <PageHeader
@@ -88,10 +99,47 @@ export default function DashboardPage() {
         }
       />
 
-      <div className="page-x space-y-6">
+      <PageContent className="space-y-6">
         <HeroStrip metrics={heroes} loading={state === "loading"} />
 
-        <PageSection title="All metrics" flush>
+        <PageSection
+          title="All metrics"
+          flush
+          table={isDesktop}
+          actions={
+            <Link
+              to="/settings?tab=front-page"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Customize metrics
+            </Link>
+          }
+        >
+          <div className="border-b px-4 py-3 md:px-6">
+            <InputGroup className="max-w-sm">
+              <InputGroupAddon>
+                <Search />
+              </InputGroupAddon>
+              <InputGroupInput
+                aria-label="Search metrics"
+                placeholder="Search metrics…"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+              <InputGroupAddon align="inline-end">
+                {search && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    aria-label="Clear metric search"
+                    onClick={() => setSearch("")}
+                  >
+                    <X />
+                  </Button>
+                )}
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
           {message ? (
             <Alert
               variant="error"
@@ -107,6 +155,13 @@ export default function DashboardPage() {
                 Retry
               </Button>
             </Alert>
+          ) : search.trim() && groups.length === 0 ? (
+            <Empty>
+              No matching metrics.{" "}
+              <Button variant="outline" onClick={() => setSearch("")}>
+                Clear search
+              </Button>
+            </Empty>
           ) : isDesktop ? (
             <MetricsTable
               groups={groups}
@@ -116,55 +171,8 @@ export default function DashboardPage() {
           ) : (
             <MetricRows groups={groups} loading={state === "loading"} />
           )}
-
-          <div
-            className="page-x flex items-center gap-6 flex-wrap"
-            style={{
-              borderTop: "1px solid var(--border)",
-              paddingTop: 16,
-              paddingBottom: 16,
-              marginTop: "auto",
-            }}
-          >
-            <Link
-              to="/settings?tab=front-page"
-              className={buttonVariants({ variant: "ghost" })}
-              style={{ fontSize: 12.5 }}
-            >
-              Show {hidden} more metrics →
-            </Link>
-            <Link
-              to="/trends"
-              className={buttonVariants({ variant: "ghost" })}
-              style={{ fontSize: 12.5 }}
-            >
-              Open in Trends →
-            </Link>
-            {/* Correlations needs width the phone does not have, so its entry
-            point falls away below the breakpoint. */}
-            {isDesktop ? (
-              <>
-                <Link
-                  to="/correlations"
-                  className={buttonVariants({ variant: "ghost" })}
-                  style={{ fontSize: 12.5 }}
-                >
-                  Correlate two metrics →
-                </Link>
-                <span
-                  style={{
-                    marginLeft: "auto",
-                    font: "400 11.5px var(--font-body)",
-                    color: "var(--muted-foreground)",
-                  }}
-                >
-                  {shown} of {total} metrics shown · edit visibility in Settings
-                </span>
-              </>
-            ) : null}
-          </div>
         </PageSection>
-      </div>
+      </PageContent>
     </>
   );
 }
@@ -196,7 +204,7 @@ function MetricsTable({
   }
 
   return (
-    <Table>
+    <Table variant="card">
       <MetricTableHead range={range} />
       <TableBody>
         {groups.map((group) => (
@@ -317,7 +325,7 @@ function TableSkeleton({
   range: DashboardRange;
 }) {
   return (
-    <Table>
+    <Table variant="card">
       <MetricTableHead range={range} />
       <TableBody>
         {Array.from({ length: 8 }).map((_, i) => (

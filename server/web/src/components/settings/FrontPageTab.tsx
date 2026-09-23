@@ -1,3 +1,4 @@
+import { ArrowUp, ArrowDown } from "lucide-react";
 import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
@@ -124,120 +125,100 @@ export default function FrontPageTab() {
     <PageSection
       title="Front page"
       description={
-        <>
-          Pick the four hero numbers and which metrics the table lists. Fewer
-          metrics means a smaller first request.
-        </>
+        <>Choose four highlights and which metrics appear in All metrics.</>
       }
     >
-      <div style={{ paddingTop: 20 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700 }}>Hero numbers</h3>
-        <p
-          style={{
-            font: "400 12px var(--font-body)",
-            color: "var(--muted-foreground)",
-            margin: "6px 0 12px",
-          }}
-        >
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold">Hero numbers</h3>
+        <p className="text-sm text-muted-foreground">
           {heroes.length} of {HERO_COUNT} chosen
           {heroes.length !== HERO_COUNT ? " — pick exactly four to save" : ""}
         </p>
-
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {heroes.map((name) => (
-            <Button
-              variant="outline"
-              key={name}
-              type="button"
-              onClick={() => toggleHero(name)}
-              style={{
-                border: "1px solid var(--primary)",
-                background: "var(--success-soft)",
-                color: "var(--foreground)",
-                padding: "8px 12px",
-                font: "500 13px var(--font-body)",
-                borderRadius: 0,
-                cursor: "pointer",
-              }}
-            >
-              {labelFor(name)} ×
-            </Button>
+        <ol className="divide-y rounded-lg border px-3">
+          {heroes.map((name, index) => (
+            <li key={name} className="flex items-center gap-2 py-2">
+              <span className="w-4 shrink-0 text-xs tabular-nums text-muted-foreground">
+                {index + 1}
+              </span>
+              <Button
+                variant="ghost"
+                className="min-w-0 flex-1 justify-start whitespace-normal text-left"
+                onClick={() => toggleHero(name)}
+                disabled={saving}
+              >
+                {labelFor(name)} ×
+              </Button>
+              {([-1, 1] as const).map((direction) => (
+                <Button
+                  key={direction}
+                  variant="ghost"
+                  size="icon"
+                  disabled={
+                    saving ||
+                    index + direction < 0 ||
+                    index + direction >= heroes.length
+                  }
+                  aria-label={`Move ${labelFor(name)} ${direction < 0 ? "up" : "down"}`}
+                  onClick={() =>
+                    setHeroes((previous) => {
+                      const next = [...previous];
+                      [next[index], next[index + direction]] = [
+                        next[index + direction],
+                        next[index],
+                      ];
+                      return next;
+                    })
+                  }
+                >
+                  {direction < 0 ? <ArrowUp /> : <ArrowDown />}
+                </Button>
+              ))}
+            </li>
           ))}
-          {heroes.length < HERO_COUNT ? (
-            <span
-              style={{
-                border: "1px dashed var(--border)",
-                color: "var(--muted-foreground)",
-                padding: "8px 12px",
-                font: "500 13px var(--font-body)",
-              }}
-            >
-              + Add below
-            </span>
-          ) : null}
-        </div>
+        </ol>
+        {heroes.length < HERO_COUNT && (
+          <p className="text-xs text-muted-foreground">
+            Add a highlight from the list below.
+          </p>
+        )}
       </div>
-
-      <div style={{ paddingTop: 26 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700 }}>Table metrics</h3>
-        <p
-          style={{
-            font: "400 12px var(--font-body)",
-            color: "var(--muted-foreground)",
-            margin: "6px 0 4px",
-          }}
-        >
+      <div className="space-y-3 pt-6">
+        <h3 className="text-sm font-semibold">Table metrics</h3>
+        <p className="text-sm text-muted-foreground">
           {visibleCount} of {options.length} listed
         </p>
-
-        <div style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="divide-y border-y">
           {options.map((m) => {
             const on = visible[m.value] ?? false;
             const isHero = heroes.includes(m.value);
+            const Toggle = isDesktop ? Checkbox : Switch;
             return (
-              <div
-                key={m.value}
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  gap: 14,
-                  padding: "11px 0",
-                  borderBottom: "1px solid var(--border)",
-                }}
-              >
-                {isDesktop ? (
-                  <Checkbox
-                    checked={on}
-                    onCheckedChange={() => toggleVisible(m.value)}
-                    aria-label={`List ${m.label}`}
-                  />
-                ) : (
-                  <Switch
-                    checked={on}
-                    onCheckedChange={() => toggleVisible(m.value)}
-                    aria-label={`List ${m.label}`}
-                  />
-                )}
-                <span
-                  style={{
-                    font: "500 13.5px var(--font-body)",
-                    color: on ? "var(--foreground)" : "var(--muted-foreground)",
-                    flex: 1,
-                  }}
-                >
-                  {m.label}
-                </span>
-                <span className="kick" style={{ width: 120, flex: "none" }}>
-                  {m.category}
-                </span>
+              <div key={m.value} className="flex items-center gap-3 py-3">
+                <Toggle
+                  checked={on}
+                  disabled={saving}
+                  onCheckedChange={() => toggleVisible(m.value)}
+                  aria-label={`List ${m.label}`}
+                />
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={
+                      on
+                        ? "text-sm font-medium"
+                        : "text-sm text-muted-foreground"
+                    }
+                  >
+                    {m.label}
+                  </p>
+                  <p className="mt-1 text-xs capitalize text-muted-foreground">
+                    {m.category.replace(/_/g, " ")}
+                  </p>
+                </div>
                 <Button
                   variant="ghost"
-                  type="button"
+                  size="sm"
                   onClick={() => toggleHero(m.value)}
-                  disabled={!isHero && heroes.length >= HERO_COUNT}
-
-                  style={{ fontSize: 11.5, flex: "none" }}
+                  disabled={saving || (!isHero && heroes.length >= HERO_COUNT)}
                 >
                   {isHero ? "Hero ×" : "Make hero"}
                 </Button>
@@ -246,26 +227,16 @@ export default function FrontPageTab() {
           })}
         </div>
       </div>
-
-      {error ? (
-        <Alert variant="error" style={{ fontSize: 13, marginTop: 14 }}>
+      {error && (
+        <Alert variant="error" className="mt-4">
           {error}
         </Alert>
-      ) : null}
-
-      <div
-        style={{ display: "flex", flexWrap: "wrap", gap: 12, paddingTop: 20 }}
-      >
-        <Button
-          variant="default"
-          type="button"
-
-          onClick={save}
-          disabled={saving}
-        >
-          {saving ? "Saving…" : "Save"}
+      )}
+      <div className="flex flex-wrap gap-3 pt-5">
+        <Button onClick={save} disabled={saving} loading={saving}>
+          Save
         </Button>
-        <Button variant="ghost" type="button" onClick={reset}>
+        <Button variant="ghost" onClick={reset} disabled={saving}>
           Reset to defaults
         </Button>
       </div>

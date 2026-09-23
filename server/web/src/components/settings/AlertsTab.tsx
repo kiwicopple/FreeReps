@@ -33,15 +33,7 @@ function describeAge(iso?: string): string {
 
 function ConditionRow({ c }: { c: AlertCondition }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "baseline",
-        gap: 12,
-        padding: "10px 0",
-        borderBottom: "1px solid var(--border)",
-      }}
-    >
+    <div className="flex flex-wrap items-baseline gap-3 border-b py-3">
       <span
         style={{
           width: 10,
@@ -51,9 +43,7 @@ function ConditionRow({ c }: { c: AlertCondition }) {
           background: c.firing ? "var(--primary)" : "var(--input)",
         }}
       />
-      <span style={{ font: "600 13px var(--font-body)", minWidth: 220 }}>
-        {c.service}
-      </span>
+      <span className="text-sm font-semibold">{c.service}</span>
       <span style={{ ...MONO, fontSize: 12, color: "var(--muted-foreground)" }}>
         {c.monitor_id}
       </span>
@@ -351,7 +341,7 @@ export default function AlertsTab() {
             </Field>
           </div>
 
-          <div style={{ display: "flex", gap: 8, paddingTop: 20 }}>
+          <div className="flex flex-wrap gap-2 pt-5">
             <Button
               variant="default"
               type="button"

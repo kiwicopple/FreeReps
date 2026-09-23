@@ -3,7 +3,7 @@ import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
-import ConfirmAction from "../ConfirmAction";
+import ConnectionMenu from "./ConnectionMenu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,7 +14,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   authorizeOura,
   disconnectOura,
@@ -26,19 +26,21 @@ import {
 import { MONO, RedirectURIRow } from "./parts";
 
 export default function OuraTab() {
+  const credentialsDirty = useRef(false);
   const [status, setStatus] = useState<OuraStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [clientId, setClientId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editingCredentials, setEditingCredentials] = useState(false);
 
   const load = useCallback(() => {
     setError(null);
     fetchOuraStatus()
       .then((s) => {
         setStatus(s);
-        if (s.client_id) setClientId(s.client_id);
+        if (s.client_id && !credentialsDirty.current) setClientId(s.client_id);
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -58,6 +60,9 @@ export default function OuraTab() {
     setError(null);
     try {
       await saveOuraCredentials(clientId, clientSecret);
+      credentialsDirty.current = false;
+      setClientSecret("");
+      setEditingCredentials(false);
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save credentials");
@@ -127,20 +132,24 @@ export default function OuraTab() {
         error ? null : (
           <Spinner className="mt-4 size-5" />
         )
-      ) : !status.configured ? (
-        <div style={{ paddingTop: 20, maxWidth: 520 }}>
-          <Field style={{ marginBottom: 14 }}>
+      ) : !status.configured || editingCredentials ? (
+        <div className="mt-5 max-w-lg space-y-4">
+          <Field className="mb-4">
             <FieldLabel htmlFor="oura-id">Client ID</FieldLabel>
             <Input
+              autoFocus={editingCredentials}
               id="oura-id"
 
               style={MONO}
               value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
+              onChange={(e) => {
+                credentialsDirty.current = true;
+                setClientId(e.target.value);
+              }}
               placeholder="Oura client ID"
             />
           </Field>
-          <Field style={{ marginBottom: 16 }}>
+          <Field className="mb-4">
             <FieldLabel htmlFor="oura-secret">Client secret</FieldLabel>
             <Input
               id="oura-secret"
@@ -148,7 +157,10 @@ export default function OuraTab() {
               style={MONO}
               type="password"
               value={clientSecret}
-              onChange={(e) => setClientSecret(e.target.value)}
+              onChange={(e) => {
+                credentialsDirty.current = true;
+                setClientSecret(e.target.value);
+              }}
               placeholder="Oura client secret"
             />
           </Field>
@@ -158,9 +170,24 @@ export default function OuraTab() {
 
             onClick={handleSaveCredentials}
             disabled={saving || !clientId || !clientSecret}
+            loading={saving}
           >
             {saving ? "Saving…" : "Save credentials"}
           </Button>
+          {status.configured && (
+            <Button
+              variant="ghost"
+              className="ml-2"
+              onClick={() => {
+                setEditingCredentials(false);
+                requestAnimationFrame(() =>
+                  document.getElementById("oura-manage")?.focus(),
+                );
+              }}
+            >
+              Cancel
+            </Button>
+          )}
         </div>
       ) : (
         <StatusPanel
@@ -169,6 +196,7 @@ export default function OuraTab() {
           onSync={handleSync}
           onConnect={handleConnect}
           onDisconnect={handleDisconnect}
+          onEdit={() => setEditingCredentials(true)}
         />
       )}
     </PageSection>
@@ -181,24 +209,20 @@ function StatusPanel({
   onSync,
   onConnect,
   onDisconnect,
+  onEdit,
 }: {
   status: OuraStatus;
   syncing: boolean;
   onSync: () => void;
   onConnect: () => void;
   onDisconnect: () => Promise<void>;
+  onEdit: () => void;
 }) {
   const connected = status.connected;
 
   return (
     <>
-      <div
-        style={{
-          border: "1px solid var(--border)",
-          padding: "22px 24px",
-          marginTop: 20,
-        }}
-      >
+      <div className="mt-5 rounded-xl bg-muted p-4">
         <div
           style={{
             display: "flex",
@@ -235,6 +259,7 @@ function StatusPanel({
                 style={{ fontSize: 12 }}
                 onClick={onSync}
                 disabled={syncing}
+                loading={syncing}
               >
                 {syncing ? "Syncing…" : "Sync now"}
               </Button>
@@ -249,10 +274,11 @@ function StatusPanel({
                 Authorize with Oura
               </Button>
             )}
-            <ConfirmAction
-              title="Disconnect Oura?"
+            <ConnectionMenu
+              provider="Oura"
+              onEdit={onEdit}
               description="This removes stored tokens and credentials. Previously imported data remains available."
-              onConfirm={onDisconnect}
+              onDisconnect={onDisconnect}
             />
           </span>
         </div>
@@ -271,7 +297,7 @@ function StatusPanel({
         </div>
       </div>
 
-      <div style={{ paddingTop: 20, maxWidth: 520 }}>
+      <div className="mt-5 max-w-lg space-y-4">
         <Label className="kick" htmlFor="oura-client">
           Client ID
         </Label>

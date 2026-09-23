@@ -1,3 +1,4 @@
+import { ArrowUp, ArrowDown } from "lucide-react";
 import PageSection from "../PageSection";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -5,7 +6,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Empty } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   deleteSourcePriority,
   fetchSourcePriority,
@@ -27,12 +28,14 @@ export default function SourcesTab() {
     queryKey: ["source-priority"],
     queryFn: fetchSourcePriority,
   });
+  const dirty = useRef(false);
+  const [removing, setRemoving] = useState<string | null>(null);
   const [order, setOrder] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!config.data) return;
+    if (!config.data || dirty.current) return;
     const rule = config.data.rules?.find(
       (r) => r.category === DEFAULT_CATEGORY,
     );
@@ -50,6 +53,7 @@ export default function SourcesTab() {
     if (target < 0 || target >= order.length) return;
     const next = [...order];
     [next[index], next[target]] = [next[target], next[index]];
+    dirty.current = true;
     setOrder(next);
   }
 
@@ -58,6 +62,7 @@ export default function SourcesTab() {
     setError(null);
     try {
       await saveSourcePriority(DEFAULT_CATEGORY, order);
+      dirty.current = false;
       queryClient.invalidateQueries({ queryKey: ["source-priority"] });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Save failed");
@@ -79,12 +84,15 @@ export default function SourcesTab() {
   );
 
   async function removeOverride(category: string) {
+    setRemoving(category);
     setError(null);
     try {
       await deleteSourcePriority(category);
       queryClient.invalidateQueries({ queryKey: ["source-priority"] });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Remove failed");
+    } finally {
+      setRemoving(null);
     }
   }
 
@@ -111,172 +119,95 @@ export default function SourcesTab() {
         <Empty>No sources recorded yet.</Empty>
       )}
 
-      <div style={{ paddingTop: 4 }}>
+      <ol className="divide-y">
         {order.map((src, i) => {
           const activity = activityBySource.get(src);
           return (
-            <div
+            <li
               key={src || "(healthkit)"}
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                gap: 16,
-                padding: "14px 0",
-                borderBottom: "1px solid var(--border)",
-              }}
+              className="flex flex-wrap items-center gap-3 py-4"
             >
-              <span className="kick num" style={{ width: 20, flex: "none" }}>
+              <span className="w-5 shrink-0 text-sm tabular-nums text-muted-foreground">
                 {i + 1}
               </span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ font: "600 14px var(--font-body)" }}>
+              <div className="min-w-0 flex-1 basis-36">
+                <p className="text-sm font-medium break-words">
                   {sourceLabelLong(src)}
-                </div>
-                <div
-                  style={{
-                    font: "400 12px var(--font-body)",
-                    color: "var(--muted-foreground)",
-                    marginTop: 2,
-                  }}
-                >
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
                   {i === 0
                     ? "Wins on conflict"
                     : i === 1
                       ? "Used when rank 1 has no reading"
                       : `Used when ranks 1–${i} have no reading`}
-                </div>
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {activity
+                    ? `${formatTimeAgo(activity.last_seen)} · ${formatNumber(activity.rows)} rows`
+                    : "Nothing stored"}
+                </p>
               </div>
-              <Badge
-                variant={activity ? "success" : "secondary"}
-                style={{ flex: "none" }}
-              >
+              <Badge variant={activity ? "success" : "secondary"}>
                 {activity ? "Delivering" : "No data"}
               </Badge>
-              <span
-                style={{
-                  width: 190,
-                  flex: "none",
-                  textAlign: "right",
-                  font: "400 12px var(--font-body)",
-                  color: "var(--muted-foreground)",
-                }}
-              >
-                {activity
-                  ? `${formatTimeAgo(activity.last_seen)} · ${formatNumber(activity.rows)} rows`
-                  : "nothing stored"}
-              </span>
-              <span
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 4,
-                  flex: "none",
-                }}
-              >
+              <div className="flex gap-1">
                 <Button
                   variant="outline"
-                  type="button"
-
-                  style={{ fontSize: 11, padding: "4px 8px" }}
-                  disabled={i === 0}
+                  size="icon"
+                  disabled={saving || i === 0}
                   onClick={() => move(i, -1)}
                   aria-label={`Move ${sourceLabelLong(src)} up`}
                 >
-                  ↑
+                  <ArrowUp />
                 </Button>
                 <Button
                   variant="outline"
-                  type="button"
-
-                  style={{ fontSize: 11, padding: "4px 8px" }}
-                  disabled={i === order.length - 1}
+                  size="icon"
+                  disabled={saving || i === order.length - 1}
                   onClick={() => move(i, 1)}
                   aria-label={`Move ${sourceLabelLong(src)} down`}
                 >
-                  ↓
+                  <ArrowDown />
                 </Button>
-              </span>
-            </div>
+              </div>
+            </li>
           );
         })}
-      </div>
-
-      {error ? (
-        <Alert
-          variant="error"
-          style={{
-            fontSize: 13,
-            marginTop: 14,
-          }}
-        >
+      </ol>
+      {error && (
+        <Alert variant="error" className="mt-4">
           {error}
         </Alert>
-      ) : null}
-
-      <div style={{ paddingTop: 20 }}>
-        <Button
-          variant="default"
-          type="button"
-
-          onClick={save}
-          disabled={saving || !changed}
-        >
-          {saving ? "Saving…" : "Save order"}
+      )}
+      <div className="pt-5">
+        <Button onClick={save} disabled={saving || !changed} loading={saving}>
+          Save order
         </Button>
       </div>
-
-      {overrides.length > 0 ? (
-        <div style={{ paddingTop: 32 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700 }}>Category exceptions</h3>
-          <p
-            style={{
-              font: "400 12px/1.5 var(--font-body)",
-              color: "var(--muted-foreground)",
-              margin: "6px 0 0",
-              maxWidth: "62ch",
-            }}
-          >
-            These categories ignore the order above and use their own. Without
-            this list the order above would look like it governed everything.
+      {overrides.length > 0 && (
+        <div className="space-y-3 pt-6">
+          <h3 className="text-sm font-semibold">Category exceptions</h3>
+          <p className="max-w-prose text-sm text-muted-foreground">
+            These categories use their own source order.
           </p>
-          <div style={{ borderTop: "1px solid var(--border)", marginTop: 12 }}>
+          <div className="divide-y border-y">
             {overrides.map((rule) => (
               <div
                 key={rule.category}
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "baseline",
-                  gap: 16,
-                  padding: "12px 0",
-                  borderBottom: "1px solid var(--border)",
-                }}
+                className="flex flex-wrap items-center gap-3 py-3"
               >
-                <span
-                  className="kick"
-                  style={{
-                    width: 140,
-                    flex: "none",
-                    color: "var(--foreground)",
-                  }}
-                >
-                  {rule.category}
-                </span>
-                <span
-                  style={{
-                    flex: 1,
-                    font: "400 13px var(--font-body)",
-                    color: "var(--muted-foreground)",
-                  }}
-                >
-                  {rule.sources.map(sourceLabelLong).join(" → ")}
-                </span>
+                <div className="min-w-0 flex-1 basis-40">
+                  <p className="text-sm font-medium capitalize">
+                    {rule.category.replace(/_/g, " ")}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {rule.sources.map(sourceLabelLong).join(" → ")}
+                  </p>
+                </div>
                 <Button
                   variant="ghost"
-                  type="button"
-
-                  style={{ fontSize: 12, flex: "none" }}
+                  disabled={removing !== null}
+                  loading={removing === rule.category}
                   onClick={() => removeOverride(rule.category)}
                 >
                   Remove
@@ -285,7 +216,7 @@ export default function SourcesTab() {
             ))}
           </div>
         </div>
-      ) : null}
+      )}
     </PageSection>
   );
 }

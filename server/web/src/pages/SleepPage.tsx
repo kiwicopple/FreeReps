@@ -1,3 +1,4 @@
+import PageContent from "@/components/PageContent";
 import { Empty } from "@/components/ui/empty";
 import { Alert } from "@/components/ui/alert";
 import DateNavigator from "@/components/DateNavigator";
@@ -181,7 +182,7 @@ function DesktopSleep({
     session.InBed > 0 ? (session.Asleep / session.InBed) * 100 : null;
 
   return (
-    <div className="page-x space-y-6">
+    <PageContent className="space-y-6">
       <SummaryGrid>
         <SummaryValue
           label="Total sleep"
@@ -213,19 +214,22 @@ function DesktopSleep({
           detail={pctOf(totals.REM, session.TotalSleep)}
         />
       </SummaryGrid>
-      <RecoveryScore session={session} />
+      <div className="dashboard-panels sleep-panels">
+        <div className="sleep-recovery">
+          <RecoveryScore session={session} />
+        </div>
+        <PageSection
+          title="Hypnogram"
+          className="sleep-chart"
+          description={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)} · ${awakenings} awakening${awakenings === 1 ? "" : "s"}`}
+        >
+          <SleepHeartRate stages={stages} />
+        </PageSection>
 
-      <PageSection title="Stage composition">
-        <StageComposition totals={totals} />
-      </PageSection>
-
-      <PageSection
-        title="Hypnogram"
-        description={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)} · ${awakenings} awakening${awakenings === 1 ? "" : "s"}`}
-      >
-        <SleepHeartRate stages={stages} />
-      </PageSection>
-
+        <PageSection title="Stage composition" className="sleep-composition">
+          <StageComposition totals={totals} />
+        </PageSection>
+      </div>
       <PageSection
         title={`Last ${sessions.length} nights`}
         description={
@@ -242,7 +246,7 @@ function DesktopSleep({
       >
         <NightsChart sessions={sessions} stages={allStages} />
       </PageSection>
-    </div>
+    </PageContent>
   );
 }
 
@@ -265,7 +269,7 @@ function MobileSleep({
     60000;
 
   return (
-    <div className="page-x space-y-6">
+    <PageContent className="space-y-6">
       <SummaryGrid>
         <SummaryValue
           label="Total sleep"
@@ -287,22 +291,24 @@ function MobileSleep({
           value={latency > 0 ? `${Math.round(latency)}m` : "—"}
         />
       </SummaryGrid>
-      <RecoveryScore session={session} />
-      <PageSection
-        title="Hypnogram"
-        description={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)}`}
-      >
-        <SleepHeartRate stages={stages} compact />
-      </PageSection>
-      <PageSection title="Stage composition">
-        <StageComposition totals={totals} compact />
-      </PageSection>
+      <div className="space-y-6">
+        <RecoveryScore session={session} />
+        <PageSection
+          title="Hypnogram"
+          description={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)}`}
+        >
+          <SleepHeartRate stages={stages} compact />
+        </PageSection>
+        <PageSection title="Stage composition">
+          <StageComposition totals={totals} compact />
+        </PageSection>
+      </div>
       <PageSection title={`Last ${Math.min(sessions.length, 10)} nights`} flush>
         {sessions.slice(0, 10).map((s) => (
           <NightRow key={s.Date} session={s} />
         ))}
       </PageSection>
-    </div>
+    </PageContent>
   );
 }
 

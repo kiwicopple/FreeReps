@@ -1,3 +1,7 @@
+import InfoPopover from "@/components/InfoPopover";
+import { Card, CardPanel } from "@/components/ui/card";
+import { SummarySkeleton } from "@/components/SummaryValue";
+import PageContent from "@/components/PageContent";
 import PageSection from "@/components/PageSection";
 import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
 import { Button } from "@/components/ui/button";
@@ -92,26 +96,45 @@ export default function TrendsPage() {
             value={range}
             onChange={setRange}
             name="trends-range"
-            note={FLAT_RULE}
           />
         }
       />
 
-      <div className="page-x space-y-6">
-        <SummaryGrid>
-          <VerdictCount
-            label="Improving"
-            value={counts.improving}
-            color="var(--success)"
-          />
-          <VerdictCount label="Flat" value={counts.flat} />
-          <VerdictCount
-            label="Declining"
-            value={counts.declining}
-            color="var(--warning)"
-          />
-        </SummaryGrid>
-        <PageSection title="Metric trends" description={FLAT_RULE} flush>
+      <PageContent className="space-y-6">
+        {state === "loading" ? (
+          <SummarySkeleton count={3} />
+        ) : query.data ? (
+          <SummaryGrid className="grid-cols-3">
+            <VerdictCount
+              label="Improving"
+              value={counts.improving}
+              color="var(--success)"
+            />
+            <VerdictCount label="Flat" value={counts.flat} />
+            <VerdictCount
+              label="Declining"
+              value={counts.declining}
+              color="var(--warning)"
+            />
+          </SummaryGrid>
+        ) : null}
+        <PageSection
+          title="Metric trends"
+          flush
+          actions={
+            <>
+              <InfoPopover label="About trend classification">
+                {FLAT_RULE}
+              </InfoPopover>
+              <Link
+                to="/settings?tab=front-page"
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Choose metrics
+              </Link>
+            </>
+          }
+        >
           {message ? (
             <Alert
               variant="error"
@@ -155,16 +178,9 @@ export default function TrendsPage() {
             <LegendLine color={VERDICT_COLOR.improving} label="Improving" />
             <LegendLine color={VERDICT_COLOR.flat} label="Flat" />
             <LegendLine color={VERDICT_COLOR.declining} label="Declining" />
-            <Link
-              to="/settings?tab=front-page"
-              className={buttonVariants({ variant: "ghost" })}
-              style={{ marginLeft: "auto", fontSize: 12.5 }}
-            >
-              Choose metrics →
-            </Link>
           </div>
         </PageSection>
-      </div>
+      </PageContent>
     </>
   );
 }
@@ -181,93 +197,83 @@ function SmallMultiples({
   range: string;
 }) {
   return (
-    <div className="grid min-w-0 grid-cols-2 xl:grid-cols-4">
+    <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-4 px-4 pb-4 md:px-6">
       {items.map(({ metric, fit }) => (
-        <div
-          key={metric.metric_name}
-          style={{
-            paddingTop: 22,
-            paddingBottom: 20,
-            /* Cells are 24px inside, but the outer columns align to the page
-               edge like every other strip on the screen. */
-            paddingLeft: 24,
-            paddingRight: 24,
-            borderRight: "1px solid var(--border)",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <Link
-            className="kick underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
-            to={`/metrics?metric=${encodeURIComponent(metric.metric_name)}&range=${range}`}
-          >
-            {metric.label || metric.metric_name}
-          </Link>
-          <div
-            className="num"
-            style={{
-              font: "800 30px/1 var(--font-heading)",
-              letterSpacing: "-0.03em",
-              marginTop: 10,
-            }}
-          >
-            {displayValue(metric)}
-            <span
-              style={{
-                font: "500 11.5px var(--font-body)",
-                color: "var(--muted-foreground)",
-                marginLeft: 5,
-              }}
+        <Card key={metric.metric_name}>
+          <CardPanel className="p-4">
+            <Link
+              className="kick underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+              to={`/metrics?metric=${encodeURIComponent(metric.metric_name)}&range=${range}`}
             >
-              {metric.unit}
-            </span>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: 8,
-              marginTop: 8,
-            }}
-          >
-            <span
+              {metric.label || metric.metric_name}
+            </Link>
+            <div
               className="num"
               style={{
-                font: "700 12.5px var(--font-body)",
-                color: VERDICT_COLOR[fit.verdict],
+                font: "800 30px/1 var(--font-heading)",
+                letterSpacing: "-0.03em",
+                marginTop: 10,
               }}
             >
-              {slopeLabel(fit.slope, metric)}
-            </span>
-            <span
+              {displayValue(metric)}
+              <span
+                style={{
+                  font: "500 11.5px var(--font-body)",
+                  color: "var(--muted-foreground)",
+                  marginLeft: 5,
+                }}
+              >
+                {metric.unit}
+              </span>
+            </div>
+            <div
               style={{
-                font: "400 11.5px var(--font-body)",
-                color: "var(--muted-foreground)",
+                display: "flex",
+                alignItems: "baseline",
+                gap: 8,
+                marginTop: 8,
               }}
             >
-              {fit.verdict}
-            </span>
-          </div>
+              <span
+                className="num"
+                style={{
+                  font: "700 12.5px var(--font-body)",
+                  color: VERDICT_COLOR[fit.verdict],
+                }}
+              >
+                {slopeLabel(fit.slope, metric)}
+              </span>
+              <span
+                style={{
+                  font: "400 11.5px var(--font-body)",
+                  color: "var(--muted-foreground)",
+                }}
+              >
+                {fit.verdict}
+              </span>
+            </div>
 
-          <TrendChart
-            series={metric.series}
-            fit={fit}
-            width={240}
-            height={74}
-          />
+            <TrendChart
+              series={metric.series}
+              fit={fit}
+              width={240}
+              height={74}
+            />
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              font: "400 10px var(--font-body)",
-              color: "var(--muted-foreground)",
-              marginTop: 4,
-            }}
-          >
-            <span>{formatDayMonth(start)}</span>
-            <span>{formatDayMonth(end)}</span>
-          </div>
-        </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                font: "400 10px var(--font-body)",
+                color: "var(--muted-foreground)",
+                marginTop: 4,
+              }}
+            >
+              <span>{formatDayMonth(start)}</span>
+              <span>{formatDayMonth(end)}</span>
+            </div>
+          </CardPanel>
+        </Card>
       ))}
     </div>
   );

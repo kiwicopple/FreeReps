@@ -1,3 +1,5 @@
+import { SummarySkeleton } from "@/components/SummaryValue";
+import PageContent from "@/components/PageContent";
 import PageSection from "@/components/PageSection";
 import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
 import { Label } from "@/components/ui/label";
@@ -106,7 +108,7 @@ export default function MetricsPage() {
         }
       />
 
-      <div className="page-x min-w-0 space-y-6">
+      <PageContent className="min-w-0 space-y-6">
         <div className="max-w-sm">
           <Label
             className="mb-3 block text-sm font-medium"
@@ -130,30 +132,34 @@ export default function MetricsPage() {
           />
         </div>
 
-        <SummaryGrid>
-          <SummaryValue label="Latest" value={scale(latest, multiplier)} />
-          <SummaryValue
-            label={isCumulative ? "Total" : "Mean"}
-            value={scale(stats?.avg ?? null, multiplier)}
-          />
-          <SummaryValue
-            label="Min"
-            value={scale(stats?.min ?? null, multiplier)}
-          />
-          <SummaryValue
-            label="Max"
-            value={scale(stats?.max ?? null, multiplier)}
-          />
-          <SummaryValue
-            label="Std dev"
-            value={scale(stats?.stddev ?? null, multiplier)}
-          />
-          {/* Samples tells you when a gap in the data explains a weird mean. */}
-          <SummaryValue
-            label="Samples"
-            value={stats ? formatNumber(stats.count) : "—"}
-          />
-        </SummaryGrid>
+        {state === "loading" ? (
+          <SummarySkeleton count={6} />
+        ) : (
+          <SummaryGrid>
+            <SummaryValue label="Latest" value={scale(latest, multiplier)} />
+            <SummaryValue
+              label={isCumulative ? "Total" : "Mean"}
+              value={scale(stats?.avg ?? null, multiplier)}
+            />
+            <SummaryValue
+              label="Min"
+              value={scale(stats?.min ?? null, multiplier)}
+            />
+            <SummaryValue
+              label="Max"
+              value={scale(stats?.max ?? null, multiplier)}
+            />
+            <SummaryValue
+              label="Std dev"
+              value={scale(stats?.stddev ?? null, multiplier)}
+            />
+            {/* Samples tells you when a gap in the data explains a weird mean. */}
+            <SummaryValue
+              label="Samples"
+              value={stats ? formatNumber(stats.count) : "—"}
+            />
+          </SummaryGrid>
+        )}
         <div className="min-w-0 space-y-6">
           <PageSection
             title={selected?.label ?? (metric ? metricLabel(metric) : "—")}
@@ -199,7 +205,7 @@ export default function MetricsPage() {
             </div>
           </PageSection>
         </div>
-      </div>
+      </PageContent>
     </>
   );
 }

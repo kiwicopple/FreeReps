@@ -1,3 +1,6 @@
+import Choice from "@/components/Choice";
+import { SummarySkeleton } from "@/components/SummaryValue";
+import PageContent from "@/components/PageContent";
 import PageSection from "@/components/PageSection";
 import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
 import {
@@ -89,7 +92,7 @@ export default function WorkoutsPage() {
     return map;
   }, [zonesQuery.data]);
 
-  // Counts come from the unfiltered response, so a pill never reads zero
+  // Counts come from the unfiltered response, so an option never reads zero
   // because of the filter it would apply.
   const typeCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -99,6 +102,17 @@ export default function WorkoutsPage() {
     }
     return [...counts.entries()].sort((a, b) => b[1] - a[1]);
   }, [all]);
+
+  const typeOptions = useMemo(
+    () => [
+      { value: "", label: `All (${all.length})` },
+      ...typeCounts.map(([type, count]) => ({
+        value: type,
+        label: `${type} (${count})`,
+      })),
+    ],
+    [all.length, typeCounts],
+  );
 
   const filtered = useMemo(
     () =>
@@ -136,88 +150,121 @@ export default function WorkoutsPage() {
         }
       />
 
-      <div className="page-x space-y-6">
-        <SummaryGrid>
-          <SummaryValue
-            label="Sessions"
-            value={String(summary.count)}
-            detail={`${summary.perWeek.toFixed(1)} per week`}
-          />
-          <SummaryValue
-            label="Total time"
-            value={formatDuration(summary.totalSeconds)}
-            detail={
-              summary.count > 0
-                ? `avg ${formatDuration(summary.totalSeconds / summary.count)} per session`
-                : ""
-            }
-          />
-          <SummaryValue
-            label="Energy"
-            value={formatNumber(summary.energy)}
-            unit="kcal"
-            detail={
-              summary.count > 0
-                ? `avg ${formatNumber(summary.energy / summary.count)} per session`
-                : ""
-            }
-          />
-          {isDesktop ? (
-            <>
-              <SummaryValue
-                label="Avg heart rate"
-                value={summary.avgHR ? formatNumber(summary.avgHR) : "—"}
-                unit="bpm"
-                detail={
-                  summary.peakHR ? `peak ${formatNumber(summary.peakHR)}` : ""
-                }
-              />
-              <SummaryValue
-                label="Distance"
-                value={formatNumber(summary.distance, 1)}
-                unit="km"
-                detail={`${summary.withDistance} sessions with GPS`}
-              />
-            </>
-          ) : null}
-        </SummaryGrid>
-
-        <div
-          className="flex items-center gap-2 overflow-x-auto md:flex-wrap"
-          role="group"
-          aria-label="Workout type filters"
-        >
-          <FilterPill
-            label="All"
-            count={all.length}
-            active={typeFilter === ""}
-            onClick={() => setParam("type", null)}
-          />
-          {typeCounts.map(([type, count]) => (
-            <FilterPill
-              key={type}
-              label={type}
-              count={count}
-              active={typeFilter === type}
-              onClick={() => setParam("type", type)}
+      <PageContent className="space-y-6">
+        {state === "loading" ? (
+          <SummarySkeleton count={isDesktop ? 5 : 3} />
+        ) : workoutsQuery.data ? (
+          <SummaryGrid>
+            <SummaryValue
+              label="Sessions"
+              value={String(summary.count)}
+              detail={`${summary.perWeek.toFixed(1)} per week`}
             />
-          ))}
-          {isDesktop ? (
-            <span
-              style={{
-                marginLeft: "auto",
-                font: "400 11.5px var(--font-body)",
-                color: "var(--muted-foreground)",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {typeFilter ? `Filtered to ${typeFilter}` : "All types"} · newest
-              first
-            </span>
-          ) : null}
-        </div>
+            <SummaryValue
+              label="Total time"
+              value={formatDuration(summary.totalSeconds)}
+              detail={
+                summary.count > 0
+                  ? `avg ${formatDuration(summary.totalSeconds / summary.count)} per session`
+                  : ""
+              }
+            />
+            <SummaryValue
+              label="Energy"
+              value={formatNumber(summary.energy)}
+              unit="kcal"
+              detail={
+                summary.count > 0
+                  ? `avg ${formatNumber(summary.energy / summary.count)} per session`
+                  : ""
+              }
+            />
+            {isDesktop ? (
+              <>
+                <SummaryValue
+                  label="Avg heart rate"
+                  value={summary.avgHR ? formatNumber(summary.avgHR) : "—"}
+                  unit="bpm"
+                  detail={
+                    summary.peakHR ? `peak ${formatNumber(summary.peakHR)}` : ""
+                  }
+                />
+                <SummaryValue
+                  label="Distance"
+                  value={formatNumber(summary.distance, 1)}
+                  unit="km"
+                  detail={`${summary.withDistance} sessions with GPS`}
+                />
+              </>
+            ) : null}
+          </SummaryGrid>
+        ) : null}
 
-        <PageSection title="Sessions" flush>
+        <PageSection
+          title="Sessions"
+          flush
+          table={isDesktop}
+          footer={
+            workoutsQuery.data && (
+              <>
+                <span
+                  className="num"
+                  style={{
+                    font: "400 12px var(--font-body)",
+                    color: "var(--muted-foreground)",
+                  }}
+                >
+                  Showing {filtered.length === 0 ? 0 : page * PAGE_SIZE + 1}–
+                  {Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
+                  {filtered.length}
+                </span>
+                <Pagination className="ml-auto w-auto">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <Button
+                        variant="outline"
+                        type="button"
+
+                        style={{ marginLeft: "auto", fontSize: 12 }}
+                        disabled={page === 0}
+                        onClick={() => setParam("page", String(page - 1))}
+                      >
+                        Prev
+                      </Button>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <Button
+                        variant="outline"
+                        type="button"
+
+                        style={{ fontSize: 12 }}
+                        disabled={(page + 1) * PAGE_SIZE >= filtered.length}
+                        onClick={() => setParam("page", String(page + 1))}
+                      >
+                        Next
+                      </Button>
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>{" "}
+              </>
+            )
+          }
+        >
+          <div className="flex flex-wrap items-center gap-3 border-b px-4 py-3 md:px-6">
+            <label className="text-sm font-medium" htmlFor="workout-type">
+              Workout type
+            </label>
+            <Choice
+              id="workout-type"
+              aria-label="Workout type"
+              searchable
+              className="w-full max-w-sm"
+              value={typeFilter}
+              onValueChange={(value) => setParam("type", value || null)}
+              options={typeOptions}
+            />
+          </div>
+
           {message ? (
             <Alert
               variant="error"
@@ -244,7 +291,10 @@ export default function WorkoutsPage() {
               zonesById={zonesById}
               onOpen={(id) =>
                 navigate(`/workouts/${id}`, {
-                  state: { workout: all.find((w) => w.ID === id) },
+                  state: {
+                    workout: all.find((w) => w.ID === id),
+                    returnTo: `/workouts${window.location.search}`,
+                  },
                 })
               }
             />
@@ -254,65 +304,18 @@ export default function WorkoutsPage() {
               zonesById={zonesById}
               onOpen={(id) =>
                 navigate(`/workouts/${id}`, {
-                  state: { workout: all.find((w) => w.ID === id) },
+                  state: {
+                    workout: all.find((w) => w.ID === id),
+                    returnTo: `/workouts${window.location.search}`,
+                  },
                 })
               }
             />
           )}
-
-          <div
-            className="page-x flex items-center gap-4"
-            style={{
-              borderTop: "1px solid var(--border)",
-              paddingTop: 14,
-              paddingBottom: 14,
-              marginTop: "auto",
-            }}
-          >
-            <span
-              className="num"
-              style={{
-                font: "400 12px var(--font-body)",
-                color: "var(--muted-foreground)",
-              }}
-            >
-              Showing {filtered.length === 0 ? 0 : page * PAGE_SIZE + 1}–
-              {Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
-              {filtered.length}
-            </span>
-            <Pagination className="ml-auto w-auto">
-              <PaginationContent>
-                <PaginationItem>
-                  <Button
-                    variant="outline"
-                    type="button"
-
-                    style={{ marginLeft: "auto", fontSize: 12 }}
-                    disabled={page === 0}
-                    onClick={() => setParam("page", String(page - 1))}
-                  >
-                    Prev
-                  </Button>
-                </PaginationItem>
-                <PaginationItem>
-                  <Button
-                    variant="outline"
-                    type="button"
-
-                    style={{ fontSize: 12 }}
-                    disabled={(page + 1) * PAGE_SIZE >= filtered.length}
-                    onClick={() => setParam("page", String(page + 1))}
-                  >
-                    Next
-                  </Button>
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>{" "}
-          </div>
         </PageSection>
         {isDesktop && maxHR > 0 ? (
           <div
-            className="page-x flex items-center gap-6 flex-wrap"
+            className="flex items-center gap-6 flex-wrap"
             style={{
               borderTop: "1px solid var(--border)",
               paddingTop: 14,
@@ -353,7 +356,7 @@ export default function WorkoutsPage() {
             </span>
           </div>
         ) : null}
-      </div>
+      </PageContent>
     </>
   );
 }
@@ -374,7 +377,7 @@ function WorkoutTable({
   onOpen: (id: string) => void;
 }) {
   return (
-    <Table>
+    <Table variant="card">
       <TableHeader>
         <TableRow>
           <TableHead style={{ width: 72 }}>Time</TableHead>
@@ -572,36 +575,6 @@ function WorkoutCards({
   );
 }
 
-function FilterPill({
-  label,
-  count,
-  active,
-  onClick,
-}: {
-  label: string;
-  count: number;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <Button
-      variant={active ? "default" : "outline"}
-      aria-pressed={active}
-      type="button"
-      onClick={onClick}
-    >
-      {label}
-      <span
-        className="num"
-        style={{ fontWeight: 400, opacity: 0.65, marginLeft: 7 }}
-      >
-        {count}
-      </span>
-    </Button>
-  );
-}
-
-/** Apple Health reports energy in kJ from some sources; kcal is what the UI states. */
 function energyKcal(w: Workout): number | null {
   const value = w.ActiveEnergyBurned ?? w.TotalEnergy;
   if (value == null) return null;

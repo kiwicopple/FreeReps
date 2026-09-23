@@ -3,7 +3,7 @@ import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
-import ConfirmAction from "../ConfirmAction";
+import ConnectionMenu from "./ConnectionMenu";
 import DateControl from "@/components/DateControl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ export default function HevyTab() {
   const [apiKey, setApiKey] = useState("");
   const [syncFrom, setSyncFrom] = useState(today());
   const [saving, setSaving] = useState(false);
+  const [editingCredentials, setEditingCredentials] = useState(false);
 
   const load = useCallback(() => {
     setError(null);
@@ -49,6 +50,7 @@ export default function HevyTab() {
     setError(null);
     try {
       await saveHevyCredentials(apiKey, syncFrom);
+      setEditingCredentials(false);
       setApiKey("");
       load();
     } catch (e) {
@@ -105,8 +107,8 @@ export default function HevyTab() {
           <Spinner className="mt-4 size-5" />
         )
       ) : !status.configured ? (
-        <div style={{ paddingTop: 20, maxWidth: 520 }}>
-          <Field style={{ marginBottom: 14 }}>
+        <div className="mt-5 max-w-lg space-y-4">
+          <Field className="mb-4">
             <FieldLabel htmlFor="hevy-key">API key</FieldLabel>
             <Input
               id="hevy-key"
@@ -118,7 +120,7 @@ export default function HevyTab() {
               placeholder="Hevy API key"
             />
           </Field>
-          <Field style={{ marginBottom: 16 }}>
+          <Field className="mb-4">
             <FieldLabel htmlFor="hevy-from">Import from</FieldLabel>
             <DateControl
               id="hevy-from"
@@ -146,19 +148,14 @@ export default function HevyTab() {
 
             onClick={handleSave}
             disabled={saving || !apiKey}
+            loading={saving}
           >
             {saving ? "Verifying…" : "Save API key"}
           </Button>
         </div>
       ) : (
         <>
-          <div
-            style={{
-              border: "1px solid var(--border)",
-              padding: "22px 24px",
-              marginTop: 20,
-            }}
-          >
+          <div className="mt-5 rounded-xl bg-muted p-4">
             <div
               style={{
                 display: "flex",
@@ -192,13 +189,15 @@ export default function HevyTab() {
                   style={{ fontSize: 12 }}
                   onClick={handleSync}
                   disabled={syncing}
+                  loading={syncing}
                 >
                   {syncing ? "Syncing…" : "Sync now"}
                 </Button>
-                <ConfirmAction
-                  title="Disconnect Hevy?"
+                <ConnectionMenu
+                  provider="Hevy"
+                  onEdit={() => setEditingCredentials(true)}
                   description="The API key is removed. Previously imported sets remain available."
-                  onConfirm={handleDisconnect}
+                  onDisconnect={handleDisconnect}
                 />
               </span>
             </div>
@@ -216,31 +215,47 @@ export default function HevyTab() {
             </div>
           </div>
 
-          <div style={{ paddingTop: 24, maxWidth: 520 }}>
-            <Label className="kick" htmlFor="hevy-replace">
-              Replace API key
-            </Label>
-            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-              <Input
-                id="hevy-replace"
+          {editingCredentials && (
+            <div className="mt-6 max-w-lg">
+              <Label className="kick" htmlFor="hevy-replace">
+                Replace API key
+              </Label>
+              <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                <Input
+                  autoFocus
+                  id="hevy-replace"
 
-                style={MONO}
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="New Hevy API key"
-              />
+                  style={MONO}
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="New Hevy API key"
+                />
+                <Button
+                  variant="outline"
+                  type="button"
+
+                  onClick={handleSave}
+                  disabled={saving || !apiKey}
+                  loading={saving}
+                >
+                  {saving ? "Verifying…" : "Save"}
+                </Button>
+              </div>
               <Button
-                variant="outline"
-                type="button"
-
-                onClick={handleSave}
-                disabled={saving || !apiKey}
+                variant="ghost"
+                className="mt-2"
+                onClick={() => {
+                  setEditingCredentials(false);
+                  requestAnimationFrame(() =>
+                    document.getElementById("hevy-manage")?.focus(),
+                  );
+                }}
               >
-                {saving ? "Verifying…" : "Save"}
+                Cancel
               </Button>
             </div>
-          </div>
+          )}
         </>
       )}
     </PageSection>

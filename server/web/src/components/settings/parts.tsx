@@ -1,6 +1,9 @@
+import { Button } from "../ui/button";
+import { Field, FieldLabel, FieldDescription, FieldError } from "../ui/field";
+import { Copy } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useId, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 
 /** The shared row: label column, value, both on one baseline. */
 export function Row({
@@ -44,30 +47,42 @@ export const MONO: React.CSSProperties = {
  */
 export function RedirectURIRow({ uri }: { uri: string }) {
   const inputId = useId();
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
   return (
-    <div style={{ paddingTop: 18, maxWidth: 560 }}>
-      <Label className="kick" htmlFor={inputId}>
-        Redirect URI
-      </Label>
-      <Input
-        id={inputId}
-
-        style={{ ...MONO, width: "100%", marginTop: 8 }}
-        readOnly
-        value={uri}
-        onClick={(e) => e.currentTarget.select()}
-      />
-      <p
-        style={{
-          font: "400 12px/1.5 var(--font-body)",
-          color: "var(--muted-foreground)",
-          margin: "6px 0 0",
-        }}
-      >
+    <Field invalid={!!error} className="mt-4 max-w-xl">
+      <FieldLabel htmlFor={inputId}>Redirect URI</FieldLabel>
+      <div className="flex min-w-0 gap-2">
+        <Input
+          id={inputId}
+          className="min-w-0 flex-1 font-mono text-xs"
+          readOnly
+          value={uri}
+          onClick={(e) => e.currentTarget.select()}
+        />
+        <Button
+          variant="outline"
+          aria-label="Copy redirect URI"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(uri);
+              setCopied(true);
+              setError("");
+            } catch {
+              setCopied(false);
+              setError("Copy failed. Select the address and copy it manually.");
+            }
+          }}
+        >
+          <Copy />
+          <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
+        </Button>
+      </div>
+      <FieldDescription>
         Register this exact value with the provider. It follows the address you
-        reach FreeReps on, so it changes with the hostname; set{" "}
-        <code>server.base_url</code> in the config to pin it to one value.
-      </p>
-    </div>
+        reach Protocol on; configure <code>server.base_url</code> to pin it.
+      </FieldDescription>
+      {error && <FieldError match={true}>{error}</FieldError>}
+    </Field>
   );
 }

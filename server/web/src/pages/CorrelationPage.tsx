@@ -1,3 +1,5 @@
+import { SummarySkeleton } from "@/components/SummaryValue";
+import PageContent from "@/components/PageContent";
 import PageSection from "@/components/PageSection";
 import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
 
@@ -134,7 +136,7 @@ export default function CorrelationPage() {
         }
       />
 
-      <div className="page-x mb-6 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_180px]">
+      <PageContent className="mb-6 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_180px]">
         <Field className="min-w-0">
           <FieldLabel htmlFor="corr-x">X axis</FieldLabel>
           <Choice
@@ -183,172 +185,182 @@ export default function CorrelationPage() {
             ]}
           />
         </Field>
-      </div>
+      </PageContent>
 
-      <div className="page-x mb-6">
-        <SummaryGrid>
-          <SummaryValue
-            label="R²"
-            value={r != null ? (r * r).toFixed(3) : "—"}
-          />
-          <SummaryValue
-            label="Slope"
-            value={fit ? formatNumber(fit.slope, 3) : "—"}
-          />
-          <SummaryValue
-            label="Paired days"
-            value={String(active?.pairs.length ?? 0)}
-          />
-          <SummaryValue
-            label="Lag applied"
-            value={lag === 0 ? "Same day" : `${lag} day${lag > 1 ? "s" : ""}`}
-          />
-        </SummaryGrid>
-      </div>
-      <div className="page-x grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(340px,440px)]">
-        <PageSection title="Metric relationship">
-          {sameMetric ? (
-            <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
-              Pick two different metrics. A metric correlates with itself
-              perfectly, which says nothing.
-            </p>
-          ) : message ? (
-            <Alert
-              variant="error"
-              style={{ color: "var(--muted-foreground)", fontSize: 13 }}
-            >
-              {message}
-              <Button
-                variant="outline"
-                onClick={() =>
-                  Promise.all([xQuery.refetch(), yQuery.refetch()])
-                }
+      <PageContent className="mb-6">
+        {state === "loading" ? (
+          <SummarySkeleton count={4} />
+        ) : (
+          <SummaryGrid>
+            <SummaryValue
+              label="R²"
+              value={r != null ? (r * r).toFixed(3) : "—"}
+            />
+            <SummaryValue
+              label="Slope"
+              value={fit ? formatNumber(fit.slope, 3) : "—"}
+            />
+            <SummaryValue
+              label="Paired days"
+              value={
+                xQuery.data && yQuery.data
+                  ? String(active?.pairs.length ?? 0)
+                  : "—"
+              }
+            />
+            <SummaryValue
+              label="Lag applied"
+              value={lag === 0 ? "Same day" : `${lag} day${lag > 1 ? "s" : ""}`}
+            />
+          </SummaryGrid>
+        )}
+      </PageContent>
+      <PageContent>
+        <div className="dashboard-panels">
+          <PageSection title="Metric relationship">
+            {sameMetric ? (
+              <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+                Pick two different metrics. A metric correlates with itself
+                perfectly, which says nothing.
+              </p>
+            ) : message ? (
+              <Alert
+                variant="error"
+                style={{ color: "var(--muted-foreground)", fontSize: 13 }}
               >
-                Retry
-              </Button>
-            </Alert>
-          ) : state === "loading" ? (
-            <Skeleton style={{ width: "100%", height: 520 }} />
-          ) : (
-            <>
-              <Scatter pairs={active?.pairs ?? []} />
-              <div
+                {message}
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    Promise.all([xQuery.refetch(), yQuery.refetch()])
+                  }
+                >
+                  Retry
+                </Button>
+              </Alert>
+            ) : state === "loading" ? (
+              <Skeleton style={{ width: "100%", height: 520 }} />
+            ) : (
+              <>
+                <Scatter pairs={active?.pairs ?? []} />
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: 8,
+                  }}
+                >
+                  <span className="kick">{xMeta?.label ?? xMetric}</span>
+                  <span className="kick">
+                    {active?.pairs.length ?? 0} paired days
+                  </span>
+                </div>
+              </>
+            )}
+          </PageSection>
+
+          <PageSection title="Analysis">
+            <PearsonBlock
+              r={sameMetric ? null : r}
+              xLabel={xMeta?.label ?? xMetric}
+              yLabel={yMeta?.label ?? yMetric}
+            />
+
+            <div className="mt-6 mb-3">
+              <h3 style={{ fontSize: 15, fontWeight: 700 }}>
+                Correlation by lag
+              </h3>
+              <p
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginTop: 8,
+                  font: "400 11.5px var(--font-body)",
+                  color: "var(--muted-foreground)",
+                  margin: "6px 0 0",
                 }}
               >
-                <span className="kick">{xMeta?.label ?? xMetric}</span>
-                <span className="kick">
-                  {active?.pairs.length ?? 0} paired days
-                </span>
-              </div>
-            </>
-          )}
-        </PageSection>
+                Y shifted forward by n days.
+              </p>
+            </div>
 
-        <PageSection title="Analysis">
-          <PearsonBlock
-            r={sameMetric ? null : r}
-            xLabel={xMeta?.label ?? xMetric}
-            yLabel={yMeta?.label ?? yMetric}
-          />
-
-          <div className="mt-6 mb-3">
-            <h3 style={{ fontSize: 15, fontWeight: 700 }}>
-              Correlation by lag
-            </h3>
-            <p
-              style={{
-                font: "400 11.5px var(--font-body)",
-                color: "var(--muted-foreground)",
-                margin: "6px 0 0",
-              }}
-            >
-              Y shifted forward by n days.
-            </p>
-          </div>
-
-          <Table style={{ fontSize: 13.5 }}>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Lag</TableHead>
-                <TableHead style={{ textAlign: "right", width: 70 }}>
-                  r
-                </TableHead>
-                <TableHead style={{ width: 150 }}>Strength</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {byLag.map((b) => (
-                <TableRow key={b.lag}>
-                  <TableCell
-                    style={{
-                      fontWeight: b.lag === lag ? 700 : 400,
-                      color:
-                        b.lag === lag
-                          ? "var(--foreground)"
-                          : "var(--muted-foreground)",
-                    }}
-                  >
-                    {b.lag === 0
-                      ? "Same day"
-                      : `${b.lag} day${b.lag > 1 ? "s" : ""}`}
-                  </TableCell>
-                  <TableCell
-                    className="num"
-                    style={{
-                      textAlign: "right",
-                      fontWeight: b.lag === lag ? 700 : 400,
-                      color:
-                        b.lag === lag
-                          ? "var(--foreground)"
-                          : "var(--muted-foreground)",
-                    }}
-                  >
-                    {b.r != null ? formatR(b.r) : "—"}
-                  </TableCell>
-                  <TableCell>
-                    <DivergingBar value={b.r} active={b.lag === lag} />
-                  </TableCell>
+            <Table style={{ fontSize: 13.5 }}>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Lag</TableHead>
+                  <TableHead style={{ textAlign: "right", width: 70 }}>
+                    r
+                  </TableHead>
+                  <TableHead style={{ width: 150 }}>Strength</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {byLag.map((b) => (
+                  <TableRow key={b.lag}>
+                    <TableCell
+                      style={{
+                        fontWeight: b.lag === lag ? 700 : 400,
+                        color:
+                          b.lag === lag
+                            ? "var(--foreground)"
+                            : "var(--muted-foreground)",
+                      }}
+                    >
+                      {b.lag === 0
+                        ? "Same day"
+                        : `${b.lag} day${b.lag > 1 ? "s" : ""}`}
+                    </TableCell>
+                    <TableCell
+                      className="num"
+                      style={{
+                        textAlign: "right",
+                        fontWeight: b.lag === lag ? 700 : 400,
+                        color:
+                          b.lag === lag
+                            ? "var(--foreground)"
+                            : "var(--muted-foreground)",
+                      }}
+                    >
+                      {b.r != null ? formatR(b.r) : "—"}
+                    </TableCell>
+                    <TableCell>
+                      <DivergingBar value={b.r} active={b.lag === lag} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
-          <div
-            className="page-x"
-            style={{
-              borderTop: "1px solid var(--border)",
-              paddingTop: 16,
-              paddingBottom: 40,
-            }}
-          >
-            <p
+            <div
+              className="px-4 md:px-6"
               style={{
-                font: "400 12px/1.5 var(--font-body)",
-                color: "var(--muted-foreground)",
-                margin: 0,
+                borderTop: "1px solid var(--border)",
+                paddingTop: 16,
+                paddingBottom: 40,
               }}
             >
-              {CAVEAT}
-            </p>
-            <Button
-              variant="ghost"
-              type="button"
+              <p
+                style={{
+                  font: "400 12px/1.5 var(--font-body)",
+                  color: "var(--muted-foreground)",
+                  margin: 0,
+                }}
+              >
+                {CAVEAT}
+              </p>
+              <Button
+                variant="ghost"
+                type="button"
 
-              style={{ fontSize: 12.5, marginTop: 12, marginLeft: -4 }}
-              disabled={!active || active.pairs.length === 0}
-              onClick={() =>
-                exportPairs(active?.pairs ?? [], xMetric, yMetric, lag)
-              }
-            >
-              Export pairs as CSV →
-            </Button>
-          </div>
-        </PageSection>
-      </div>
+                style={{ fontSize: 12.5, marginTop: 12, marginLeft: -4 }}
+                disabled={!active || active.pairs.length === 0}
+                onClick={() =>
+                  exportPairs(active?.pairs ?? [], xMetric, yMetric, lag)
+                }
+              >
+                Export pairs as CSV →
+              </Button>
+            </div>
+          </PageSection>
+        </div>
+      </PageContent>
     </>
   );
 }
@@ -371,7 +383,7 @@ function PearsonBlock({
 
   return (
     <div
-      className="page-x"
+      className="px-4 md:px-6"
       style={{
         paddingTop: 26,
         paddingBottom: 22,
@@ -382,7 +394,7 @@ function PearsonBlock({
       <div
         className="num"
         style={{
-          font: "800 76px/1 var(--font-heading)",
+          font: "700 36px/1.2 var(--font-heading)",
           letterSpacing: "-0.04em",
           marginTop: 10,
           color,

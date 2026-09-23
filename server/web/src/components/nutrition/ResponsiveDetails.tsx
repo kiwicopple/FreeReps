@@ -3,17 +3,24 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
   type ReactNode,
 } from "react";
 import { useIsDesktop } from "../../hooks/useMediaQuery";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { ChevronRight } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsiblePanel,
-} from "../ui/collapsible";
+  Sheet,
+  SheetTrigger,
+  SheetPopup,
+  SheetHeader,
+  SheetTitle,
+  SheetPanel,
+  SheetFooter,
+  SheetClose,
+} from "../ui/sheet";
 import {
   Drawer,
   DrawerTrigger,
@@ -24,9 +31,10 @@ import {
   DrawerFooter,
   DrawerClose,
 } from "../ui/drawer";
-const CloseDetails = createContext<() => void>(() => {});
+type CloseDetail = (afterClose?: () => void) => void;
+const CloseDetails = createContext<CloseDetail | null>(null);
 
-/** Metric cards use sheets at every width; compact rows keep independent desktop expansion. */
+/** All nutrition details share modal scrolling, nested closure and focus restoration. */
 export default function ResponsiveDetails({
   title,
   className,
@@ -37,19 +45,29 @@ export default function ResponsiveDetails({
   title: string;
   className?: string;
   trigger: ReactNode;
-  children: ReactNode | ((close: () => void) => ReactNode);
+  children: ReactNode | ((close: CloseDetail) => ReactNode);
   card?: boolean;
 }) {
   const closeParent = useContext(CloseDetails);
-  const closeStack = () => {
+  const afterClosed = useRef<(() => void) | undefined>(undefined);
+  const closeStack: CloseDetail = (afterClose) => {
     setOpen(false);
-    closeParent();
+    if (closeParent) closeParent(afterClose);
+    else afterClosed.current = afterClose;
+  };
+  const onOpenChangeComplete = (next: boolean) => {
+    if (!next && afterClosed.current) {
+      const action = afterClosed.current;
+      afterClosed.current = undefined;
+      action();
+    }
   };
   const desktop = useIsDesktop();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   useEffect(() => {
     setOpen(false);
-  }, [desktop]);
+  }, [desktop, location.pathname, location.search]);
   const trigger = card ? (
     <Card
       className="summary-card nutrition-detail-trigger"
@@ -71,18 +89,46 @@ export default function ResponsiveDetails({
       {typeof children === "function" ? children(closeStack) : children}
     </CloseDetails.Provider>
   );
-  if (desktop && !card)
+  if (desktop)
     return (
-      <Collapsible className={className} open={open} onOpenChange={setOpen}>
-        <CollapsibleTrigger render={trigger}>{label}</CollapsibleTrigger>
-        <CollapsiblePanel>{content}</CollapsiblePanel>
-      </Collapsible>
+      <Sheet
+        open={open}
+        onOpenChange={setOpen}
+        onOpenChangeComplete={onOpenChangeComplete}
+      >
+        <div className={className}>
+          <SheetTrigger render={trigger}>
+            {label}
+            {card && (
+              <ChevronRight
+                aria-hidden
+                className="absolute right-5 top-5 size-4 text-muted-foreground"
+              />
+            )}
+          </SheetTrigger>
+        </div>
+        <SheetPopup className="nutrition-page max-w-lg" showCloseButton={false}>
+          <SheetHeader>
+            <SheetTitle>{title}</SheetTitle>
+          </SheetHeader>
+          <SheetPanel>{content}</SheetPanel>
+          <SheetFooter>
+            <SheetClose
+              aria-label={`Close ${title}`}
+              render={<Button variant="outline" />}
+            >
+              Close
+            </SheetClose>
+          </SheetFooter>
+        </SheetPopup>
+      </Sheet>
     );
   return (
     <Drawer
-      position={desktop ? "right" : "bottom"}
+      position="bottom"
       open={open}
       onOpenChange={setOpen}
+      onOpenChangeComplete={onOpenChangeComplete}
     >
       <div className={className}>
         <DrawerTrigger render={trigger}>
@@ -95,14 +141,7 @@ export default function ResponsiveDetails({
           )}
         </DrawerTrigger>
       </div>
-      <DrawerPopup
-        showBar={!desktop}
-        className={
-          desktop
-            ? "nutrition-page h-full max-h-dvh max-w-lg"
-            : "nutrition-page max-h-[90dvh]"
-        }
-      >
+      <DrawerPopup showBar className="nutrition-page max-h-[90dvh]">
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>

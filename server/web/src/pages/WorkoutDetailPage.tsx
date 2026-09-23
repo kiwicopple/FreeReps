@@ -1,5 +1,15 @@
+import { useState, useCallback } from "react";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
+import PageContent from "@/components/PageContent";
 import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { Empty } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +34,17 @@ import {
 export default function WorkoutDetailPage() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
+  const [sets, setSets] = useState<{ id: string; state: string }>({
+    id: "",
+    state: "loading",
+  });
+  const onSets = useCallback(
+    (state: "loading" | "error" | "empty" | "ready") =>
+      setSets({ id: id!, state }),
+    [id],
+  );
+  const returnTo = (location.state as { returnTo?: string } | null)?.returnTo;
+  const backTo = returnTo?.startsWith("/workouts?") ? returnTo : "/workouts";
   const routeWorkout = (location.state as { workout?: Workout } | null)
     ?.workout;
   // Sessions that live only in workout_sets have no row in the workouts table,
@@ -39,19 +60,30 @@ export default function WorkoutDetailPage() {
   });
 
   const w = isSynthetic ? routeWorkout! : data;
-  const backAction = (
-    <Link to="/workouts" className={buttonVariants({ variant: "outline" })}>
-      ← Workouts
-    </Link>
+  const breadcrumb = (label: string) => (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink render={<Link to={backTo} />}>
+            Workouts
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>{label}</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
   );
+  const backAction = <Link to={backTo}>← Workouts</Link>;
 
   if (!isSynthetic && isLoading) {
     return (
       <>
         <PageHeader title="Workout" actions={backAction} />
-        <div className="page-x">
+        <PageContent>
           <Skeleton style={{ width: 220, height: 34 }} />
-        </div>
+        </PageContent>
       </>
     );
   }
@@ -67,7 +99,7 @@ export default function WorkoutDetailPage() {
           }
           actions={backAction}
         />
-        <div className="page-x">
+        <PageContent>
           {error && !error.message.startsWith("404:") ? (
             <Alert variant="error">
               The workout could not be loaded.{" "}
@@ -78,7 +110,7 @@ export default function WorkoutDetailPage() {
           ) : (
             <Empty>This workout is no longer in the database.</Empty>
           )}
-        </div>
+        </PageContent>
       </>
     );
   }
@@ -128,9 +160,12 @@ export default function WorkoutDetailPage() {
 
   return (
     <>
-      <PageHeader title={getWorkoutDisplayName(w)} actions={backAction} />
+      <PageHeader
+        title={getWorkoutDisplayName(w)}
+        breadcrumb={breadcrumb(getWorkoutDisplayName(w))}
+      />
 
-      <div className="page-x mb-6 space-y-4">
+      <PageContent className="mb-6 space-y-4">
         <p className="text-sm text-muted-foreground">
           <time dateTime={w.StartTime}>
             {formatDateWithYear(new Date(w.StartTime))} ·{" "}
@@ -147,10 +182,11 @@ export default function WorkoutDetailPage() {
             />
           ))}
         </SummaryGrid>
-      </div>
-      <div className="page-x space-y-6">
+      </PageContent>
+      <PageContent className="space-y-6">
         <WorkoutSets
           workoutId={id!}
+          onAvailability={onSets}
           workoutName={w.Name}
           alphaSessionName={w.alpha_session_name}
           workoutStart={isSynthetic ? w.StartTime : undefined}
@@ -158,15 +194,30 @@ export default function WorkoutDetailPage() {
         />
 
         {hasHR ? <HRTimelineChart hrData={data!.HeartRateData!} /> : null}
-        {hasHR ? <HRZoneBars hrData={data!.HeartRateData!} /> : null}
+        <div className="dashboard-panels dashboard-panels-equal">
+          {hasHR ? <HRZoneBars hrData={data!.HeartRateData!} /> : null}
 
-        {/* Hidden for indoor or zero-distance workouts: there is no track. */}
-        {hasRoute &&
-        !w.IsIndoor &&
-        (distanceKm(w.Distance, w.DistanceUnits) ?? 0) > 0.1 ? (
-          <RouteMap route={data!.RouteData!} />
-        ) : null}
-      </div>
+          {/* Hidden for indoor or zero-distance workouts: there is no track. */}
+          {hasRoute &&
+          !w.IsIndoor &&
+          (distanceKm(w.Distance, w.DistanceUnits) ?? 0) > 0.1 ? (
+            <RouteMap route={data!.RouteData!} />
+          ) : null}
+        </div>
+        {!hasHR &&
+          !(
+            hasRoute &&
+            !w.IsIndoor &&
+            (distanceKm(w.Distance, w.DistanceUnits) ?? 0) > 0.1
+          ) &&
+          sets.id === id &&
+          sets.state === "empty" && (
+            <Empty>
+              No exercise, heart-rate or route details were recorded for this
+              workout.
+            </Empty>
+          )}
+      </PageContent>
     </>
   );
 }

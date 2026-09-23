@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import PageSection from "../PageSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert } from "@/components/ui/alert";
@@ -43,6 +44,7 @@ interface Props {
   alphaSessionName?: string;
   workoutStart?: string;
   workoutEnd?: string;
+  onAvailability?: (state: "loading" | "error" | "empty" | "ready") => void;
 }
 
 export default function WorkoutSets({
@@ -51,6 +53,7 @@ export default function WorkoutSets({
   alphaSessionName,
   workoutStart,
   workoutEnd,
+  onAvailability,
 }: Props) {
   const isStrength = STRENGTH_TYPES.has(workoutName) || !!alphaSessionName;
 
@@ -60,6 +63,19 @@ export default function WorkoutSets({
     enabled: isStrength,
   });
 
+  useEffect(() => {
+    onAvailability?.(
+      !isStrength
+        ? "empty"
+        : isLoading
+          ? "loading"
+          : error
+            ? "error"
+            : data?.length
+              ? "ready"
+              : "empty",
+    );
+  }, [isStrength, isLoading, error, data, onAvailability]);
   if (!isStrength) return null;
 
   if (isLoading) {
