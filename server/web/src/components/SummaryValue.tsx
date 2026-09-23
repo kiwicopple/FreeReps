@@ -42,7 +42,6 @@ export function SummaryContent({
 }) {
   return (
     <>
-      <span aria-hidden className="summary-accent" />
       <span
         data-slot="summary-label"
         className="text-xs font-medium text-muted-foreground"
