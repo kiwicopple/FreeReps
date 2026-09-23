@@ -1,0 +1,63 @@
+/** General educational copy, reviewed against the linked references on 2026-09-22. */
+const ods = (name: string) => `https://ods.od.nih.gov/factsheets/${name}-HealthProfessional/`;
+const fda = "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label";
+const digestion = "https://www.niddk.nih.gov/health-information/digestive-diseases/digestive-system-how-it-works";
+const fats = "https://www.niddk.nih.gov/health-information/weight-management/myths-nutrition-physical-activity";
+const electrolytes = "https://www.medlineplus.gov/fluidandelectrolytebalance.html";
+type NutrientInfo = { summary: string; source: string };
+const info = (summary: string, source: string): NutrientInfo => ({ summary, source });
+
+export const nutrientInfo: Record<string, NutrientInfo> = {
+  energy: info("Calories measure the energy in food and drink. Your body uses that energy to keep organs working, move, and repair tissues.", digestion),
+  protein: info("Provides amino acids, the building blocks used to maintain and repair muscle and other tissues. It also supplies material for enzymes and many hormones.", digestion),
+  carbohydrate: info("A major fuel source for the body. This total includes sugars, starches, and fiber, which have different roles in your diet.", fda),
+  fat: info("Provides energy and helps your body absorb vitamins A, D, E, and K. Fat type matters as well as the total amount.", fats),
+  saturated_fat: info("A type of fat to limit rather than aim to increase. Higher intakes can raise LDL cholesterol, a risk factor for heart disease.", fda),
+  monounsaturated_fat: info("An unsaturated fat found in foods such as olive oil, avocados, and nuts. It can be a useful replacement for saturated fat.", "https://medlineplus.gov/ency/patientinstructions/000785.htm"),
+  polyunsaturated_fat: info("Includes omega-3 and omega-6 fats. Some are essential, meaning you need to get them from food; they help form cell membranes.", ods("Omega3FattyAcids")),
+  trans_fat: info("A type of fat associated with higher LDL cholesterol and heart-disease risk. This is something to minimize, not a nutrient target to reach.", fda),
+  fiber: info("Carbohydrate that resists digestion. It supports bowel regularity; some types also help manage cholesterol and the rise in blood sugar after meals.", fda),
+  sugar: info("Includes both naturally occurring and added sugars. It provides energy, but the total alone does not tell you whether a food is nutritious.", fda),
+  added_sugar: info("Sugar added during preparation or processing, rather than sugar naturally present in foods such as fruit. It adds calories and is tracked as a limit, not a goal.", fda),
+  starch: info("A carbohydrate made of linked glucose units. Digestion breaks most starch down into sugar that your body can use for energy.", digestion),
+  alcohol: info("Supplies calories but is not an essential nutrient. It is tracked for awareness, not as a health target; drinking can harm the liver and other organs.", "https://www.niaaa.nih.gov/alcohols-effects-health/alcohols-effects-body"),
+  omega_3: info("A family of fats involved in cell membranes and body signaling. This total can include ALA, EPA, and DHA; those components should not be added to it again.", ods("Omega3FattyAcids")),
+  omega_6: info("A family of polyunsaturated fats that includes essential linoleic acid. These fats contribute to cell membranes and signaling and are common in plant oils, nuts, and seeds.", ods("Omega3FattyAcids")),
+  ala: info("Alpha-linolenic acid, an essential plant-based omega-3 found in foods such as flax, chia, and walnuts. Your body converts only small amounts into EPA and DHA.", ods("Omega3FattyAcids")),
+  epa: info("An omega-3 found in fish and some algae products. It helps make signaling molecules involved in inflammation and other normal body processes.", ods("Omega3FattyAcids")),
+  dha: info("An omega-3 that is an important structural part of brain and eye cells. Fish and algae are sources; it is included within total omega-3 intake.", ods("Omega3FattyAcids")),
+  cholesterol: info("Your body uses cholesterol for cell membranes and hormone production and makes its own supply. Dietary cholesterol is an intake measure, not the same thing as a blood cholesterol result.", "https://medlineplus.gov/cholesterol.html"),
+  sodium: info("An electrolyte involved in fluid balance, nerves, and muscles. Too much can raise blood pressure; the displayed limit is not an amount to try to consume.", fda),
+  potassium: info("Helps nerves transmit signals and muscles contract, and supports fluid balance. It also plays a role in maintaining normal blood pressure.", ods("Potassium")),
+  calcium: info("Builds and maintains bones and teeth. Smaller amounts also help muscles contract, nerves communicate, and blood clot.", ods("Calcium")),
+  magnesium: info("Helps your body use energy and supports muscles, nerves, and bones. It is involved in hundreds of enzyme reactions; more is not automatically better.", ods("Magnesium")),
+  phosphorus: info("Works with calcium in bones and teeth. It is also part of cell membranes, DNA, and the molecules that carry energy within cells.", ods("Phosphorus")),
+  iron: info("Helps red blood cells carry oxygen and muscles store it. Iron is essential, but extra iron is not a general energy booster when you already have enough.", ods("Iron")),
+  zinc: info("Supports normal immune function, wound healing, and the production of DNA and proteins. It also contributes to your sense of taste.", ods("Zinc")),
+  copper: info("Helps your body use iron, make energy, and maintain connective tissue. Only small amounts are needed for these enzyme functions.", ods("Copper")),
+  manganese: info("Helps enzymes process nutrients and supports bone formation. It also contributes to the body's defenses against cell damage.", ods("Manganese")),
+  selenium: info("Supports thyroid hormone metabolism and enzymes that protect cells from damage. It is needed in small amounts; excess intake can be harmful.", ods("Selenium")),
+  iodine: info("Used to make thyroid hormones, which help regulate how your body uses energy. Both too little and too much can disrupt thyroid function.", ods("Iodine")),
+  chromium: info("Studied for a possible role in insulin action and nutrient metabolism, but its essential role in humans is debated. Supplement benefits for weight or blood sugar are uncertain.", ods("Chromium")),
+  molybdenum: info("A trace mineral that helps enzymes break down certain amino acids and other compounds. The body needs only very small amounts.", ods("Molybdenum")),
+  chloride: info("An electrolyte that helps maintain fluid and acid–base balance. It is commonly consumed together with sodium in salt.", electrolytes),
+  vitamin_a_rae: info("Supports vision, immune function, and cell growth. RAE means retinol activity equivalents: a way to account for different forms of vitamin A in food.", ods("VitaminA")),
+  vitamin_c: info("Helps make collagen for skin and connective tissue and improves absorption of plant-based iron. It also supports normal immune function and protects cells from oxidative damage.", ods("VitaminC")),
+  vitamin_d: info("Helps your body absorb calcium and maintain bones. It also supports muscle and immune function; food intake alone does not reveal your vitamin D blood level.", ods("VitaminD")),
+  vitamin_e_alpha_tocopherol: info("Acts as an antioxidant, helping protect cell membranes from damage. This entry measures alpha-tocopherol, the form used to meet human vitamin E requirements.", ods("VitaminE")),
+  vitamin_k: info("Needed to activate proteins involved in blood clotting and bone health. If you take warfarin, consistency of intake matters.", ods("VitaminK")),
+  thiamin_b1: info("Helps turn carbohydrates into usable energy and supports normal cell function. Like other B vitamins, it enables energy metabolism rather than supplying calories itself.", ods("Thiamin")),
+  riboflavin_b2: info("Helps enzymes release energy from food and supports cell growth and function. It also helps the body process other vitamins.", ods("Riboflavin")),
+  niacin_b3: info("Helps convert food into energy and supports DNA repair and cell signaling. Nutritional needs are different from the high doses sometimes used as medicine.", ods("Niacin")),
+  pantothenic_acid_b5: info("Helps make coenzyme A, which your body uses to process fats and other nutrients. It is widely available in foods.", ods("PantothenicAcid")),
+  vitamin_b6: info("Helps process amino acids, make hemoglobin, and produce brain signaling chemicals. Long-term high supplement doses can damage nerves.", ods("VitaminB6")),
+  biotin_b7: info("Helps enzymes process fats, carbohydrates, and amino acids. Evidence for improving hair or nails in people without a deficiency is limited.", ods("Biotin")),
+  folate_dfe: info("Folate supports DNA production and cell division. DFE means dietary folate equivalents, which account for absorption differences between food folate and folic acid.", ods("Folate")),
+  folate_total: info("The total amount of folate forms reported in the food record. Folate supports cell division; this value is not necessarily equivalent to the absorption-adjusted DFE measure.", ods("Folate")),
+  folic_acid: info("A form of folate used in fortified foods and supplements. It contributes to DNA production and is absorbed differently from naturally occurring food folate.", ods("Folate")),
+  vitamin_b12: info("Supports healthy nerves, red blood cell formation, and DNA production. It is naturally present mainly in animal foods and also available in fortified foods.", ods("VitaminB12")),
+  choline: info("Helps build cell membranes and make acetylcholine, a chemical used in memory and muscle control. It also helps transport fats out of the liver.", ods("Choline")),
+  caffeine: info("A stimulant that can increase alertness and sometimes exercise performance. It is not essential and can interfere with sleep or cause jitteriness.", ods("ExerciseAndAthleticPerformance")),
+  water: info("Supports fluid balance, temperature regulation, and transport of nutrients and waste. Total water comes from both drinks and food, so drinks alone are only part of the picture.", "https://medlineplus.gov/ency/article/002471.htm"),
+  creatine: info("Helps muscles rapidly replenish energy during short, intense efforts. Supplementation can improve repeated high-intensity exercise and training performance; it is not an essential vitamin or mineral.", ods("ExerciseAndAthleticPerformance")),
+};

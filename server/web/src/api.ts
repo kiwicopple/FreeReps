@@ -1,3 +1,5 @@
+import { metricLabel } from "./utils/metricLabel";
+
 const BASE = "/api/v1";
 
 // --- Version ---
@@ -105,7 +107,10 @@ export async function fetchFrontPage(
 ): Promise<FrontPageResponse> {
   const res = await fetch(`${BASE}/metrics/latest?range=${range}`);
   if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
-  return res.json();
+  const data: FrontPageResponse = await res.json();
+  return { ...data, metrics: data.metrics.map((m) => ({
+    ...m, label: metricLabel(m.metric_name, m.label),
+  })) };
 }
 
 export interface MaxHeartRate {
@@ -483,7 +488,10 @@ export interface MetricMeta {
 export async function fetchAvailableMetrics(): Promise<MetricMeta[]> {
   const res = await fetch(`${BASE}/metrics/available`);
   if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
-  return res.json();
+  const data: MetricMeta[] = await res.json();
+  return data.map((m) => ({
+    ...m, display_label: metricLabel(m.metric_name, m.display_label),
+  }));
 }
 
 export async function saveMetricVisibility(visibility: Record<string, boolean>): Promise<void> {

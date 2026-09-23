@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           {/* A plain Link: the brand points at Today but must not carry the
               active mark, which belongs to the Today nav item. */}
           <Link to="/" className="nav-brand">
-            FreeReps
+            Protocol
           </Link>
           {NAV_ITEMS.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end}>
@@ -56,7 +56,17 @@ export default function Layout({ children }: { children: ReactNode }) {
         </nav>
       ) : null}
 
-      <main className="flex-1 flex flex-col">{children}</main>
+      <main
+        className="flex-1 flex flex-col"
+        // Leave breathing room below the iPhone status bar and notch.
+        style={{
+          paddingTop: isDesktop
+            ? undefined
+            : "calc(env(safe-area-inset-top, 0px) + 24px)",
+        }}
+      >
+        {children}
+      </main>
 
       {!isDesktop ? (
         <>

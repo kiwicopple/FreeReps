@@ -216,7 +216,7 @@ export default function AlertsTab() {
             <Row label="Reported as">
               <input
                 className="input"
-                style={{ ...MONO, width: 260 }}
+                style={{ ...MONO, width: 260, maxWidth: "100%" }}
                 value={settings.hostname}
                 onChange={(e) => patch({ hostname: e.target.value })}
                 placeholder="freereps"

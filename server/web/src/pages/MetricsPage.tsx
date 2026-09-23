@@ -1,3 +1,4 @@
+import { metricLabel } from "../utils/metricLabel";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -139,7 +140,7 @@ export default function MetricsPage() {
           >
             <div>
               <h2 style={{ fontSize: 26, letterSpacing: "-0.02em" }}>
-                {selected?.label ?? metric ?? "—"}
+                {selected?.label ?? (metric ? metricLabel(metric) : "—")}
               </h2>
               <div
                 style={{

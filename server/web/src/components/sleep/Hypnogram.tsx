@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { SleepStage } from "../../api";
 import { STAGE_LANES, stageColor } from "../../utils/stageColors";
 
@@ -9,6 +10,7 @@ interface Props {
   stages: SleepStage[];
   /** The phone gets four 10px rows in a 108px SVG, without lane labels. */
   compact?: boolean;
+  overlay?: ReactNode;
 }
 
 /**
@@ -16,7 +18,7 @@ interface Props {
  * Awake is the accent, so awakenings are the one thing that pops out of the
  * plot.
  */
-export default function Hypnogram({ stages, compact = false }: Props) {
+export default function Hypnogram({ stages, compact = false, overlay }: Props) {
   if (stages.length === 0) {
     return (
       <p style={{ color: "var(--color-neutral-600)", fontSize: 13 }}>
@@ -65,6 +67,7 @@ export default function Hypnogram({ stages, compact = false }: Props) {
     const gap = 16;
     const height = (STAGE_LANES.length - 1) * gap + rowHeight;
     return (
+      <div style={{ position: "relative" }}>
       <svg
         viewBox={`0 0 100 ${height}`}
         preserveAspectRatio="none"
@@ -83,6 +86,8 @@ export default function Hypnogram({ stages, compact = false }: Props) {
           />
         ))}
       </svg>
+      {overlay}
+      </div>
     );
   }
 
@@ -139,6 +144,7 @@ export default function Hypnogram({ stages, compact = false }: Props) {
             }}
           />
         ))}
+        {overlay}
       </div>
     </div>
   );

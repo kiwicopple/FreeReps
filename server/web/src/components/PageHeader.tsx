@@ -20,7 +20,7 @@ export default function PageHeader({ kicker, title, actions }: Props) {
     <div
       className="flex items-end justify-between gap-6 page-x"
       style={{
-        paddingTop: isDesktop ? 22 : 8,
+        paddingTop: isDesktop ? 22 : 16,
         paddingBottom: isDesktop ? 18 : 14,
       }}
     >

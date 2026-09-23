@@ -1,10 +1,12 @@
+import RecoveryScore from "../components/sleep/RecoveryScore";
+import { localToday, shiftDate, validDate } from "../utils/nutrition";
+import SleepHeartRate from "../components/sleep/SleepHeartRate";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fetchSleep, type SleepSession, type SleepStage } from "../api";
 import PageHeader from "../components/PageHeader";
 import RangeControl from "../components/RangeControl";
-import Hypnogram, { hourTicks } from "../components/sleep/Hypnogram";
 import NightsChart from "../components/sleep/NightsChart";
 import StageComposition, {
   type StageTotals,
@@ -26,13 +28,13 @@ const RANGE_DAYS: Record<Range, number> = { "7d": 7, "30d": 30, "90d": 90 };
 export default function SleepPage() {
   const isDesktop = useIsDesktop();
   const [params, setParams] = useSearchParams();
-  const range = (params.get("range") as Range) ?? "30d";
-
-  const days = RANGE_DAYS[range];
-  const end = new Date();
-  const start = new Date(end.getTime() - days * 86400000);
-  const endISO = end.toISOString().split("T")[0];
-  const startISO = start.toISOString().split("T")[0];
+  const rawRange = params.get("range");
+  const range: Range = RANGES.includes(rawRange as Range) ? rawRange as Range : "30d";
+  const rawDate = params.get("date");
+  const selectedDate = validDate(rawDate) ? rawDate : null;
+  const today = localToday();
+  const endISO = selectedDate ?? today;
+  const startISO = shiftDate(endISO, 1 - RANGE_DAYS[range]);
 
   const query = useQuery({
     queryKey: ["sleep", startISO, endISO],
@@ -44,8 +46,17 @@ export default function SleepPage() {
   const sessions = query.data?.sessions ?? [];
   const stages = query.data?.stages ?? [];
 
-  // The API returns newest first; the last night is the summary's subject.
-  const last = sessions.length > 0 ? sessions[0] : null;
+  // Session dates identify the night, rather than the following wake-up day.
+  const last = selectedDate
+    ? sessions.find((s) => s.Date.slice(0, 10) === selectedDate) ?? null
+    : sessions[0] ?? null;
+  const date = selectedDate ?? last?.Date.slice(0, 10) ?? today;
+  const navigateDate = (next: string | null) => {
+    const p = new URLSearchParams(params);
+    if (next) p.set("date", next);
+    else p.delete("date");
+    setParams(p);
+  };
 
   const lastNightStages = useMemo(
     () => (last ? stagesForSession(stages, last) : []),
@@ -72,7 +83,7 @@ export default function SleepPage() {
       <PageHeader
         kicker={
           last
-            ? `Last night — ${new Date(last.Date).toLocaleDateString("en-GB", {
+            ? `Night of ${new Date(last.Date).toLocaleDateString("en-GB", {
                 weekday: "long",
                 day: "numeric",
                 month: "long",
@@ -89,6 +100,18 @@ export default function SleepPage() {
           />
         }
       />
+
+      <div className="page-x" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, paddingBottom: 20 }}>
+        <button aria-label="Previous night" onClick={() => navigateDate(shiftDate(date, -1))} style={{ minWidth: 44, minHeight: 44 }}>←</button>
+        <input aria-label="Night date" type="date" value={date} max={today} onChange={(e) => {
+          if (validDate(e.target.value) && e.target.value <= today) navigateDate(e.target.value);
+        }} style={{ minHeight: 44, minWidth: 0, colorScheme: "dark", background: "var(--color-surface)", color: "var(--color-text)", border: "1px solid var(--color-divider)", padding: "0 8px" }} />
+        <button aria-label="Next night" disabled={date >= today} onClick={() => navigateDate(shiftDate(date, 1))} style={{ minWidth: 44, minHeight: 44 }}>→</button>
+        <button onClick={() => navigateDate(null)} style={{ minHeight: 44 }}>Latest</button>
+        <span style={{ fontSize: 12, color: "var(--color-neutral-600)", flexBasis: "100%" }}>Choose the date the night is recorded under.</span>
+      </div>
+
+      {last && <RecoveryScore session={last} />}
 
       {message ? (
         <p
@@ -109,7 +132,7 @@ export default function SleepPage() {
           className="page-x"
           style={{ color: "var(--color-neutral-600)", fontSize: 13 }}
         >
-          No sleep sessions in this window.
+          No sleep recorded for this date. Choose another night or return to Latest.
         </p>
       ) : isDesktop ? (
         <DesktopSleep
@@ -152,7 +175,6 @@ function DesktopSleep({
 }) {
   const efficiency =
     session.InBed > 0 ? (session.Asleep / session.InBed) * 100 : null;
-  const ticks = hourTicks(stages);
 
   return (
     <>
@@ -203,24 +225,8 @@ function DesktopSleep({
         title="Hypnogram"
         aside={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)} · ${awakenings} awakening${awakenings === 1 ? "" : "s"}`}
       >
-        <Hypnogram stages={stages} />
-        <div style={{ position: "relative", height: 20, marginLeft: 52 }}>
-          {ticks.map((t) => (
-            <span
-              key={t.pct}
-              className="num"
-              style={{
-                position: "absolute",
-                left: `${t.pct}%`,
-                transform: "translateX(-50%)",
-                font: "400 11px var(--font-body)",
-                color: "var(--color-neutral-600)",
-              }}
-            >
-              {t.label}
-            </span>
-          ))}
-        </div>
+        <SleepHeartRate stages={stages} />
+
       </Section>
 
       <Section
@@ -310,7 +316,7 @@ function MobileSleep({
         {formatClock(session.SleepEnd)}
       </div>
       <div className="page-x" style={{ paddingBottom: 14 }}>
-        <Hypnogram stages={stages} compact />
+        <SleepHeartRate stages={stages} compact />
       </div>
 
       <div className="page-x" style={{ paddingBottom: 16 }}>

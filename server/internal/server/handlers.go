@@ -301,6 +301,8 @@ func (s *Server) handleTimeSeries(w http.ResponseWriter, r *http.Request) {
 	agg := r.URL.Query().Get("agg")
 	bucket := "1 day" // default
 	switch agg {
+	case "5min":
+		bucket = "5 minutes"
 	case "hourly":
 		bucket = "1 hour"
 	case "weekly":

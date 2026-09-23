@@ -1,14 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { fetchAvailableMetrics, type MetricMeta } from "../api";
-
-function fallbackLabel(m: MetricMeta): string {
-  if (m.display_label) return m.display_label;
-  return m.metric_name
-    .replace(/^oura_/, "")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
+import { fetchAvailableMetrics } from "../api";
 
 export interface MetricOption {
   value: string;
@@ -36,7 +28,7 @@ export function useAvailableMetrics() {
     () =>
       (query.data ?? []).map((m) => ({
         value: m.metric_name,
-        label: fallbackLabel(m),
+        label: m.display_label,
         unit: m.display_unit,
         category: m.category,
         isCumulative: m.is_cumulative,

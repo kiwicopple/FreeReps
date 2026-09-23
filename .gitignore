@@ -72,3 +72,21 @@ Pods/
 *.ipa
 *.dSYM.zip
 *.dSYM
+
+# Private health data and local secrets (public repository)
+.env
+.env.*
+!.env.example
+!.env.sample
+health-exports/
+private-data/
+backups/
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.dump
+export.xml
+export_cda.xml
+export.zip
+apple_health_export/

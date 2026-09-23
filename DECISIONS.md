@@ -773,14 +773,26 @@ support, which is a v1 non-goal below.
 
 **Decided:** 2026-02-19 (project start; stated in `README.md` § Design Principles)
 
-**Decision.** FreeReps stores raw data and visualizes it. It computes no
-composite scores — no Recovery, no Exertion, no readiness figure. Analysis is
-delegated to Claude through the MCP server.
+**Decision.** FreeReps stores raw data and visualizes it. At the user's request,
+Protocol now includes an experimental recovery score on the sleep page with
+visible inputs, weights, missing-data coverage, and the complete formula.
+Duration and continuity carry 40% and 20%; overnight heart rate and HRV carry
+20% each and require seven usable prior nights within 28 days. Partial scores
+are marked provisional, and are not directly comparable with full scores.
+No medical validation or training clearance is implied. Other analysis remains
+available through the MCP server.
 
 **Reasoning.** A proprietary score is an opaque function of inputs the user
 cannot inspect, and every such algorithm encodes assumptions that do not
 generalize across bodies. Raw data plus a free correlation explorer plus an LLM
 gives the same answers with the derivation visible.
+
+**Revisions.** 2026-09-22 — The user explicitly requested a personal 0–100 score.
+The original decision prohibited all computed scores. Reopened because the new
+UI exposes the formula and supports inspecting changes night by night. The
+formula is versioned as experimental v1; thresholds are design choices, not
+published clinical cutoffs. Lowest-heart-rate timing remains a chart annotation,
+not a score contributor.
 
 **Not doing, for the same reason.** Workout planning and automated coaching.
 

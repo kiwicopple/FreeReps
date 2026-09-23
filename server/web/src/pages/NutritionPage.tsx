@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import RangeControl from "../components/RangeControl";
+import ResponsiveDetails from "../components/nutrition/ResponsiveDetails";
 import ProtocolEditor from "../components/nutrition/ProtocolEditor";
 import {
   getFoodLog,
@@ -24,6 +25,7 @@ import {
   unitLabel,
   validDate,
 } from "../utils/nutrition";
+import { nutrientInfo } from "../utils/nutrientInfo";
 import "./nutrition.css";
 const HERO = ["energy", "protein", "carbohydrate", "fat"];
 const SECONDARY = ["fiber", "water"];
@@ -149,7 +151,8 @@ export default function NutritionPage() {
         ? targetStatus(value, t, !!currentDay?.complete, covered)
         : `${avg.count}/${count} days with values`;
     return (
-      <details
+      <ResponsiveDetails
+        title={nutrientLabel(key)}
         key={key}
         className={hero ? "nutrition-hero" : "nutrition-nutrient"}
       >
@@ -181,7 +184,16 @@ export default function NutritionPage() {
           )}
         </summary>
         <div className="nutrition-detail">
+          {nutrientInfo[key] && (
+            <section className="nutrition-explainer" aria-label={`About ${nutrientLabel(key)}`}>
+              <p>{nutrientInfo[key].summary}</p>
+              <a href={nutrientInfo[key].source} target="_blank" rel="noreferrer">
+                Learn more about {nutrientLabel(key).toLowerCase()} ↗
+              </a>
+            </section>
+          )}
           <button
+            data-sheet-close
             onClick={() => {
               setSelected(key);
               if (range === "day") navigate(date, "7d");
@@ -242,7 +254,7 @@ export default function NutritionPage() {
             }),
           )}
         </div>
-      </details>
+      </ResponsiveDetails>
     );
   }
   return (
@@ -498,7 +510,7 @@ export default function NutritionPage() {
                   Recorded consumption, not a recommended supplement schedule.
                 </p>
               </section>
-              <details className="nutrition-section">
+              <ResponsiveDetails title="Other nutrients" className="nutrition-section">
                 <summary>
                   <h2 style={{ display: "inline" }}>Other nutrients</h2>
                 </summary>
@@ -510,11 +522,11 @@ export default function NutritionPage() {
                     .sort()
                     .map((k) => nutrient(k))}
                 </div>
-              </details>
+              </ResponsiveDetails>
               <section className="nutrition-section">
                 <h2>Food log</h2>
                 {records.map((r) => (
-                  <details key={r.entry.id} className="nutrition-log">
+                  <ResponsiveDetails title={r.entry.meal || "Food entry"} key={r.entry.id} className="nutrition-log">
                     <summary>
                       <span>
                         <strong>{r.entry.meal || "Food entry"}</strong>
@@ -548,11 +560,11 @@ export default function NutritionPage() {
                       </div>
                     ))}
                     <p className="nutrition-muted">{r.entry.notes}</p>
-                  </details>
+                  </ResponsiveDetails>
                 ))}
               </section>
               {protocol && (
-                <details className="nutrition-section">
+                <ResponsiveDetails title="Your protocol" className="nutrition-section">
                   <summary>
                     Your protocol · effective {protocol.effective_date}
                   </summary>
@@ -568,7 +580,7 @@ export default function NutritionPage() {
                       {p.protocol.effective_date} · {p.reason}
                     </p>
                   ))}
-                </details>
+                </ResponsiveDetails>
               )}
               <p className="nutrition-muted nutrition-footer">
                 Send meal photos in the connected conversation. FreeReps stores

@@ -2,8 +2,8 @@
 
 Self-hosted server for health data: ingest from Apple Health, Oura and Alpha
 Progression, storage in PostgreSQL/TimescaleDB, a web dashboard with freely
-configurable correlations, and an MCP server. It computes no scores and does no
-coaching — that is a decision, not a gap ([`DECISIONS.md`](DECISIONS.md)).
+configurable correlations, and an MCP server. It includes an experimental, transparent recovery score and does no
+automated coaching ([`DECISIONS.md`](DECISIONS.md)).
 
 Monorepo. `server/` holds the Go binary `freereps` with the web UI embedded;
 `app/` holds the iOS companion (`FreeReps.xcodeproj`). Build and run
@@ -203,3 +203,12 @@ follow [`docs/nutrition.md`](docs/nutrition.md). Use the FreeReps food tools or
 estimates, never photos. Unknown vitamins remain unknown, not zero. This workflow
 exists so estimates, corrections and daily totals remain reproducible. Keep real
 food records out of Git and confirm successful storage by reading back the log.
+
+## Public repository privacy
+
+Never commit actual personal health records, food logs, Apple Health exports,
+database dumps, screenshots containing health readings, credentials, or local
+configuration. Use synthetic fixtures in tests. Before each commit and push,
+review the staged paths and diff for private data; ignore rules do not protect
+files already tracked. Keep actual data in the local database or ignored private
+directories. This repository is public, so a commit can disclose it permanently.
