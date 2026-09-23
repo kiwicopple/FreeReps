@@ -4,10 +4,12 @@ export default function PageHeader({
   title,
   actions,
   children,
+  breadcrumb,
 }: {
   title: string;
   actions?: ReactNode;
   children?: ReactNode;
+  breadcrumb?: ReactNode;
 }) {
   const header = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
@@ -29,6 +31,7 @@ export default function PageHeader({
   return (
     <header ref={header} className="page-header">
       <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col gap-3">
+        {breadcrumb}
         <div className="flex min-h-9 min-w-0 flex-wrap items-center justify-between gap-3">
           <h1 className="min-w-0 break-words text-2xl leading-tight tracking-tight">
             {title}

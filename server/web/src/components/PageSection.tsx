@@ -1,15 +1,22 @@
 import { useId, type ReactNode } from "react";
 import {
   Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardPanel,
+  CardFooter,
   CardFrame,
   CardFrameHeader,
   CardFrameTitle,
   CardFrameDescription,
+  CardFrameAction,
   CardFrameFooter,
 } from "./ui/card";
 import { cn } from "../lib/utils";
 
-/** A section owns its heading and spacing; its callers own the content and behavior. */
+/** Panels use one surface; card tables provide their own content border. */
 export default function PageSection({
   title,
   description,
@@ -17,6 +24,7 @@ export default function PageSection({
   children,
   footer,
   flush = false,
+  table = false,
   className,
   id,
 }: {
@@ -26,36 +34,57 @@ export default function PageSection({
   children: ReactNode;
   footer?: ReactNode;
   flush?: boolean;
+  table?: boolean;
   className?: string;
   id?: string;
 }) {
   const heading = useId();
+  const Root = table ? CardFrame : Card;
+  const Header = table ? CardFrameHeader : CardHeader;
+  const Title = table ? CardFrameTitle : CardTitle;
+  const Description = table ? CardFrameDescription : CardDescription;
+  const Action = table ? CardFrameAction : CardAction;
+  const Footer = table ? CardFrameFooter : CardFooter;
   return (
-    <CardFrame
-      render={<section id={id} aria-labelledby={heading} />}
-      className={cn("min-w-0", className)}
+    <Root
+      render={
+        <section
+          id={id}
+          tabIndex={id ? -1 : undefined}
+          aria-labelledby={heading}
+        />
+      }
+      className={cn("min-w-0", table && "isolate before:-z-10", className)}
     >
-      <CardFrameHeader className="flex flex-row flex-wrap items-center justify-between gap-3 px-4 py-4 md:px-6">
-        <div className="min-w-0 space-y-1">
-          <CardFrameTitle render={<h2 id={heading} />} className="text-base">
-            {title}
-          </CardFrameTitle>
-          {description && (
-            <CardFrameDescription className="max-w-prose [&_a]:underline [&_a]:underline-offset-2">
-              {description}
-            </CardFrameDescription>
-          )}
-        </div>
-        {actions && (
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
-            {actions}
-          </div>
+      <Header className="gap-3 px-4 py-4 md:px-6">
+        <Title render={<h2 id={heading} />} className="text-base">
+          {title}
+        </Title>
+        {description && (
+          <Description className="max-w-prose [&_a]:underline">
+            {description}
+          </Description>
         )}
-      </CardFrameHeader>
-      <Card className={cn("min-w-0", !flush && "p-4 md:p-6")}>{children}</Card>
-      {footer && (
-        <CardFrameFooter className="px-4 md:px-6">{footer}</CardFrameFooter>
+        {actions && (
+          <Action className="flex min-w-0 flex-wrap items-center gap-2">
+            {actions}
+          </Action>
+        )}
+      </Header>
+      {table ? (
+        children
+      ) : (
+        <CardPanel
+          className={cn("min-w-0", flush ? "p-0" : "px-4 pb-4 md:px-6 md:pb-6")}
+        >
+          {children}
+        </CardPanel>
       )}
-    </CardFrame>
+      {footer && (
+        <Footer className="flex flex-wrap items-center gap-3 px-4 py-3 md:px-6">
+          {footer}
+        </Footer>
+      )}
+    </Root>
   );
 }

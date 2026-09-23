@@ -13,3 +13,8 @@ Local accessibility adjustment: muted control text uses the full semantic color 
 
 Layout consolidation also imports Card/CardFrame, Group and Meter from the
 same pinned registry revision. Separator is retained as Group's required dependency.
+
+Dashboard consolidation adds Sheet, Menu, Tooltip, Breadcrumb and Input Group
+from the same pinned MIT registry revision. The local sheet composition uses
+SheetPanel scrolling on desktop and DrawerPanel scrolling on mobile.
+No package or registry revision was changed.

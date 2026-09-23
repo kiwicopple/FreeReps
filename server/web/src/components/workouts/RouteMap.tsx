@@ -1,8 +1,8 @@
 import PageSection from "../PageSection";
-import { MapContainer, TileLayer, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, Polyline, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { WorkoutRoute } from "../../api";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import type { LatLngTuple, LatLngBoundsExpression } from "leaflet";
 import { tokenColor } from "../../utils/tokenColor";
 
@@ -49,6 +49,7 @@ export default function RouteMap({ route }: Props) {
             scrollWheelZoom={true}
             style={{ height: "100%", width: "100%" }}
           >
+            <ResizeMap />
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -71,4 +72,22 @@ export default function RouteMap({ route }: Props) {
       </div>
     </PageSection>
   );
+}
+
+/** Leaflet observes window changes; the sidebar also changes its container alone. */
+function ResizeMap() {
+  const map = useMap();
+  useEffect(() => {
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+    });
+    observer.observe(map.getContainer());
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [map]);
+  return null;
 }

@@ -3,7 +3,6 @@
 @import "@fontsource-variable/archivo/wght.css";
 @custom-variant dark (&:where(.dark, .dark *));
 :root {
-  --app-nav-height: 0px;
   --background: #fafafa;
   --foreground: #202020;
   --card: #f4f4f4;
@@ -138,9 +137,7 @@
 
   html {
     background: var(--background);
-    scroll-padding-top: calc(
-      var(--app-nav-height) + var(--page-header-height, 80px) + 16px
-    );
+    scroll-padding-top: calc(var(--page-header-height, 80px) + 16px);
   }
 
   body {
@@ -204,14 +201,16 @@
 .page-x {
   padding-inline: var(--page-x);
 }
-main > .page-x {
+.page-content {
   width: 100%;
   max-width: 1440px;
   margin-inline: auto;
+  container-type: inline-size;
+  container-name: content;
 }
 .page-header {
   position: sticky;
-  top: var(--app-nav-height);
+  top: 0;
   z-index: 20;
   padding-block: calc(env(safe-area-inset-top, 0px) + 16px) 16px;
   margin-bottom: 24px;
@@ -238,9 +237,6 @@ main > .page-x {
   background: var(--primary);
 }
 @media (min-width: 768px) {
-  :root {
-    --app-nav-height: 64px;
-  }
   .page-header {
     padding-block: 16px;
   }
@@ -256,85 +252,139 @@ main > .page-x {
    Components
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* — navigation — */
-/* Both navigation and the secondary page bar stay visible above scrolling content. */
-.nav {
-  position: sticky;
-  top: 0;
+/* Dashboard shell: only the sidebar has an independent navigation scroll area. */
+.app-shell {
+  min-height: 100dvh;
+}
+.app-main {
+  min-width: 0;
+  padding-bottom: 24px;
+}
+.app-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
   z-index: 30;
-  height: var(--app-nav-height);
-  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 64px;
+  border-right: 1px solid var(--border);
+  background: var(--card);
+}
+.sidebar-brand {
   display: flex;
   align-items: center;
-  gap: var(--space-6);
-  padding: 0 var(--page-x);
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-}
-
-/* Qualified with `a` because .nav a below would otherwise win on specificity
-   (0-1-1 against 0-1-0) and render the brand at 13px/500. */
-.nav a.nav-brand {
-  font-family: var(--font-heading);
-  font-weight: 800;
+  gap: 10px;
+  height: 68px;
+  flex-shrink: 0;
+  padding: 0 20px;
   font-size: 19px;
-  letter-spacing: -0.02em;
-  margin-right: var(--space-4);
+  font-weight: 800;
   color: var(--foreground);
 }
-
-.nav a {
+.sidebar-mark {
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.sidebar-link {
+  width: 100%;
+  min-height: 44px;
+  justify-content: flex-start;
+  padding-inline: 12px;
   color: var(--muted-foreground);
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
 }
-
-.nav a:hover {
+.sidebar-link[aria-current="page"] {
+  background: var(--accent);
   color: var(--foreground);
+  box-shadow: inset 2px 0 var(--primary);
 }
-
-/* An inset shadow rather than a border, so the active mark does not shift the
-   baseline. */
-.nav a[aria-current="page"] {
-  font-weight: 600;
-  color: var(--foreground);
-  box-shadow: inset 0 -2px 0 var(--primary);
+.sidebar-label {
+  display: none;
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   Mobile shell (< 768px)
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* Bottom tab bar — five equal columns on the page ground, no blur, not
-   translucent. The accent mark moves from the bottom of a desktop nav link to
-   the top of the tab. */
-.tabs {
+.sidebar-link .sidebar-label {
+  display: inline;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.sidebar-toggle {
+  display: none;
+}
+@media (min-width: 768px) {
+  .app-main {
+    margin-left: 64px;
+  }
+}
+@media (min-width: 1280px) {
+  .app-shell:not([data-collapsed="true"]) .app-sidebar {
+    width: 224px;
+  }
+  .app-shell:not([data-collapsed="true"]) .app-main {
+    margin-left: 224px;
+  }
+  .app-shell:not([data-collapsed="true"]) .sidebar-label {
+    display: block;
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+  .app-shell:not([data-collapsed="true"]) .sidebar-brand .sidebar-mark {
+    display: none;
+  }
+  .sidebar-toggle {
+    display: flex;
+  }
+}
+.mobile-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
+  inset: auto 0 0;
+  z-index: 30;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   border-top: 1px solid var(--border);
   background: var(--card);
+  padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0px));
 }
-
-.tabs a {
-  padding: 14px 0 22px;
-  padding-bottom: calc(22px + env(safe-area-inset-bottom));
-  text-align: center;
-  font: 600 10px var(--font-body);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.mobile-nav-item {
+  min-width: 0;
+  height: 56px;
+  padding: 6px 0;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 10px;
+  border-radius: 8px;
   color: var(--muted-foreground);
-  min-height: 44px;
 }
-
-.tabs a[aria-current="page"] {
+.mobile-nav-item svg {
+  width: 18px;
+  height: 18px;
+}
+.mobile-nav-item[aria-current="page"],
+.mobile-nav-item[data-active="true"] {
   color: var(--foreground);
-  box-shadow: inset 0 3px 0 var(--primary);
+  background: var(--accent);
+}
+@media (max-width: 767px) {
+  .app-main {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  }
+}
+.dashboard-panels {
+  display: grid;
+  min-width: 0;
+  gap: 24px;
+}
+@container content (min-width:960px) {
+  .dashboard-panels {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .dashboard-panels-equal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* Record row — what a table row becomes below 768px. Identity left, number
@@ -377,3 +427,58 @@ p a {
 .date-entry input::-webkit-calendar-picker-indicator {
   display: none;
 }
+
+.settings-layout {
+  flex-direction: column;
+}
+.settings-sections {
+  display: none;
+}
+.settings-picker {
+  max-width: 320px;
+}
+@container content (min-width:960px) {
+  .settings-layout {
+    flex-direction: row;
+  }
+  .settings-sections {
+    display: flex;
+  }
+  .settings-picker {
+    display: none;
+  }
+}
+[data-slot="tabs-content"][hidden] {
+  display: none;
+}
+
+@container content (min-width:960px) {
+  .sleep-panels {
+    grid-template-areas: "chart recovery" "chart composition";
+  }
+  .sleep-chart {
+    grid-area: chart;
+  }
+  .sleep-recovery {
+    grid-area: recovery;
+  }
+  .sleep-composition {
+    grid-area: composition;
+  }
+}
+@media (max-width: 767px) {
+  [data-slot="card-header"],
+  [data-slot="card-frame-header"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  [data-slot="card-action"],
+  [data-slot="card-frame-action"] {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+    max-width: 100%;
+  }
+}
+
+.mobile-nav-item[aria-current="page"] svg,
+.mobile-nav-item[data-active="true"] svg { color: var(--primary); }

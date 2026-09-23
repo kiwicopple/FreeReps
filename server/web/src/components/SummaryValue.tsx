@@ -1,3 +1,4 @@
+import { Skeleton } from "./ui/skeleton";
 import type { ReactNode } from "react";
 import { cn } from "../lib/utils";
 import { Card } from "./ui/card";
@@ -81,5 +82,19 @@ export default function SummaryValue({
     <Card className={cn("summary-card", className)}>
       <SummaryContent {...props} />
     </Card>
+  );
+}
+
+export function SummarySkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <SummaryGrid label="Loading key metrics">
+      {Array.from({ length: count }, (_, i) => (
+        <Card key={i} className="summary-card">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="my-2 h-8 w-24" />
+          <Skeleton className="h-3 w-16" />
+        </Card>
+      ))}
+    </SummaryGrid>
   );
 }
