@@ -1,3 +1,5 @@
+import DateControl from "@/components/DateControl";
+import Choice from "@/components/Choice";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useState } from "react";
@@ -281,12 +283,12 @@ export default function NutritionPage() {
           >
             ←
           </Button>
-          <input
+          <DateControl
             aria-label="End date"
-            type="date"
+
             value={date}
-            onChange={(e) => {
-              if (validDate(e.target.value)) navigate(e.target.value);
+            onValueChange={(value) => {
+              if (validDate(value)) navigate(value);
             }}
           />
           <Button variant="outline"
@@ -389,17 +391,17 @@ export default function NutritionPage() {
                 <section className="nutrition-section">
                   <div className="nutrition-toolbar">
                     <h2>Daily trend</h2>
-                    <select
+                    <Choice searchable
                       aria-label="Trend nutrient"
                       value={selected}
-                      onChange={(e) => setSelected(e.target.value)}
+                      onValueChange={(value) => setSelected(value)}
                     >
                       {Object.keys(data.catalog).map((k) => (
                         <option key={k} value={k}>
                           {nutrientLabel(k)}
                         </option>
                       ))}
-                    </select>
+                    </Choice>
                   </div>
                   <Trend
                     days={days}

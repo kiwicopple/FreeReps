@@ -1,3 +1,4 @@
+import DateControl from "@/components/DateControl";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import RecoveryScore from "../components/sleep/RecoveryScore";
@@ -105,8 +106,8 @@ export default function SleepPage() {
 
       <div className="page-x" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, paddingBottom: 20 }}>
         <Button variant="outline" aria-label="Previous night" onClick={() => navigateDate(shiftDate(date, -1))} style={{ minWidth: 44, minHeight: 44 }}>←</Button>
-        <input aria-label="Night date" type="date" value={date} max={today} onChange={(e) => {
-          if (validDate(e.target.value) && e.target.value <= today) navigateDate(e.target.value);
+        <DateControl aria-label="Night date"  value={date} max={today} onValueChange={(value) => {
+          if (validDate(value) && value <= today) navigateDate(value);
         }} style={{ minHeight: 44, minWidth: 0, colorScheme: "dark", background: "var(--card)", color: "var(--foreground)", border: "1px solid var(--border)", padding: "0 8px" }} />
         <Button variant="outline" aria-label="Next night" disabled={date >= today} onClick={() => navigateDate(shiftDate(date, 1))} style={{ minWidth: 44, minHeight: 44 }}>→</Button>
         <Button variant="outline" onClick={() => navigateDate(null)} style={{ minHeight: 44 }}>Latest</Button>

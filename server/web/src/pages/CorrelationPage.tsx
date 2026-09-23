@@ -1,3 +1,4 @@
+import Choice from "@/components/Choice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -115,11 +116,11 @@ export default function CorrelationPage() {
       >
         <div className="field" style={{ width: 280 }}>
           <label htmlFor="corr-x">X axis</label>
-          <select
+          <Choice searchable
             id="corr-x"
-            className="input"
+            className=""
             value={xMetric}
-            onChange={(e) => setParam("x", e.target.value)}
+            onValueChange={(value) => setParam("x", value)}
           >
             {groups.map((g) => (
               <optgroup key={g.label} label={g.label}>
@@ -130,16 +131,16 @@ export default function CorrelationPage() {
                 ))}
               </optgroup>
             ))}
-          </select>
+          </Choice>
         </div>
 
         <div className="field" style={{ width: 280 }}>
           <label htmlFor="corr-y">Y axis</label>
-          <select
+          <Choice searchable
             id="corr-y"
-            className="input"
+            className=""
             value={yMetric}
-            onChange={(e) => setParam("y", e.target.value)}
+            onValueChange={(value) => setParam("y", value)}
           >
             {groups.map((g) => (
               <optgroup key={g.label} label={g.label}>
@@ -150,22 +151,22 @@ export default function CorrelationPage() {
                 ))}
               </optgroup>
             ))}
-          </select>
+          </Choice>
         </div>
 
         <div className="field" style={{ width: 200 }}>
           <label htmlFor="corr-lag">Lag</label>
-          <select
+          <Choice searchable
             id="corr-lag"
-            className="input"
+            className=""
             value={lag}
-            onChange={(e) => setParam("lag", e.target.value)}
+            onValueChange={(value) => setParam("lag", value)}
           >
             <option value={0}>Same day</option>
             <option value={1}>1 day</option>
             <option value={2}>2 days</option>
             <option value={3}>3 days</option>
-          </select>
+          </Choice>
         </div>
       </div>
 

@@ -1,3 +1,8 @@
+import { Field, FieldLabel } from "../ui/field";
+import NumericField from "../NumericField";
+import { Alert } from "../ui/alert";
+import DateControl from "@/components/DateControl";
+import Choice from "@/components/Choice";
 import { Input } from "@/components/ui/input";
 import Disclosure from "@/components/Disclosure";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,6 +11,9 @@ import { useState } from "react";
 import type { NutritionProtocol, NutritionTarget } from "../../nutritionApi";
 import { saveProtocol } from "../../nutritionApi";
 import { nutrientLabel, unitLabel } from "../../utils/nutrition";
+type DraftTarget = Omit<NutritionTarget, "value"> & {value:number|null};
+type DraftProtocol = Omit<NutritionProtocol,"profile"|"targets"> & {profile: Omit<NutritionProtocol["profile"],"age"|"height_cm"|"weight_kg"> & {age:number|null;height_cm:number|null;weight_kg:number|null}; targets:Record<string,DraftTarget>};
+function requiredNumber(value:number|null, label:string) { if(value===null)throw new Error(`${label} is required.`); return value; }
 export default function ProtocolEditor({
   record,
   version,
@@ -21,7 +29,7 @@ export default function ProtocolEditor({
   onClose: () => void;
   onSave: () => Promise<void>;
 }) {
-  const [draft, setDraft] = useState<NutritionProtocol>(() => ({
+  const [draft, setDraft] = useState<DraftProtocol>(() => ({
     ...structuredClone(record),
     effective_date: date,
   }));
@@ -29,7 +37,7 @@ export default function ProtocolEditor({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [add, setAdd] = useState("");
-  function update(key: string, patch: Partial<NutritionTarget>) {
+  function update(key: string, patch: Partial<DraftTarget>) {
     setDraft((d) => ({
       ...d,
       targets: { ...d.targets, [key]: { ...d.targets[key], ...patch } },
@@ -40,7 +48,14 @@ export default function ProtocolEditor({
     setBusy(true);
     setError("");
     try {
-      await saveProtocol(draft, version, reason);
+      const protocol: NutritionProtocol = {...draft,
+        profile: {...draft.profile, age:requiredNumber(draft.profile.age,"Age"),height_cm:requiredNumber(draft.profile.height_cm,"Height"),weight_kg:requiredNumber(draft.profile.weight_kg,"Weight")},
+        targets:Object.fromEntries(Object.entries(draft.targets).map(([key,target])=>{
+          if(target.kind==="range"&&(target.low===undefined||target.high===undefined))throw new Error(`${nutrientLabel(key)} range bounds are required.`);
+          return [key,{...target,value:requiredNumber(target.value,nutrientLabel(key))}];
+        }))
+      };
+      await saveProtocol(protocol, version, reason);
       await onSave();
       onClose();
     } catch (e) {
@@ -58,68 +73,68 @@ export default function ProtocolEditor({
       </p>
       <form onSubmit={submit}>
         <div className="nutrition-form-grid">
-          <label>
+          <Field><FieldLabel>
             Effective from
-            <input
+            </FieldLabel><DateControl
               required
-              type="date"
+
               value={draft.effective_date}
-              onChange={(e) =>
-                setDraft({ ...draft, effective_date: e.target.value })
+              onValueChange={(value) =>
+                setDraft({ ...draft, effective_date: value })
               }
             />
-          </label>
-          <label>
+          </Field>
+          <Field><FieldLabel>
             Reason
-            <Input
+            </FieldLabel><Input
               required
               maxLength={1000}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
-          </label>
+          </Field>
         </div>
         <Disclosure>
           <summary>Profile and preferences</summary>
           <div className="nutrition-form-grid">
             {(["age", "height_cm", "weight_kg"] as const).map((key) => (
-              <label key={key}>
+              <Field key={key}><FieldLabel>
                 {key.replace(/_/g, " ")}
-                <input
-                  type="number"
-                  step="any"
+                </FieldLabel><NumericField
+
+
                   required
                   value={draft.profile[key]}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setDraft({
                       ...draft,
                       profile: {
                         ...draft.profile,
-                        [key]: Number(e.target.value),
+                        [key]: value,
                       },
                     })
                   }
                 />
-              </label>
+              </Field>
             ))}
-            <label>
+            <Field><FieldLabel>
               Reference sex
-              <select
+              </FieldLabel><Choice
                 value={draft.profile.sex}
-                onChange={(e) =>
+                onValueChange={(value) =>
                   setDraft({
                     ...draft,
-                    profile: { ...draft.profile, sex: e.target.value },
+                    profile: { ...draft.profile, sex: value },
                   })
                 }
               >
                 <option value="male">Male</option>
                 <option value="female">Female</option>
-              </select>
-            </label>
-            <label>
+              </Choice>
+            </Field>
+            <Field><FieldLabel>
               Activity
-              <Input
+              </FieldLabel><Input
                 value={draft.profile.activity}
                 onChange={(e) =>
                   setDraft({
@@ -128,10 +143,10 @@ export default function ProtocolEditor({
                   })
                 }
               />
-            </label>
-            <label>
+            </Field>
+            <Field><FieldLabel>
               Goal
-              <Input
+              </FieldLabel><Input
                 value={draft.profile.goal}
                 onChange={(e) =>
                   setDraft({
@@ -140,11 +155,11 @@ export default function ProtocolEditor({
                   })
                 }
               />
-            </label>
+            </Field>
           </div>
-          <label>
+          <Field><FieldLabel>
             Food preferences
-            <Textarea
+            </FieldLabel><Textarea
               value={draft.profile.preferences}
               onChange={(e) =>
                 setDraft({
@@ -153,7 +168,7 @@ export default function ProtocolEditor({
                 })
               }
             />
-          </label>
+          </Field>
           <p className="nutrition-muted">
             Changing profile details does not automatically recalculate targets.
           </p>
@@ -164,26 +179,26 @@ export default function ProtocolEditor({
               {nutrientLabel(key)} · {t.value} {unitLabel(t.unit)}
             </summary>
             <div className="nutrition-form-grid">
-              <label>
+              <Field><FieldLabel>
                 Target ({unitLabel(t.unit)})
-                <input
+                </FieldLabel><NumericField
                   required
-                  type="number"
-                  min="0.000001"
-                  step="any"
+
+                  min={0.000001}
+
                   value={t.value}
-                  onChange={(e) =>
-                    update(key, { value: Number(e.target.value) })
+                  onValueChange={(value) =>
+                    update(key, { value: value })
                   }
                 />
-              </label>
-              <label>
+              </Field>
+              <Field><FieldLabel>
                 Comparison
-                <select
+                </FieldLabel><Choice
                   value={t.kind}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     update(key, {
-                      kind: e.target.value as NutritionTarget["kind"],
+                      kind: value as NutritionTarget["kind"],
                       low: undefined,
                       high: undefined,
                     })
@@ -193,54 +208,54 @@ export default function ProtocolEditor({
                   <option value="range">Range</option>
                   <option value="maximum">Planning maximum</option>
                   <option value="reference">Reference only</option>
-                </select>
-              </label>
+                </Choice>
+              </Field>
               {t.kind === "range" && (
                 <>
-                  <label>
+                  <Field><FieldLabel>
                     Range low
-                    <input
+                    </FieldLabel><NumericField
                       required
-                      type="number"
-                      min="0"
-                      step="any"
-                      value={t.low ?? ""}
-                      onChange={(e) =>
-                        update(key, { low: Number(e.target.value) })
+
+                      min={0}
+
+                      value={t.low ?? null}
+                      onValueChange={(value) =>
+                        update(key, { low: value??undefined })
                       }
                     />
-                  </label>
-                  <label>
+                  </Field>
+                  <Field><FieldLabel>
                     Range high
-                    <input
+                    </FieldLabel><NumericField
                       required
-                      type="number"
-                      min="0"
-                      step="any"
-                      value={t.high ?? ""}
-                      onChange={(e) =>
-                        update(key, { high: Number(e.target.value) })
+
+                      min={0}
+
+                      value={t.high ?? null}
+                      onValueChange={(value) =>
+                        update(key, { high: value??undefined })
                       }
                     />
-                  </label>
+                  </Field>
                 </>
               )}
-              <label>
+              <Field><FieldLabel>
                 Basis / label
-                <Input
+                </FieldLabel><Input
                   required
                   value={t.label}
                   onChange={(e) => update(key, { label: e.target.value })}
                 />
-              </label>
-              <label>
+              </Field>
+              <Field><FieldLabel>
                 Source
-                <Input
+                </FieldLabel><Input
                   required
                   value={t.source}
                   onChange={(e) => update(key, { source: e.target.value })}
                 />
-              </label>
+              </Field>
               {[
                 "vitamin_d",
                 "vitamin_c",
@@ -256,23 +271,23 @@ export default function ProtocolEditor({
                 "vitamin_b6",
                 "choline",
               ].includes(key) && (
-                <label>
+                <Field><FieldLabel>
                   Total-intake upper limit (optional)
-                  <input
-                    type="number"
-                    step="any"
-                    min={t.value}
-                    value={t.upper ?? ""}
-                    onChange={(e) =>
+                  </FieldLabel><NumericField
+
+
+                    min={t.value??0}
+                    value={t.upper ?? null}
+                    onValueChange={(value) =>
                       update(key, {
                         upper:
-                          e.target.value === ""
+                          value === null
                             ? undefined
-                            : Number(e.target.value),
+                            : value,
                       })
                     }
                   />
-                </label>
+                </Field>
               )}
             </div>
             <Button variant="outline"
@@ -291,10 +306,10 @@ export default function ProtocolEditor({
           </Disclosure>
         ))}
         <div className="nutrition-toolbar">
-          <select
+          <Choice searchable
             aria-label="Nutrient to add"
             value={add}
-            onChange={(e) => setAdd(e.target.value)}
+            onValueChange={(value) => setAdd(value)}
           >
             <option value="">Add a target…</option>
             {Object.keys(catalog)
@@ -305,7 +320,7 @@ export default function ProtocolEditor({
                   {nutrientLabel(k)}
                 </option>
               ))}
-          </select>
+          </Choice>
           <Button variant="outline"
             type="button"
             disabled={!add}
@@ -323,16 +338,16 @@ export default function ProtocolEditor({
             Add
           </Button>
         </div>
-        <label>
+        <Field><FieldLabel>
           Protocol notes
-          <Textarea
+          </FieldLabel><Textarea
             value={draft.notes}
             onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
           />
-        </label>
-        {error && <p role="alert">{error}</p>}
+        </Field>
+        {error && <Alert variant="error">{error}</Alert>}
         <div className="nutrition-toolbar">
-          <Button variant="outline" disabled={busy} type="submit">
+          <Button loading={busy} type="submit">
             {busy ? "Saving…" : "Save targets"}
           </Button>
           <Button variant="outline" disabled={busy} type="button" onClick={onClose}>

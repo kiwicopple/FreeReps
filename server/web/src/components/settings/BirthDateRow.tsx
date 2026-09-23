@@ -1,3 +1,4 @@
+import DateControl from "@/components/DateControl";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -45,12 +46,12 @@ export default function BirthDateRow() {
   return (
     <Row label="Date of birth">
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <input
-          className="input num"
+        <DateControl
+          className="num"
           style={{ width: 170 }}
-          type="date"
+
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onValueChange={(value) => setDraft(value)}
           aria-label="Date of birth"
         />
         <Button variant="outline"

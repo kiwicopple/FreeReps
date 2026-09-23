@@ -1,3 +1,4 @@
+import DateControl from "@/components/DateControl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useState } from "react";
@@ -129,13 +130,13 @@ export default function HevyTab() {
           </div>
           <div className="field" style={{ marginBottom: 16 }}>
             <label htmlFor="hevy-from">Import from</label>
-            <input
+            <DateControl
               id="hevy-from"
-              className="input"
+              className=""
               style={MONO}
-              type="date"
+
               value={syncFrom}
-              onChange={(e) => setSyncFrom(e.target.value)}
+              onValueChange={(value) => setSyncFrom(value)}
             />
             <p
               style={{

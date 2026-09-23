@@ -1,32 +1,11 @@
 .nutrition-page {
   padding-bottom: 36px;
 }
-.nutrition-page button,
-.nutrition-page select,
-.nutrition-page input,
-.nutrition-page textarea {
-  font: inherit;
-  color: var(--foreground);
-  background: var(--background);
-  border: 1px solid var(--input);
-  border-radius: 3px;
-  padding: 8px 12px;
-}
-.nutrition-page button {
-  cursor: pointer;
-}
-.nutrition-page button:hover {
-  border-color: var(--primary);
-}
-.nutrition-page button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
 .nutrition-page a,
 .nutrition-text-button {
   color: var(--primary);
 }
-.nutrition-page :is(summary, .nutrition-sheet-trigger) {
+.nutrition-page .nutrition-detail-trigger {
   cursor: pointer;
 }
 .nutrition-toolbar {
@@ -68,8 +47,8 @@
 .nutrition-hero + .nutrition-hero {
   border-left: 1px solid var(--input);
 }
-.nutrition-hero :is(summary, .nutrition-sheet-trigger),
-.nutrition-nutrient :is(summary, .nutrition-sheet-trigger) {
+.nutrition-hero .nutrition-detail-trigger,
+.nutrition-nutrient .nutrition-detail-trigger {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -168,7 +147,7 @@
   border-bottom: 1px solid var(--input);
   padding: 16px 0;
 }
-.nutrition-log :is(summary, .nutrition-sheet-trigger) {
+.nutrition-log .nutrition-detail-trigger {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -187,28 +166,12 @@
 .nutrition-table-wrap {
   overflow-x: auto;
 }
-.nutrition-page table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-.nutrition-page td,
-.nutrition-page th {
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--input);
-  white-space: nowrap;
-}
-.nutrition-page .nutrition-text-button {
-  border: 0;
-  padding: 0;
-}
 .nutrition-editor {
   border: 2px solid var(--primary);
   padding: 20px;
   margin: 18px 0;
 }
-.nutrition-editor details {
+.nutrition-editor [data-slot="collapsible"] {
   border-top: 1px solid var(--input);
   padding: 12px 0;
 }
@@ -294,61 +257,6 @@
   content: " +";
   color: var(--muted-foreground);
 }
-details[open] > :is(summary, .nutrition-sheet-trigger) .nutrition-label::after {
-  content: " −";
-}
-
-.nutrition-page .nutrition-sheet-trigger {
-  width: 100%;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  text-align: left;
-}
-.nutrition-sheet-trigger:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 5px;
-}
-dialog.nutrition-sheet {
-  position: fixed;
-  inset: auto 0 0;
-  margin: 0;
-  width: 100%;
-  max-width: none;
-  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 16px);
-  padding: 0;
-  color: var(--foreground);
-  background: var(--background);
-  border: 0;
-  border-top: 1px solid var(--border);
-  border-radius: 16px 16px 0 0;
-  overflow: hidden;
-}
-dialog.nutrition-sheet[open] {
-  display: flex;
-  flex-direction: column;
-}
-.nutrition-sheet::backdrop { background: rgb(0 0 0 / 65%); }
-.nutrition-sheet-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-shrink: 0;
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--border);
-}
-.nutrition-sheet-header h2 { margin: 0; font-size: 20px; }
-.nutrition-sheet-body {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 20px calc(24px + env(safe-area-inset-bottom, 0px));
-  overflow-wrap: anywhere;
-}
-
 .nutrition-explainer {
   margin-bottom: 20px;
   padding-bottom: 18px;
@@ -357,3 +265,6 @@ dialog.nutrition-sheet[open] {
 }
 .nutrition-explainer p { margin: 0 0 8px; }
 .nutrition-explainer a { font-size: 13px; }
+
+.nutrition-detail-trigger { align-items: flex-start; }
+.nutrition-editor [data-slot="input-control"], .nutrition-editor [data-slot="select-trigger"] { width: 100%; }
