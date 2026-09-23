@@ -90,15 +90,6 @@ export default function SleepPage() {
   return (
     <>
       <PageHeader
-        kicker={
-          last
-            ? `Night of ${new Date(last.Date).toLocaleDateString("en-GB", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-              })}`
-            : "No sleep recorded"
-        }
         title="Sleep"
         actions={
           <RangeControl
@@ -108,9 +99,7 @@ export default function SleepPage() {
             name="sleep-range"
           />
         }
-      />
-
-      <div className="page-x mb-6 space-y-2">
+      >
         <DateNavigator
           label="Night date"
           value={date}
@@ -122,10 +111,7 @@ export default function SleepPage() {
           onReset={() => navigateDate(null)}
           resetLabel="Latest"
         />
-        <p className="text-xs text-muted-foreground">
-          Choose the date the night is recorded under.
-        </p>
-      </div>
+      </PageHeader>
       {last && (
         <div className="page-x mb-6">
           <RecoveryScore session={last} />

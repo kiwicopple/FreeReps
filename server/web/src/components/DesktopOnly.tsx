@@ -11,7 +11,7 @@ import PageHeader from "./PageHeader";
 export default function DesktopOnly({ title }: { title: string }) {
   return (
     <>
-      <PageHeader kicker="Desktop only" title={title} />
+      <PageHeader title={title} />
       <div
         className="page-x"
         style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}
@@ -24,7 +24,7 @@ export default function DesktopOnly({ title }: { title: string }) {
             margin: 0,
           }}
         >
-          Metrics and Correlations need a wider screen. Open FreeReps on a
+          Metrics and Correlations need a wider screen. Open Protocol on a
           desktop.
         </p>
         <Link

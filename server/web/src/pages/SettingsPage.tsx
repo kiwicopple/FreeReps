@@ -1,3 +1,4 @@
+import { buttonVariants } from "../components/ui/button";
 import { Tabs, TabsList, TabsTab, TabsPanel } from "../components/ui/tabs";
 import { Link, useSearchParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
@@ -48,10 +49,17 @@ export default function SettingsPage() {
     // content, and the sections are short enough to read in sequence.
     return (
       <>
-        <PageHeader kicker="Protocol" title="Settings" />
-        <div className="page-x" style={{ paddingBottom: 16 }}>
-          <Link to="/trends">View trends →</Link>
-        </div>
+        <PageHeader
+          title="Settings"
+          actions={
+            <Link
+              to="/trends"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              View trends →
+            </Link>
+          }
+        />
         <div className="page-x space-y-6">
           {TABS.map((tab) => (
             <div key={tab.id}>{tab.render()}</div>
@@ -63,7 +71,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader kicker="Protocol" title="Settings" />
+      <PageHeader title="Settings" />
 
       <Tabs
         orientation="vertical"

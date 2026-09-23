@@ -31,7 +31,6 @@ import {
 import { useIsDesktop } from "../hooks/useMediaQuery";
 import {
   formatClock,
-  formatDateWithYear,
   formatDuration,
   formatDistance,
   distanceKm,
@@ -126,7 +125,6 @@ export default function WorkoutsPage() {
   return (
     <>
       <PageHeader
-        kicker={`${formatDateWithYear(start)} – ${formatDateWithYear(end)}`}
         title="Workouts"
         actions={
           <RangeControl

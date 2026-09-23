@@ -14,6 +14,8 @@ import WorkoutSets from "../components/workouts/WorkoutSets";
 import { getWorkoutDisplayName } from "../components/workouts/workoutNames";
 import {
   distanceKm,
+  formatClock,
+  formatDateWithYear,
   formatDistance,
   formatDuration,
   formatNumber,
@@ -37,12 +39,20 @@ export default function WorkoutDetailPage() {
   });
 
   const w = isSynthetic ? routeWorkout! : data;
+  const backAction = (
+    <Link to="/workouts" className={buttonVariants({ variant: "outline" })}>
+      ← Workouts
+    </Link>
+  );
 
   if (!isSynthetic && isLoading) {
     return (
-      <div className="page-x" style={{ paddingTop: 22 }}>
-        <Skeleton style={{ width: 220, height: 34 }} />
-      </div>
+      <>
+        <PageHeader title="Workout" actions={backAction} />
+        <div className="page-x">
+          <Skeleton style={{ width: 220, height: 34 }} />
+        </div>
+      </>
     );
   }
 
@@ -50,20 +60,12 @@ export default function WorkoutDetailPage() {
     return (
       <>
         <PageHeader
-          kicker="Workout"
           title={
             error && !error.message.startsWith("404:")
               ? "Workout unavailable"
               : "Not found"
           }
-          actions={
-            <Link
-              to="/workouts"
-              className={buttonVariants({ variant: "outline" })}
-            >
-              ← Workouts
-            </Link>
-          }
+          actions={backAction}
         />
         <div className="page-x">
           {error && !error.message.startsWith("404:") ? (
@@ -126,29 +128,15 @@ export default function WorkoutDetailPage() {
 
   return (
     <>
-      <PageHeader
-        kicker={new Date(w.StartTime).toLocaleDateString("en-GB", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })}
-        title={getWorkoutDisplayName(w)}
-        actions={
-          <Link
-            to="/workouts"
-            className={buttonVariants({ variant: "outline" })}
-            style={{ fontSize: 12 }}
-          >
-            ← Workouts
-          </Link>
-        }
-      />
+      <PageHeader title={getWorkoutDisplayName(w)} actions={backAction} />
 
-      <div className="page-x mb-6">
+      <div className="page-x mb-6 space-y-4">
+        <p className="text-sm text-muted-foreground">
+          <time dateTime={w.StartTime}>
+            {formatDateWithYear(new Date(w.StartTime))} ·{" "}
+            {formatClock(w.StartTime)}
+          </time>
+        </p>
         <SummaryGrid>
           {stats.map((s) => (
             <SummaryValue

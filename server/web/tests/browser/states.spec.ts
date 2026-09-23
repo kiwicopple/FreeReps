@@ -58,7 +58,8 @@ for (const [path, endpoint, empty] of [
     await expect(page.getByText("Something went wrong")).toHaveCount(0);
     await expect(page.locator("[data-slot=empty]").first()).toBeVisible();
   });
-test("nutrition retains loaded totals when refresh fails and recovers on retry", async ({
+// Automatic updates must preserve loaded totals and offer Retry after a failure.
+test("nutrition retains loaded totals when automatic refresh fails and recovers on retry", async ({
   safePage: page,
 }) => {
   let fail = false;
@@ -77,8 +78,10 @@ test("nutrition retains loaded totals when refresh fails and recovers on retry",
       .first(),
   ).toBeVisible();
   fail = true;
-  await page.getByRole("button", { name: "Nutrition page actions" }).click();
-  await page.getByRole("menuitem", { name: "Refresh", exact: true }).click();
+  // Returning to the foreground refreshes nutrition without a manual page action.
+  await page.evaluate(() =>
+    window.dispatchEvent(new Event("visibilitychange")),
+  );
   await expect(
     page.getByRole("alert").filter({ hasText: "Showing the last loaded data" }),
   ).toBeVisible({ timeout: 15000 });

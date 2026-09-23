@@ -7,6 +7,10 @@ API payload or preference changes.
 
 ## Shared compositions
 
+- `PageHeader` shows only the page title and essential range/actions in one
+  consistent row. Sleep and Nutrition place their date navigation directly
+  beneath it. Subtitle lines, sync metadata and the nutrition timezone line
+  are omitted; workout timestamps remain in the detail content.
 - `PageSection` supplies a semantic heading, description, actions, padded or
   flush content and optional footer using coss CardFrame/Card. Table rows and
   secondary nutrient values remain rows, rather than individual cards.
@@ -34,9 +38,12 @@ analysis panels switch from stacked to adjacent at 1280px. General typography
 resets live in the CSS base layer so component utility styles take precedence.
 Navigation safe areas and specialized chart/map implementations are retained.
 
-Card, Group, Menu, Meter and Group's Separator dependency come from the MIT
+Card, Group, Meter and Group's Separator dependency come from the MIT
 registry at the existing pinned revision recorded in
 `server/web/src/components/ui/UPSTREAM.md`. No new dependency was necessary.
+Nutrition refreshes automatically while visible and when returning to the app;
+failures retain a visible Retry action. The manual refresh menu and its unused
+coss component have been removed.
 
 ## Feature acceptance mapping
 
@@ -53,7 +60,7 @@ registry at the existing pinned revision recorded in
 | Metrics/Correlations | Grouped/searchable selection, URL values, lag, stats, chart resizing and exact CSV | `data.spec.ts`, existing stats unit tests |
 | Trends | Classification, direction, fitted charts and links | `parity.spec.ts`, existing trend unit tests |
 | Nine settings sections | URL tabs/mobile sections, credentials/OAuth, priorities, imports, alerts, identity, saves/resets, exact requests and retries | `settings.spec.ts` |
-| Feedback and actions | Pending/disabled menu Refresh, visible errors/retries, loading/empty/stale states | `layout.spec.ts`, `states.spec.ts` |
+| Feedback and actions | Automatic nutrition refresh, visible errors/retries, loading/empty/stale states | `states.spec.ts` |
 | Details | Independent disclosure drafts, grouped/searchable choices, nested closure/focus, scroll/backdrop/Escape | `controls.unit.test.tsx`, `controls.spec.ts`, `nutrition.spec.ts`, `layout.spec.ts` |
 
 Existing behavioral assertions remain; only locators tied to replaced markup
@@ -76,8 +83,8 @@ focused commits to the existing GitHub fork and confirm Web parity CI before
 one app-only Docker deployment. Preserve the previously deployed image for
 rollback and leave data volumes untouched. Live smoke checks are read-only.
 
-The previous deployed image is preserved as
-`freereps-local-app:pre-layout-20260923`; recreating only the app from this image
+The image preceding header simplification is preserved as
+`freereps-local-app:pre-headers-20260923`; recreating only the app from this image
 (without a build) provides rollback without changing data volumes.
 
 Removed per-page section/stat helpers, summary/option child parsing, native
@@ -85,7 +92,7 @@ nutrition progress bars, delegated `data-sheet-close`, redundant dividers and
 obsolete nutrition grid/progress styling. Specialized chart geometry and domain
 presentation remain intentionally. There is no migration flag or dual layout.
 
-Automated local results: 178 browser cases passed, with 6 intentional viewport
+Automated local results: 176 browser cases passed, with 6 intentional viewport
 skips; 10 Vitest cases and the existing nutrition/recovery numerical suites passed.
 Type checking, production build, Go build/vet/tests, golangci-lint (zero issues),
 the document check and whitespace check passed.

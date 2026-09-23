@@ -66,42 +66,6 @@ for (const timezoneId of ["Pacific/Kiritimati", "America/Los_Angeles"]) {
   });
 }
 
-// A secondary action must remain discoverable and cannot start duplicate refreshes.
-test("nutrition actions disable Refresh while pending and keep retry visible on failure", async ({
-  safePage: page,
-}) => {
-  await page.goto("/nutrition");
-  await expect(
-    page.getByRole("button", { name: "Edit targets", exact: true }),
-  ).toBeVisible();
-  let release!: () => void;
-  const pending = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  let calls = 0;
-  await page.route("**/api/v1/food?*", async (route) => {
-    calls++;
-    await pending;
-    await route.fulfill({
-      status: 503,
-      json: { error: "Synthetic refresh failure" },
-    });
-  });
-  const actions = page.getByRole("button", { name: "Nutrition page actions" });
-  await actions.click();
-  await page.getByRole("menuitem", { name: "Refresh", exact: true }).click();
-  await expect.poll(() => calls).toBe(1);
-  await actions.click();
-  await expect(
-    page.getByRole("menuitem", { name: "Refresh", exact: true }),
-  ).toBeDisabled();
-  await page.keyboard.press("Escape");
-  release();
-  await expect(
-    page.getByRole("button", { name: "Retry", exact: true }),
-  ).toBeVisible({ timeout: 15000 });
-});
-
 // Visual saturation must not hide over-target quantities or turn unknown intake into zero.
 test("compact nutrient rows retain unknown, zero, partial data and honest meters", async ({
   safePage: page,
@@ -245,7 +209,7 @@ test("nested nutrient trend navigation closes the drawer stack", async ({
 
 // Review overlays in both palettes: their portals inherit theme and reduced-motion preferences.
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`picker and menu accessibility in ${colorScheme}`, async ({
+  test(`picker accessibility in ${colorScheme}`, async ({
     safePage: page,
   }, info) => {
     await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
@@ -270,21 +234,6 @@ for (const colorScheme of ["light", "dark"] as const) {
         path: info.outputPath(`synthetic-picker-${colorScheme}.png`),
       });
     await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Nutrition page actions" }).click();
-    await expect(page.getByRole("menuitem", { name: "Refresh" })).toBeVisible();
-    const menuViolations = (
-      await new AxeBuilder({ page })
-        // Base UI's invisible VoiceOver focus sentinels deliberately have role=button
-        // without names. Audit all application controls, excluding only these internals.
-        .exclude("[data-base-ui-focus-guard]")
-        .withTags(["wcag2a", "wcag2aa"])
-        .analyze()
-    ).violations;
-    expect(
-      menuViolations.filter((v) =>
-        ["serious", "critical"].includes(v.impact ?? ""),
-      ),
-    ).toEqual([]);
   });
 }
 

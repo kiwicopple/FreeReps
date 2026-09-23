@@ -11,5 +11,5 @@ Update deliberately; do not regenerate components automatically.
 
 Local accessibility adjustment: muted control text uses the full semantic color rather than 72% opacity to meet contrast on the Protocol light palette.
 
-Layout consolidation also imports Card/CardFrame, Group, Menu and Meter from the
+Layout consolidation also imports Card/CardFrame, Group and Meter from the
 same pinned registry revision. Separator is retained as Group's required dependency.

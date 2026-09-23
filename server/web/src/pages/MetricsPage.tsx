@@ -20,7 +20,7 @@ import RangeControl from "../components/RangeControl";
 import MetricChart from "../components/metrics/MetricChart";
 import { useAvailableMetrics } from "../hooks/useMetrics";
 import { useIsDesktop } from "../hooks/useMediaQuery";
-import { formatDateWithYear, formatNumber } from "../utils/format";
+import { formatNumber } from "../utils/format";
 import { queryMessage, queryState } from "../utils/queryState";
 
 const RANGES = ["1d", "7d", "30d", "90d", "1y"] as const;
@@ -95,7 +95,6 @@ export default function MetricsPage() {
   return (
     <>
       <PageHeader
-        kicker={`${formatDateWithYear(start)} – ${formatDateWithYear(end)}`}
         title="Metrics"
         actions={
           <RangeControl

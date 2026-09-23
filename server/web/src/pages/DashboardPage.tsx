@@ -30,7 +30,7 @@ import {
 } from "../components/dashboard/metricDisplay";
 import { useIsDesktop } from "../hooks/useMediaQuery";
 import { deltaColor } from "../utils/metricDirection";
-import { formatFullDate, formatTimeAgo } from "../utils/format";
+import { formatTimeAgo } from "../utils/format";
 import { queryMessage, queryState } from "../utils/queryState";
 import { sourceLabel } from "../utils/sourceLabel";
 
@@ -73,65 +73,25 @@ export default function DashboardPage() {
   const shown = data?.metrics.length ?? 0;
   const total = data?.total_available ?? 0;
   const hidden = Math.max(total - shown, 0);
-  const syncLine = data?.last_sync
-    ? `${new Date(data.last_sync).toLocaleTimeString("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}${data.last_sources?.length ? ` · ${data.last_sources.join(", ")}` : ""}`
-    : "never";
 
   return (
     <>
       <PageHeader
-        kicker={formatFullDate(new Date())}
         title="Today"
         actions={
-          isDesktop ? (
-            <>
-              <span
-                style={{
-                  font: "400 11.5px var(--font-body)",
-                  color: "var(--muted-foreground)",
-                }}
-              >
-                Last sync {syncLine}
-              </span>
-              <Link
-                to="/settings?tab=sources"
-                className={buttonVariants({ variant: "outline" })}
-                style={{ fontSize: 12 }}
-              >
-                Sync now
-              </Link>
-            </>
-          ) : (
-            <span
-              style={{
-                font: "400 11px var(--font-body)",
-                color: "var(--muted-foreground)",
-              }}
-            >
-              Sync {syncLine}
-            </span>
-          )
+          <RangeControl
+            options={RANGES}
+            value={range}
+            onChange={setRange}
+            name="dashboard-range"
+          />
         }
       />
 
       <div className="page-x space-y-6">
         <HeroStrip metrics={heroes} loading={state === "loading"} />
 
-        <PageSection
-          title="All metrics"
-          flush
-          actions={
-            <RangeControl
-              options={RANGES}
-              value={range}
-              onChange={setRange}
-              name="dashboard-range"
-            />
-          }
-        >
+        <PageSection title="All metrics" flush>
           {message ? (
             <Alert
               variant="error"

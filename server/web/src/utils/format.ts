@@ -100,16 +100,6 @@ export function formatTimeAgo(iso: string): string {
   return diffDay === 0 ? "today" : `${diffDay}d ago`;
 }
 
-/** "Monday, 16 March 2026" — the dashboard kicker. */
-export function formatFullDate(d: Date): string {
-  return d.toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
 /** "Mon, 16 Mar" — the table group header. */
 export function formatShortDate(d: Date): string {
   return d.toLocaleDateString("en-GB", {
@@ -119,7 +109,7 @@ export function formatShortDate(d: Date): string {
   });
 }
 
-/** "16 Dec 2025" — range endpoints. */
+/** "16 Dec 2025" — a dated record. */
 export function formatDateWithYear(d: Date): string {
   return d.toLocaleDateString("en-GB", {
     day: "numeric",

@@ -85,7 +85,6 @@ export default function TrendsPage() {
   return (
     <>
       <PageHeader
-        kicker="Linear fit over the selected window"
         title="Trends"
         actions={
           <RangeControl

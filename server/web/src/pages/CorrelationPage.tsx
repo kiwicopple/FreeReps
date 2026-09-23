@@ -123,7 +123,6 @@ export default function CorrelationPage() {
   return (
     <>
       <PageHeader
-        kicker={`${days} days · ${active?.pairs.length ?? 0} paired days`}
         title="Correlations"
         actions={
           <RangeControl

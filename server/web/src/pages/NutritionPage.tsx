@@ -3,8 +3,6 @@ import { Alert } from "@/components/ui/alert";
 import DateNavigator from "@/components/DateNavigator";
 import PageSection from "@/components/PageSection";
 import { Meter } from "@/components/ui/meter";
-import { Menu, MenuTrigger, MenuPopup, MenuItem } from "@/components/ui/menu";
-import { MoreHorizontal } from "lucide-react";
 import Choice from "@/components/Choice";
 import { Button } from "@/components/ui/button";
 import {
@@ -312,57 +310,27 @@ export default function NutritionPage() {
   return (
     <>
       <PageHeader
-        kicker="Food, supplements & daily intake"
         title="Nutrition"
         actions={
-          <>
-            <RangeControl
-              options={["day", "7d", "30d"]}
-              value={range}
-              onChange={(r) => navigate(date, r)}
-              name="nutrition-range"
-            />
-            <Menu>
-              <MenuTrigger
-                render={
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    aria-label="Nutrition page actions"
-                  />
-                }
-              >
-                <MoreHorizontal />
-              </MenuTrigger>
-              <MenuPopup align="end">
-                <MenuItem
-                  disabled={query.isFetching}
-                  onClick={() =>
-                    void refresh().catch((e) => setError(String(e)))
-                  }
-                >
-                  Refresh
-                </MenuItem>
-              </MenuPopup>
-            </Menu>
-          </>
-        }
-      />
-      <div className="page-x nutrition-page space-y-6">
-        <div className="space-y-2">
-          <DateNavigator
-            label="End date"
-            value={date}
-            onValueChange={(value) => navigate(value)}
-            onPrevious={() => navigate(shiftDate(date, -1))}
-            onNext={() => navigate(shiftDate(date, 1))}
-            onReset={() => navigate(localToday())}
-            resetLabel="Today"
+          <RangeControl
+            options={["day", "7d", "30d"]}
+            value={range}
+            onChange={(r) => navigate(date, r)}
+            name="nutrition-range"
           />
-          <p className="nutrition-muted">
-            Asia/Singapore{range !== "day" ? ` · ${start} to ${date}` : ""}
-          </p>
-        </div>
+        }
+      >
+        <DateNavigator
+          label="End date"
+          value={date}
+          onValueChange={(value) => navigate(value)}
+          onPrevious={() => navigate(shiftDate(date, -1))}
+          onNext={() => navigate(shiftDate(date, 1))}
+          onReset={() => navigate(localToday())}
+          resetLabel="Today"
+        />
+      </PageHeader>
+      <div className="page-x nutrition-page space-y-6">
         {error && (
           <Alert variant="error" role="alert">
             {error}
