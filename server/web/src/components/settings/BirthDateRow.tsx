@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { fetchBirthDate, saveBirthDate } from "../../api";
@@ -52,19 +53,19 @@ export default function BirthDateRow() {
           onChange={(e) => setDraft(e.target.value)}
           aria-label="Date of birth"
         />
-        <button
+        <Button variant="outline"
           type="button"
-          className="btn btn-secondary"
+
           style={{ fontSize: 12 }}
           disabled={saving || draft === stored}
           onClick={() => commit(draft)}
         >
           {saving ? "Saving…" : "Save"}
-        </button>
+        </Button>
         {stored ? (
-          <button
+          <Button variant="ghost"
             type="button"
-            className="btn btn-ghost"
+
             style={{ fontSize: 12 }}
             disabled={saving}
             onClick={() => {
@@ -73,7 +74,7 @@ export default function BirthDateRow() {
             }}
           >
             Clear
-          </button>
+          </Button>
         ) : null}
       </div>
 

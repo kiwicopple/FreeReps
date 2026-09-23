@@ -1,3 +1,6 @@
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWorkoutSets, WorkoutSet } from "../../api";
 
@@ -50,7 +53,7 @@ export default function WorkoutSets({
   if (!isStrength) return null;
 
   if (isLoading) {
-    return <span className="skel" style={{ width: "100%", height: 120 }} />;
+    return <Skeleton  style={{ width: "100%", height: 120 }} />;
   }
 
   if (error || !data || data.length === 0) {
@@ -106,25 +109,25 @@ export default function WorkoutSets({
                 </span>
               ) : null}
               {ex.muscle ? (
-                <span className="tag tag-neutral">
+                <Badge variant="secondary" >
                   {ex.muscle.replace(/_/g, " ")}
-                </span>
+                </Badge>
               ) : null}
             </div>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th style={{ width: 60, paddingLeft: 0 }}>Set</th>
-                  <th style={{ textAlign: "right" }}>Weight</th>
-                  <th style={{ textAlign: "right" }}>Reps</th>
-                  <th style={{ textAlign: "right", paddingRight: 0 }}>
+            <Table >
+              <TableHeader>
+                <TableRow>
+                  <TableHead style={{ width: 60, paddingLeft: 0 }}>Set</TableHead>
+                  <TableHead style={{ textAlign: "right" }}>Weight</TableHead>
+                  <TableHead style={{ textAlign: "right" }}>Reps</TableHead>
+                  <TableHead style={{ textAlign: "right", paddingRight: 0 }}>
                     RIR / RPE
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {ex.sets.map((set, i) => (
-                  <tr
+                  <TableRow
                     key={i}
                     style={{
                       color: set.IsWarmup
@@ -132,13 +135,13 @@ export default function WorkoutSets({
                         : "var(--foreground)",
                     }}
                   >
-                    <td
+                    <TableCell
                       className="num"
                       style={{ paddingLeft: 0, paddingTop: 8, paddingBottom: 8 }}
                     >
                       {set.IsWarmup ? "W" : set.SetNumber}
-                    </td>
-                    <td
+                    </TableCell>
+                    <TableCell
                       className="num"
                       style={{ textAlign: "right", paddingTop: 8, paddingBottom: 8 }}
                     >
@@ -147,14 +150,14 @@ export default function WorkoutSets({
                         : set.IsBodyweightPlus
                           ? "BW"
                           : "—"}
-                    </td>
-                    <td
+                    </TableCell>
+                    <TableCell
                       className="num"
                       style={{ textAlign: "right", paddingTop: 8, paddingBottom: 8 }}
                     >
                       {set.Reps}
-                    </td>
-                    <td
+                    </TableCell>
+                    <TableCell
                       className="num"
                       style={{
                         textAlign: "right",
@@ -164,11 +167,11 @@ export default function WorkoutSets({
                       }}
                     >
                       {formatEffort(set)}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         ))}
       </div>

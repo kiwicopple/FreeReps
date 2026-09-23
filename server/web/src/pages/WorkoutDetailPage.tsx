@@ -1,3 +1,5 @@
+import { buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { fetchWorkoutDetail, type Workout } from "../api";
@@ -31,7 +33,7 @@ export default function WorkoutDetailPage() {
   if (!isSynthetic && isLoading) {
     return (
       <div className="page-x" style={{ paddingTop: 22 }}>
-        <span className="skel" style={{ width: 220, height: 34 }} />
+        <Skeleton  style={{ width: 220, height: 34 }} />
       </div>
     );
   }
@@ -106,7 +108,7 @@ export default function WorkoutDetailPage() {
         })}
         title={getWorkoutDisplayName(w)}
         actions={
-          <Link to="/workouts" className="btn btn-secondary" style={{ fontSize: 12 }}>
+          <Link to="/workouts" className={buttonVariants({ variant: "outline" })} style={{ fontSize: 12 }}>
             ← Workouts
           </Link>
         }

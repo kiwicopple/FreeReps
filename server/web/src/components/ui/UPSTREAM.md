@@ -8,3 +8,5 @@ Companion library utilities and use-media-query share this provenance.
 The adjacent license preserves coss.com's MIT notice. No code was copied
 from the differently licensed packages/ui directory.
 Update deliberately; do not regenerate components automatically.
+
+Local accessibility adjustment: muted control text uses the full semantic color rather than 72% opacity to meet contrast on the Protocol light palette.

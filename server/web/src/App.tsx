@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import Layout from "./components/Layout";
@@ -19,7 +20,7 @@ const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 function PageFallback() {
   return (
     <div className="page-x" style={{ paddingTop: 22 }}>
-      <span className="skel" style={{ width: 180, height: 34 }} />
+      <Skeleton  style={{ width: 180, height: 34 }} />
     </div>
   );
 }

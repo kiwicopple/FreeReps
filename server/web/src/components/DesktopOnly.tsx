@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PageHeader from "./PageHeader";
 
@@ -28,7 +29,7 @@ export default function DesktopOnly({ title }: { title: string }) {
         </p>
         <Link
           to="/trends"
-          className="btn btn-ghost"
+          className={buttonVariants({ variant: "ghost" })}
           style={{ fontSize: 12.5, marginTop: 14, marginLeft: -4 }}
         >
           Go to Trends →

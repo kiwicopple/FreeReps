@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import type { ReactNode } from "react";
 
 /** The shared row: label column, value, both on one baseline. */
@@ -65,82 +66,6 @@ export const MONO: React.CSSProperties = {
   fontSize: 12.5,
 };
 
-/** A square checkbox — never the rounded native one. */
-export function SquareCheckbox({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={onChange}
-      style={{
-        width: 15,
-        height: 15,
-        flex: "none",
-        padding: 0,
-        cursor: "pointer",
-        borderRadius: 0,
-        border: checked
-          ? "2px solid var(--primary)"
-          : "1px solid var(--border)",
-        background: checked ? "var(--primary)" : "transparent",
-      }}
-    />
-  );
-}
-
-/** A square switch — square, never a pill. Used by the phone layout. */
-export function SquareSwitch({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={onChange}
-      style={{
-        width: 44,
-        height: 26,
-        flex: "none",
-        padding: 2,
-        cursor: "pointer",
-        borderRadius: 0,
-        border: "1px solid var(--input)",
-        background: checked ? "var(--primary)" : "transparent",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: checked ? "flex-end" : "flex-start",
-      }}
-    >
-      <span
-        style={{
-          width: 20,
-          height: 20,
-          display: "block",
-          background: checked ? "var(--background)" : "var(--input)",
-        }}
-      />
-    </button>
-  );
-}
-
 /**
  * The redirect URI an OAuth provider has to have registered.
  *
@@ -155,9 +80,9 @@ export function RedirectURIRow({ uri }: { uri: string }) {
       <label className="kick" htmlFor="redirect-uri">
         Redirect URI
       </label>
-      <input
+      <Input
         id="redirect-uri"
-        className="input"
+
         style={{ ...MONO, width: "100%", marginTop: 8 }}
         readOnly
         value={uri}

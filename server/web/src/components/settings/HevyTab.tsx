@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useState } from "react";
 import {
   disconnectHevy,
@@ -95,9 +97,9 @@ export default function HevyTab() {
           }}
         >
           {error}{" "}
-          <button type="button" className="btn btn-ghost" onClick={load}>
+          <Button variant="ghost" type="button"  onClick={load}>
             Retry
-          </button>
+          </Button>
         </p>
       ) : null}
 
@@ -115,9 +117,9 @@ export default function HevyTab() {
         <div style={{ paddingTop: 20, maxWidth: 520 }}>
           <div className="field" style={{ marginBottom: 14 }}>
             <label htmlFor="hevy-key">API key</label>
-            <input
+            <Input
               id="hevy-key"
-              className="input"
+
               style={MONO}
               type="password"
               value={apiKey}
@@ -147,14 +149,14 @@ export default function HevyTab() {
               Hevy cannot be counted a second time.
             </p>
           </div>
-          <button
+          <Button variant="default"
             type="button"
-            className="btn btn-primary"
+
             onClick={handleSave}
             disabled={saving || !apiKey}
           >
             {saving ? "Verifying…" : "Save API key"}
-          </button>
+          </Button>
         </div>
       ) : (
         <>
@@ -175,23 +177,23 @@ export default function HevyTab() {
               />
               <span style={{ font: "600 14px var(--font-body)" }}>Connected</span>
               <span style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-                <button
+                <Button variant="outline"
                   type="button"
-                  className="btn btn-secondary"
+
                   style={{ fontSize: 12 }}
                   onClick={handleSync}
                   disabled={syncing}
                 >
                   {syncing ? "Syncing…" : "Sync now"}
-                </button>
-                <button
+                </Button>
+                <Button variant="ghost"
                   type="button"
-                  className="btn btn-ghost"
+
                   style={{ fontSize: 12 }}
                   onClick={handleDisconnect}
                 >
                   Disconnect
-                </button>
+                </Button>
               </span>
             </div>
             <div
@@ -213,23 +215,23 @@ export default function HevyTab() {
               Replace API key
             </label>
             <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-              <input
+              <Input
                 id="hevy-replace"
-                className="input"
+
                 style={MONO}
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="New Hevy API key"
               />
-              <button
+              <Button variant="outline"
                 type="button"
-                className="btn btn-secondary"
+
                 onClick={handleSave}
                 disabled={saving || !apiKey}
               >
                 {saving ? "Verifying…" : "Save"}
-              </button>
+              </Button>
             </div>
           </div>
         </>

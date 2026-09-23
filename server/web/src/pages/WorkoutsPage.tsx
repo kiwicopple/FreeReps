@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -264,24 +266,24 @@ export default function WorkoutsPage() {
           {Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
           {filtered.length}
         </span>
-        <button
+        <Button variant="outline"
           type="button"
-          className="btn btn-secondary"
+
           style={{ marginLeft: "auto", fontSize: 12 }}
           disabled={page === 0}
           onClick={() => setParam("page", String(page - 1))}
         >
           Prev
-        </button>
-        <button
+        </Button>
+        <Button variant="outline"
           type="button"
-          className="btn btn-secondary"
+
           style={{ fontSize: 12 }}
           disabled={(page + 1) * PAGE_SIZE >= filtered.length}
           onClick={() => setParam("page", String(page + 1))}
         >
           Next
-        </button>
+        </Button>
       </div>
 
       {isDesktop && maxHR > 0 ? (
@@ -344,48 +346,48 @@ function WorkoutTable({
   onOpen: (id: string) => void;
 }) {
   return (
-    <table className="table">
-      <thead>
-        <tr>
-          <th style={{ width: 72 }}>Time</th>
-          <th>Workout</th>
-          <th style={{ textAlign: "right", width: 100 }}>Duration</th>
-          <th style={{ textAlign: "right", width: 120 }}>Avg / max HR</th>
-          <th style={{ width: 180 }}>HR zones</th>
-          <th style={{ textAlign: "right", width: 100 }}>Energy</th>
-          <th style={{ textAlign: "right", width: 110 }}>Distance</th>
-          <th style={{ width: 130 }}>Source</th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table >
+      <TableHeader>
+        <TableRow>
+          <TableHead style={{ width: 72 }}>Time</TableHead>
+          <TableHead>Workout</TableHead>
+          <TableHead style={{ textAlign: "right", width: 100 }}>Duration</TableHead>
+          <TableHead style={{ textAlign: "right", width: 120 }}>Avg / max HR</TableHead>
+          <TableHead style={{ width: 180 }}>HR zones</TableHead>
+          <TableHead style={{ textAlign: "right", width: 100 }}>Energy</TableHead>
+          <TableHead style={{ textAlign: "right", width: 110 }}>Distance</TableHead>
+          <TableHead style={{ width: 130 }}>Source</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {groups.map((group) => (
           <Fragment key={group.key}>
-            <tr className="grp">
-              <td colSpan={8} className="kick">
+            <TableRow className="grp">
+              <TableCell colSpan={8} className="kick">
                 {group.label}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
             {group.workouts.map((w) => (
-              <tr
+              <TableRow
                 key={w.ID}
                 style={{ cursor: "pointer" }}
                 onClick={() => onOpen(w.ID)}
               >
-                <td className="num" style={{ fontSize: 12.5 }}>
+                <TableCell className="num" style={{ fontSize: 12.5 }}>
                   {formatClock(w.StartTime)}
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   <span style={{ fontWeight: 600 }}>
                     {getWorkoutDisplayName(w)}
                   </span>
-                </td>
-                <td
+                </TableCell>
+                <TableCell
                   className="num"
                   style={{ textAlign: "right", fontWeight: 600 }}
                 >
                   {formatDuration(w.DurationSec)}
-                </td>
-                <td
+                </TableCell>
+                <TableCell
                   className="num"
                   style={{
                     textAlign: "right",
@@ -396,11 +398,11 @@ function WorkoutTable({
                   {w.AvgHeartRate
                     ? `${formatNumber(w.AvgHeartRate)} / ${w.MaxHeartRate ? formatNumber(w.MaxHeartRate) : "—"}`
                     : "—"}
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   <ZoneBar shares={zonesById.get(w.ID) ?? null} />
-                </td>
-                <td
+                </TableCell>
+                <TableCell
                   className="num"
                   style={{
                     textAlign: "right",
@@ -411,8 +413,8 @@ function WorkoutTable({
                   {energyKcal(w) != null
                     ? `${formatNumber(energyKcal(w)!)} kcal`
                     : "—"}
-                </td>
-                <td
+                </TableCell>
+                <TableCell
                   className="num"
                   style={{
                     textAlign: "right",
@@ -421,16 +423,16 @@ function WorkoutTable({
                   }}
                 >
                   {formatDistance(w.Distance, w.DistanceUnits)}
-                </td>
-                <td style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
+                </TableCell>
+                <TableCell style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
                   {sourceLabel(w.Source)}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
           </Fragment>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   );
 }
 
@@ -531,7 +533,7 @@ function FilterPill({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button variant="outline"
       type="button"
       onClick={onClick}
       style={{
@@ -549,7 +551,7 @@ function FilterPill({
       <span className="num" style={{ fontWeight: 400, opacity: 0.65, marginLeft: 7 }}>
         {count}
       </span>
-    </button>
+    </Button>
   );
 }
 

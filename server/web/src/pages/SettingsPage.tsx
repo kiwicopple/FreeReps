@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Link, useSearchParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import AlertsTab from "../components/settings/AlertsTab";
@@ -83,7 +84,7 @@ export default function SettingsPage() {
       >
         <div className="rail">
           {TABS.map((tab) => (
-            <button
+            <Button variant="outline"
               key={tab.id}
               className="rail-item"
               aria-selected={tab.id === active}
@@ -91,7 +92,7 @@ export default function SettingsPage() {
               onClick={() => setTab(tab.id)}
             >
               {tab.label}
-            </button>
+            </Button>
           ))}
         </div>
 

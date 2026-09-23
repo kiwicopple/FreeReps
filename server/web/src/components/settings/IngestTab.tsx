@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { fetchImportLogs, type ImportLog } from "../../api";
 import { formatNumber } from "../../utils/format";
@@ -23,9 +24,9 @@ export default function IngestTab() {
         <label className="kick" htmlFor="ingest-url">
           Server URL
         </label>
-        <input
+        <Input
           id="ingest-url"
-          className="input"
+
           style={{ ...MONO, maxWidth: 620, marginTop: 8 }}
           value={serverURL}
           readOnly

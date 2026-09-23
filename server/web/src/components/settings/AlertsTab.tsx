@@ -1,3 +1,6 @@
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useState } from "react";
 import {
   fetchAlerts,
@@ -145,9 +148,9 @@ export default function AlertsTab() {
           }}
         >
           {error}{" "}
-          <button type="button" className="btn btn-ghost" onClick={load}>
+          <Button variant="ghost" type="button"  onClick={load}>
             Retry
-          </button>
+          </Button>
         </p>
       ) : null}
 
@@ -178,11 +181,10 @@ export default function AlertsTab() {
           <div style={{ paddingTop: 12, maxWidth: 640 }}>
             <Row label="Reporting">
               <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <input
-                  type="checkbox"
+                <Switch
+
                   checked={settings.enabled}
-                  onChange={(e) => patch({ enabled: e.target.checked })}
-                />
+                  onCheckedChange={(checked) => patch({ enabled: checked })} />
                 <span style={{ font: "400 13px var(--font-body)" }}>
                   {settings.enabled
                     ? "Conditions are reported"
@@ -192,8 +194,8 @@ export default function AlertsTab() {
             </Row>
 
             <Row label="ntfy topic URL">
-              <input
-                className="input"
+              <Input
+
                 style={{ ...MONO, width: "100%" }}
                 type="url"
                 value={settings.ntfy_url}
@@ -214,8 +216,8 @@ export default function AlertsTab() {
             </Row>
 
             <Row label="Reported as">
-              <input
-                className="input"
+              <Input
+
                 style={{ ...MONO, width: 260, maxWidth: "100%" }}
                 value={settings.hostname}
                 onChange={(e) => patch({ hostname: e.target.value })}
@@ -304,22 +306,22 @@ export default function AlertsTab() {
           </div>
 
           <div style={{ display: "flex", gap: 8, paddingTop: 20 }}>
-            <button
+            <Button variant="default"
               type="button"
-              className="btn btn-primary"
+
               onClick={handleSave}
               disabled={saving}
             >
               {saving ? "Saving…" : "Save"}
-            </button>
-            <button
+            </Button>
+            <Button variant="outline"
               type="button"
-              className="btn btn-secondary"
+
               onClick={handleTest}
               disabled={testing || !settings.ntfy_url}
             >
               {testing ? "Sending…" : "Send test message"}
-            </button>
+            </Button>
           </div>
 
           <div style={{ paddingTop: 30, maxWidth: 640 }}>

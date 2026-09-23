@@ -1,3 +1,5 @@
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { uploadAlphaCSV } from "../../api";
@@ -82,7 +84,7 @@ export default function ImportTab() {
           maxWidth: 620,
         }}
       >
-        <input
+        <Input nativeInput
           ref={fileRef}
           type="file"
           accept=".csv,text/csv"
@@ -101,9 +103,9 @@ export default function ImportTab() {
             <span style={{ font: "500 13.5px var(--font-body)" }}>
               {selectedFile.name}
             </span>
-            <button
+            <Button variant="ghost"
               type="button"
-              className="btn btn-ghost"
+
               style={{ fontSize: 12 }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -112,7 +114,7 @@ export default function ImportTab() {
               }}
             >
               Remove
-            </button>
+            </Button>
           </div>
         ) : (
           <p
@@ -128,15 +130,15 @@ export default function ImportTab() {
       </div>
 
       {selectedFile ? (
-        <button
+        <Button variant="default"
           type="button"
-          className="btn btn-primary"
+
           style={{ marginTop: 16 }}
           onClick={handleUpload}
           disabled={uploading}
         >
           {uploading ? "Uploading…" : "Upload"}
-        </button>
+        </Button>
       ) : null}
 
       {error ? (

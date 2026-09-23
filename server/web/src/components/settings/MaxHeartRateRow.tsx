@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { fetchMaxHeartRate, saveMaxHeartRate } from "../../api";
@@ -69,19 +70,19 @@ export default function MaxHeartRateRow() {
         >
           bpm
         </span>
-        <button
+        <Button variant="outline"
           type="button"
-          className="btn btn-secondary"
+
           style={{ fontSize: 12 }}
           disabled={saving || draft === ""}
           onClick={() => commit(Number(draft))}
         >
           {saving ? "Saving…" : "Save"}
-        </button>
+        </Button>
         {data?.origin === "configured" ? (
-          <button
+          <Button variant="ghost"
             type="button"
-            className="btn btn-ghost"
+
             style={{ fontSize: 12 }}
             disabled={saving}
             onClick={() => {
@@ -90,7 +91,7 @@ export default function MaxHeartRateRow() {
             }}
           >
             Use automatic
-          </button>
+          </Button>
         ) : null}
       </div>
 

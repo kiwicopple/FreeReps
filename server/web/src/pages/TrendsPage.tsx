@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -167,7 +168,7 @@ export default function TrendsPage() {
         <LegendLine color={VERDICT_COLOR.declining} label="Declining" />
         <Link
           to="/settings?tab=front-page"
-          className="btn btn-ghost"
+          className={buttonVariants({ variant: "ghost" })}
           style={{ marginLeft: "auto", fontSize: 12.5 }}
         >
           Choose metrics →

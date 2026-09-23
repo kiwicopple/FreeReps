@@ -1,3 +1,4 @@
+import SegmentedControl from "../SegmentedControl";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMe, fetchStats, fetchVersion } from "../../api";
 import { useTheme, type ThemePreference } from "../../theme";
@@ -51,20 +52,7 @@ export default function IdentityTab() {
       <MaxHeartRateRow />
 
       <Row label="Appearance">
-        <span className="seg">
-          {THEMES.map((t) => (
-            <label key={t.value} className="seg-opt">
-              <input
-                type="radio"
-                name="theme"
-                value={t.value}
-                checked={theme === t.value}
-                onChange={() => setTheme(t.value)}
-              />
-              {t.label}
-            </label>
-          ))}
-        </span>
+        <SegmentedControl label="Appearance" name="theme" options={THEMES} value={theme} onChange={setTheme} />
         <p
           style={{
             font: "400 12px var(--font-body)",

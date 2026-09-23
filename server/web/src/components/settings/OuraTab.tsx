@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useCallback, useEffect, useState } from "react";
 import {
   authorizeOura,
@@ -105,9 +108,9 @@ export default function OuraTab() {
           }}
         >
           {error}{" "}
-          <button type="button" className="btn btn-ghost" onClick={load}>
+          <Button variant="ghost" type="button"  onClick={load}>
             Retry
-          </button>
+          </Button>
         </p>
       ) : null}
 
@@ -125,9 +128,9 @@ export default function OuraTab() {
         <div style={{ paddingTop: 20, maxWidth: 520 }}>
           <div className="field" style={{ marginBottom: 14 }}>
             <label htmlFor="oura-id">Client ID</label>
-            <input
+            <Input
               id="oura-id"
-              className="input"
+
               style={MONO}
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
@@ -136,9 +139,9 @@ export default function OuraTab() {
           </div>
           <div className="field" style={{ marginBottom: 16 }}>
             <label htmlFor="oura-secret">Client secret</label>
-            <input
+            <Input
               id="oura-secret"
-              className="input"
+
               style={MONO}
               type="password"
               value={clientSecret}
@@ -146,14 +149,14 @@ export default function OuraTab() {
               placeholder="Oura client secret"
             />
           </div>
-          <button
+          <Button variant="default"
             type="button"
-            className="btn btn-primary"
+
             onClick={handleSaveCredentials}
             disabled={saving || !clientId || !clientSecret}
           >
             {saving ? "Saving…" : "Save credentials"}
-          </button>
+          </Button>
         </div>
       ) : (
         <StatusPanel
@@ -207,33 +210,33 @@ function StatusPanel({
           </span>
           <span style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
             {connected ? (
-              <button
+              <Button variant="outline"
                 type="button"
-                className="btn btn-secondary"
+
                 style={{ fontSize: 12 }}
                 onClick={onSync}
                 disabled={syncing}
               >
                 {syncing ? "Syncing…" : "Sync now"}
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button variant="default"
                 type="button"
-                className="btn btn-primary"
+
                 style={{ fontSize: 12 }}
                 onClick={onConnect}
               >
                 Authorize with Oura
-              </button>
+              </Button>
             )}
-            <button
+            <Button variant="ghost"
               type="button"
-              className="btn btn-ghost"
+
               style={{ fontSize: 12 }}
               onClick={onDisconnect}
             >
               Disconnect
-            </button>
+            </Button>
           </span>
         </div>
         <div
@@ -255,9 +258,9 @@ function StatusPanel({
         <label className="kick" htmlFor="oura-client">
           Client ID
         </label>
-        <input
+        <Input
           id="oura-client"
-          className="input"
+
           style={{ ...MONO, marginTop: 8 }}
           value={status.client_id ?? ""}
           readOnly
@@ -267,22 +270,22 @@ function StatusPanel({
       {status.sync_states && Object.keys(status.sync_states).length > 0 ? (
         <div style={{ paddingTop: 30 }}>
           <h3 style={{ fontSize: 15, fontWeight: 700 }}>Pull schedule</h3>
-          <table className="table" style={{ marginTop: 12 }}>
-            <thead>
-              <tr>
-                <th style={{ width: 200, paddingLeft: 0 }}>Job</th>
-                <th style={{ paddingRight: 0 }}>Last run</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table  style={{ marginTop: 12 }}>
+            <TableHeader>
+              <TableRow>
+                <TableHead style={{ width: 200, paddingLeft: 0 }}>Job</TableHead>
+                <TableHead style={{ paddingRight: 0 }}>Last run</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {Object.entries(status.sync_states)
                 .sort(([a], [b]) => a.localeCompare(b))
                 .map(([job, lastSync]) => (
-                  <tr key={job}>
-                    <td style={{ font: "500 13.5px var(--font-body)", paddingLeft: 0 }}>
+                  <TableRow key={job}>
+                    <TableCell style={{ font: "500 13.5px var(--font-body)", paddingLeft: 0 }}>
                       {job.replace(/_/g, " ")}
-                    </td>
-                    <td
+                    </TableCell>
+                    <TableCell
                       className="num"
                       style={{
                         ...MONO,
@@ -291,11 +294,11 @@ function StatusPanel({
                       }}
                     >
                       {lastSync}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       ) : null}
     </>

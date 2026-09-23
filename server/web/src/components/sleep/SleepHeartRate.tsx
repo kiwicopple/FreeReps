@@ -1,3 +1,5 @@
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { fetchTimeSeries, type SleepStage } from "../../api";
@@ -38,7 +40,7 @@ export default function SleepHeartRate({ stages, compact = false }: { stages: Sl
   ) : undefined;
   return <>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "space-between", marginBottom: 12, fontSize: 12 }}>
-      <label style={{ display: "flex", gap: 7, alignItems: "center", color: "var(--primary)" }}><input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} /> Heart rate</label>
+      <label style={{ display: "flex", gap: 7, alignItems: "center", color: "var(--primary)" }}><Switch  checked={show} onCheckedChange={(checked) => setShow(checked)} /> Heart rate</label>
       {show && lowest && <span>{min}–{max} bpm · bottom to top</span>}
     </div>
     <Hypnogram stages={stages} compact={compact} overlay={overlay} />
@@ -47,7 +49,7 @@ export default function SleepHeartRate({ stages, compact = false }: { stages: Sl
     </div>}
     {compact && valid && <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginTop: 6 }}><span>{formatClock(new Date(start).toISOString())}</span><span>{formatClock(new Date(end).toISOString())}</span></div>}
     <div aria-live="polite" style={{ fontSize: 12, lineHeight: 1.6, marginTop: 12, color: "var(--muted-foreground)" }}>
-      {query.isLoading ? "Loading overnight heart rate…" : query.isError ? <>Heart rate could not load. <button onClick={() => query.refetch()}>Retry</button></> : lowest ? <><strong style={{ color: "var(--foreground)" }}>Lowest 5-minute average: {lowest.value.toFixed(0)} bpm around {formatClock(new Date(lowest.time).toISOString())}</strong><br />{Math.floor((lowest.time - start) / 3600000)}h {Math.floor((lowest.time - start) / 60000) % 60}m into the recorded night · {points.length} recorded intervals. Gaps indicate missing readings.</> : "No heart-rate readings for this night yet."}
+      {query.isLoading ? "Loading overnight heart rate…" : query.isError ? <>Heart rate could not load. <Button variant="outline" onClick={() => query.refetch()}>Retry</Button></> : lowest ? <><strong style={{ color: "var(--foreground)" }}>Lowest 5-minute average: {lowest.value.toFixed(0)} bpm around {formatClock(new Date(lowest.time).toISOString())}</strong><br />{Math.floor((lowest.time - start) / 3600000)}h {Math.floor((lowest.time - start) / 60000) % 60}m into the recorded night · {points.length} recorded intervals. Gaps indicate missing readings.</> : "No heart-rate readings for this night yet."}
     </div>
   </>;
 }

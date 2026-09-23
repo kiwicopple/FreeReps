@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import type { FrontPageMetric } from "../../api";
 import Sparkline from "../Sparkline";
 import { useIsDesktop } from "../../hooks/useMediaQuery";
@@ -85,8 +86,8 @@ function HeroCell({
             </span>
           </>
         ) : (
-          <span
-            className="skel"
+          <Skeleton
+
             style={{ width: isDesktop ? 120 : 90, height: isDesktop ? 48 : 34 }}
           />
         )}
@@ -121,7 +122,7 @@ function HeroCell({
             </span>
           </>
         ) : (
-          <span className="skel" style={{ width: 80, height: 12 }} />
+          <Skeleton  style={{ width: 80, height: 12 }} />
         )}
       </div>
 

@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { metricLabel } from "../utils/metricLabel";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -119,7 +121,7 @@ export default function MetricsPage() {
                 {group.label}
               </div>
               {group.metrics.map((m: MetricOption) => (
-                <button
+                <Button variant="outline"
                   key={m.value}
                   className="rail-item"
                   aria-selected={m.value === metric}
@@ -127,7 +129,7 @@ export default function MetricsPage() {
                   onClick={() => setParam("metric", m.value)}
                 >
                   {m.label}
-                </button>
+                </Button>
               ))}
             </div>
           ))}
@@ -154,15 +156,15 @@ export default function MetricsPage() {
                   .join(" · ")}
               </div>
             </div>
-            <button
+            <Button variant="outline"
               type="button"
-              className="btn btn-secondary"
+
               style={{ fontSize: 12 }}
               onClick={() => exportCSV(points, multiplier, metric)}
               disabled={points.length === 0}
             >
               Export CSV
-            </button>
+            </Button>
           </div>
 
           <div
@@ -197,7 +199,7 @@ export default function MetricsPage() {
                 {message}
               </p>
             ) : state === "loading" ? (
-              <div className="skel" style={{ width: "100%", height: 420 }} />
+              <Skeleton  style={{ width: "100%", height: 420 }} />
             ) : (
               <MetricChart
                 points={points}

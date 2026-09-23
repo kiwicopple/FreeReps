@@ -165,69 +165,6 @@ a:hover {
    Components
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* — buttons — */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  text-decoration: none;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 14px;
-  line-height: 1.2;
-  color: var(--foreground);
-  background: transparent;
-  border: 1px solid transparent;
-  padding: var(--space-2) calc(var(--space-3) * 1.2);
-  border-radius: var(--radius-md);
-}
-
-.btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: var(--background);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--primary);
-}
-
-.btn-primary:active:not(:disabled) {
-  background: var(--success-foreground);
-}
-
-.btn-secondary {
-  border-color: var(--border);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--foreground) 7%, transparent);
-}
-
-.btn-secondary:active:not(:disabled) {
-  background: color-mix(in srgb, var(--foreground) 14%, transparent);
-}
-
-.btn-ghost {
-  color: var(--success-foreground);
-  padding-inline: var(--space-1);
-}
-
-.btn-ghost:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--primary) 10%, transparent);
-  color: var(--success-foreground);
-}
-
-.btn-ghost:active:not(:disabled) {
-  background: color-mix(in srgb, var(--primary) 18%, transparent);
-}
-
 /* — forms — */
 .field > label {
   display: block;
@@ -256,75 +193,6 @@ a:hover {
 .input:focus-visible {
   border-color: var(--primary);
   outline-offset: 0;
-}
-
-/* — segmented range control — a real radio group, not buttons — */
-.seg {
-  display: inline-flex;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-}
-
-.seg-opt {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  font-size: 12px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.seg-opt input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-
-.seg-opt + .seg-opt {
-  border-left: 1px solid var(--border);
-}
-
-.seg-opt:has(input:checked) {
-  background: var(--primary);
-  color: var(--background);
-}
-
-.seg-opt:not(:has(input:checked)):hover {
-  background: color-mix(in srgb, var(--foreground) 7%, transparent);
-}
-
-.seg-opt:has(input:focus-visible) {
-  outline: 2px solid var(--primary);
-  outline-offset: -2px;
-}
-
-/* — tags — */
-.tag {
-  display: inline-flex;
-  align-items: center;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  padding: 3px 10px;
-  border-radius: var(--radius-md);
-}
-
-.tag-accent {
-  background: var(--success-soft);
-  color: var(--success-foreground);
-}
-
-.tag-neutral {
-  background: var(--muted);
-  color: var(--foreground);
-}
-
-.tag-outline {
-  border: 1px solid var(--primary);
-  color: var(--success-foreground);
 }
 
 /* — navigation — */
@@ -370,51 +238,6 @@ a:hover {
   font-weight: 600;
   color: var(--foreground);
   box-shadow: inset 0 -2px 0 var(--primary);
-}
-
-/* — tables — */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.table th {
-  text-align: left;
-  font: 600 10px var(--font-body);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-  padding: 10px 16px;
-  border-bottom: 2px solid var(--foreground);
-  white-space: nowrap;
-}
-
-.table td {
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.table th:first-child,
-.table td:first-child {
-  padding-left: var(--page-x);
-}
-
-.table th:last-child,
-.table td:last-child {
-  padding-right: var(--page-x);
-}
-
-.table tbody tr:hover:not(.grp) {
-  background: var(--success-soft);
-}
-
-/* Group header row — breaks a table into categories. Not hoverable. */
-.table tr.grp td {
-  background: var(--secondary);
-  border-bottom: 2px solid var(--foreground);
-  padding-top: 8px;
-  padding-bottom: 8px;
 }
 
 /* — rail (Metrics, Settings) — */
@@ -521,15 +344,6 @@ a:hover {
   border-color: var(--foreground);
   color: var(--background);
 }
-
-/* — skeleton — reserves the value's height so nothing reflows on arrival — */
-.skel {
-  display: inline-block;
-  background: var(--border);
-  vertical-align: baseline;
-}
-
-
 
 @layer base { * { border-color: var(--border); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }

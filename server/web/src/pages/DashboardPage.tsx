@@ -1,3 +1,6 @@
+import { buttonVariants } from "@/components/ui/button";
+import { Table, TableBody, TableHeader, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -84,7 +87,7 @@ export default function DashboardPage() {
               </span>
               <Link
                 to="/settings?tab=sources"
-                className="btn btn-secondary"
+                className={buttonVariants({ variant: "outline" })}
                 style={{ fontSize: 12 }}
               >
                 Sync now
@@ -155,12 +158,12 @@ export default function DashboardPage() {
       >
         <Link
           to="/settings?tab=front-page"
-          className="btn btn-ghost"
+          className={buttonVariants({ variant: "ghost" })}
           style={{ fontSize: 12.5 }}
         >
           Show {hidden} more metrics →
         </Link>
-        <Link to="/trends" className="btn btn-ghost" style={{ fontSize: 12.5 }}>
+        <Link to="/trends" className={buttonVariants({ variant: "ghost" })} style={{ fontSize: 12.5 }}>
           Open in Trends →
         </Link>
         {/* Correlations needs width the phone does not have, so its entry
@@ -169,7 +172,7 @@ export default function DashboardPage() {
           <>
             <Link
               to="/correlations"
-              className="btn btn-ghost"
+              className={buttonVariants({ variant: "ghost" })}
               style={{ fontSize: 12.5 }}
             >
               Correlate two metrics →
@@ -217,30 +220,30 @@ function MetricsTable({
   }
 
   return (
-    <table className="table">
-      <TableHead range={range} />
-      <tbody>
+    <Table >
+      <MetricTableHead range={range} />
+      <TableBody>
         {groups.map((group) => (
           <MetricGroup key={group.category} group={group} columns={columns} />
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   );
 }
 
-function TableHead({ range }: { range: DashboardRange }) {
+function MetricTableHead({ range }: { range: DashboardRange }) {
   return (
-    <thead>
-      <tr>
-        <th>Metric</th>
-        <th style={{ textAlign: "right", width: 130 }}>Latest</th>
-        <th style={{ textAlign: "right", width: 90 }}>Δ 7d</th>
-        <th style={{ textAlign: "right", width: 150 }}>{range} range</th>
-        <th style={{ width: 200 }}>{range}</th>
-        <th style={{ width: 150 }}>Source</th>
-        <th style={{ width: 110 }}>Updated</th>
-      </tr>
-    </thead>
+    <TableHeader>
+      <TableRow>
+        <TableHead>Metric</TableHead>
+        <TableHead style={{ textAlign: "right", width: 130 }}>Latest</TableHead>
+        <TableHead style={{ textAlign: "right", width: 90 }}>Δ 7d</TableHead>
+        <TableHead style={{ textAlign: "right", width: 150 }}>{range} range</TableHead>
+        <TableHead style={{ width: 200 }}>{range}</TableHead>
+        <TableHead style={{ width: 150 }}>Source</TableHead>
+        <TableHead style={{ width: 110 }}>Updated</TableHead>
+      </TableRow>
+    </TableHeader>
   );
 }
 
@@ -253,11 +256,11 @@ function MetricGroup({
 }) {
   return (
     <>
-      <tr className="grp">
-        <td colSpan={columns} className="kick">
+      <TableRow className="grp">
+        <TableCell colSpan={columns} className="kick">
           {group.label}
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
       {group.metrics.map((m) => (
         <MetricRow key={m.metric_name} metric={m} />
       ))}
@@ -267,16 +270,16 @@ function MetricGroup({
 
 function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
   return (
-    <tr>
-      <td style={{ fontWeight: 500 }}>
+    <TableRow>
+      <TableCell style={{ fontWeight: 500 }}>
         <Link
           to={`/metrics?metric=${encodeURIComponent(m.metric_name)}`}
           style={{ color: "inherit" }}
         >
           {m.label || m.metric_name}
         </Link>
-      </td>
-      <td
+      </TableCell>
+      <TableCell
         className="num"
         style={{ textAlign: "right", fontWeight: 700, whiteSpace: "nowrap" }}
       >
@@ -284,8 +287,8 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
         <span style={{ fontWeight: 400, color: "var(--muted-foreground)" }}>
           {m.unit}
         </span>
-      </td>
-      <td
+      </TableCell>
+      <TableCell
         className="num"
         style={{
           textAlign: "right",
@@ -295,8 +298,8 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
         }}
       >
         {displayDelta(m)}
-      </td>
-      <td
+      </TableCell>
+      <TableCell
         className="num"
         style={{
           textAlign: "right",
@@ -306,8 +309,8 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
         }}
       >
         {displayRange(m)}
-      </td>
-      <td style={{ paddingTop: 8, paddingBottom: 8 }}>
+      </TableCell>
+      <TableCell style={{ paddingTop: 8, paddingBottom: 8 }}>
         <Sparkline
           values={m.series}
           width={180}
@@ -316,14 +319,14 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
           stroke="var(--muted-foreground)"
           strokeWidth={1.4}
         />
-      </td>
-      <td style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
+      </TableCell>
+      <TableCell style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
         {sourceLabel(m.source)}
-      </td>
-      <td style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
+      </TableCell>
+      <TableCell style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
         {m.time ? formatTimeAgo(m.time) : "—"}
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -336,22 +339,22 @@ function TableSkeleton({
   range: DashboardRange;
 }) {
   return (
-    <table className="table">
-      <TableHead range={range} />
-      <tbody>
+    <Table >
+      <MetricTableHead range={range} />
+      <TableBody>
         {Array.from({ length: 8 }).map((_, i) => (
-          <tr key={i}>
+          <TableRow key={i}>
             {Array.from({ length: columns }).map((_, j) => (
-              <td key={j}>
-                <span
-                  className="skel"
+              <TableCell key={j}>
+                <Skeleton
+
                   style={{ width: j === 0 ? 120 : 60, height: 14 }}
                 />
-              </td>
+              </TableCell>
             ))}
-          </tr>
+          </TableRow>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   );
 }

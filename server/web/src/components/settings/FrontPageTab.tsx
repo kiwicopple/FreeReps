@@ -1,3 +1,6 @@
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
@@ -7,7 +10,7 @@ import {
 } from "../../api";
 import { useAvailableMetrics } from "../../hooks/useMetrics";
 import { useIsDesktop } from "../../hooks/useMediaQuery";
-import { SquareCheckbox, SquareSwitch, TabHeader } from "./parts";
+import { TabHeader } from "./parts";
 
 const HERO_COUNT = 4;
 
@@ -110,7 +113,7 @@ export default function FrontPageTab() {
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {heroes.map((name) => (
-            <button
+            <Button variant="outline"
               key={name}
               type="button"
               onClick={() => toggleHero(name)}
@@ -125,7 +128,7 @@ export default function FrontPageTab() {
               }}
             >
               {labelFor(name)} ×
-            </button>
+            </Button>
           ))}
           {heroes.length < HERO_COUNT ? (
             <span
@@ -170,16 +173,16 @@ export default function FrontPageTab() {
                 }}
               >
                 {isDesktop ? (
-                  <SquareCheckbox
+                  <Checkbox
                     checked={on}
-                    onChange={() => toggleVisible(m.value)}
-                    label={`List ${m.label}`}
+                    onCheckedChange={() => toggleVisible(m.value)}
+                    aria-label={`List ${m.label}`}
                   />
                 ) : (
-                  <SquareSwitch
+                  <Switch
                     checked={on}
-                    onChange={() => toggleVisible(m.value)}
-                    label={`List ${m.label}`}
+                    onCheckedChange={() => toggleVisible(m.value)}
+                    aria-label={`List ${m.label}`}
                   />
                 )}
                 <span
@@ -194,15 +197,15 @@ export default function FrontPageTab() {
                 <span className="kick" style={{ width: 120, flex: "none" }}>
                   {m.category}
                 </span>
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => toggleHero(m.value)}
                   disabled={!isHero && heroes.length >= HERO_COUNT}
-                  className="btn btn-ghost"
+
                   style={{ fontSize: 11.5, flex: "none" }}
                 >
                   {isHero ? "Hero ×" : "Make hero"}
-                </button>
+                </Button>
               </div>
             );
           })}
@@ -216,17 +219,17 @@ export default function FrontPageTab() {
       ) : null}
 
       <div style={{ display: "flex", gap: 12, paddingTop: 20 }}>
-        <button
+        <Button variant="default"
           type="button"
-          className="btn btn-primary"
+
           onClick={save}
           disabled={saving}
         >
           {saving ? "Saving…" : "Save"}
-        </button>
-        <button type="button" className="btn btn-ghost" onClick={reset}>
+        </Button>
+        <Button variant="ghost" type="button"  onClick={reset}>
           Reset to defaults
-        </button>
+        </Button>
       </div>
     </>
   );

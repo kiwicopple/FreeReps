@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import RecoveryScore from "../components/sleep/RecoveryScore";
 import { localToday, shiftDate, validDate } from "../utils/nutrition";
 import SleepHeartRate from "../components/sleep/SleepHeartRate";
@@ -102,12 +104,12 @@ export default function SleepPage() {
       />
 
       <div className="page-x" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, paddingBottom: 20 }}>
-        <button aria-label="Previous night" onClick={() => navigateDate(shiftDate(date, -1))} style={{ minWidth: 44, minHeight: 44 }}>←</button>
+        <Button variant="outline" aria-label="Previous night" onClick={() => navigateDate(shiftDate(date, -1))} style={{ minWidth: 44, minHeight: 44 }}>←</Button>
         <input aria-label="Night date" type="date" value={date} max={today} onChange={(e) => {
           if (validDate(e.target.value) && e.target.value <= today) navigateDate(e.target.value);
         }} style={{ minHeight: 44, minWidth: 0, colorScheme: "dark", background: "var(--card)", color: "var(--foreground)", border: "1px solid var(--border)", padding: "0 8px" }} />
-        <button aria-label="Next night" disabled={date >= today} onClick={() => navigateDate(shiftDate(date, 1))} style={{ minWidth: 44, minHeight: 44 }}>→</button>
-        <button onClick={() => navigateDate(null)} style={{ minHeight: 44 }}>Latest</button>
+        <Button variant="outline" aria-label="Next night" disabled={date >= today} onClick={() => navigateDate(shiftDate(date, 1))} style={{ minWidth: 44, minHeight: 44 }}>→</Button>
+        <Button variant="outline" onClick={() => navigateDate(null)} style={{ minHeight: 44 }}>Latest</Button>
         <span style={{ fontSize: 12, color: "var(--muted-foreground)", flexBasis: "100%" }}>Choose the date the night is recorded under.</span>
       </div>
 
@@ -125,7 +127,7 @@ export default function SleepPage() {
           className="page-x"
           style={{ borderTop: "2px solid var(--foreground)", paddingTop: 24 }}
         >
-          <span className="skel" style={{ width: 180, height: 44 }} />
+          <Skeleton  style={{ width: 180, height: 44 }} />
         </div>
       ) : !last ? (
         <p

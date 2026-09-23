@@ -1,3 +1,6 @@
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -187,7 +190,7 @@ export default function CorrelationPage() {
               {message}
             </p>
           ) : state === "loading" ? (
-            <div className="skel" style={{ width: "100%", height: 520 }} />
+            <Skeleton  style={{ width: "100%", height: 520 }} />
           ) : (
             <>
               <Scatter pairs={active?.pairs ?? []} />
@@ -256,18 +259,18 @@ export default function CorrelationPage() {
             </p>
           </div>
 
-          <table className="table" style={{ fontSize: 13.5 }}>
-            <thead>
-              <tr>
-                <th>Lag</th>
-                <th style={{ textAlign: "right", width: 70 }}>r</th>
-                <th style={{ width: 150 }}>Strength</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table  style={{ fontSize: 13.5 }}>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lag</TableHead>
+                <TableHead style={{ textAlign: "right", width: 70 }}>r</TableHead>
+                <TableHead style={{ width: 150 }}>Strength</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {byLag.map((b) => (
-                <tr key={b.lag}>
-                  <td
+                <TableRow key={b.lag}>
+                  <TableCell
                     style={{
                       fontWeight: b.lag === lag ? 700 : 400,
                       color:
@@ -277,8 +280,8 @@ export default function CorrelationPage() {
                     }}
                   >
                     {b.lag === 0 ? "Same day" : `${b.lag} day${b.lag > 1 ? "s" : ""}`}
-                  </td>
-                  <td
+                  </TableCell>
+                  <TableCell
                     className="num"
                     style={{
                       textAlign: "right",
@@ -290,14 +293,14 @@ export default function CorrelationPage() {
                     }}
                   >
                     {b.r != null ? formatR(b.r) : "—"}
-                  </td>
-                  <td>
+                  </TableCell>
+                  <TableCell>
                     <DivergingBar value={b.r} active={b.lag === lag} />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
 
           <div
             className="page-x"
@@ -316,9 +319,9 @@ export default function CorrelationPage() {
             >
               {CAVEAT}
             </p>
-            <button
+            <Button variant="ghost"
               type="button"
-              className="btn btn-ghost"
+
               style={{ fontSize: 12.5, marginTop: 12, marginLeft: -4 }}
               disabled={!active || active.pairs.length === 0}
               onClick={() =>
@@ -326,7 +329,7 @@ export default function CorrelationPage() {
               }
             >
               Export pairs as CSV →
-            </button>
+            </Button>
           </div>
         </div>
       </div>

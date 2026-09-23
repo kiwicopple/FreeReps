@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -192,7 +194,7 @@ export default function NutritionPage() {
               </a>
             </section>
           )}
-          <button
+          <Button variant="outline"
             data-sheet-close
             onClick={() => {
               setSelected(key);
@@ -200,7 +202,7 @@ export default function NutritionPage() {
             }}
           >
             Show {nutrientLabel(key).toLowerCase()} trend
-          </button>
+          </Button>
           {t && (
             <p>
               {targetText(t)} · {t.label}
@@ -273,12 +275,12 @@ export default function NutritionPage() {
       />
       <div className="page-x nutrition-page">
         <div className="nutrition-toolbar">
-          <button
+          <Button variant="outline"
             aria-label="Previous date"
             onClick={() => navigate(shiftDate(date, -1))}
           >
             ←
-          </button>
+          </Button>
           <input
             aria-label="End date"
             type="date"
@@ -287,24 +289,24 @@ export default function NutritionPage() {
               if (validDate(e.target.value)) navigate(e.target.value);
             }}
           />
-          <button
+          <Button variant="outline"
             aria-label="Next date"
             onClick={() => navigate(shiftDate(date, 1))}
           >
             →
-          </button>
-          <button onClick={() => navigate(localToday())}>Today</button>
+          </Button>
+          <Button variant="outline" onClick={() => navigate(localToday())}>Today</Button>
           <span className="nutrition-muted">
             Asia/Singapore{range !== "day" ? ` · ${start} to ${date}` : ""}
           </span>
-          <button
+          <Button variant="outline"
             onClick={() => void refresh().catch((e) => setError(String(e)))}
             disabled={query.isFetching}
           >
             Refresh
-          </button>
+          </Button>
           {protocol && (
-            <button onClick={() => setEditing(!editing)}>Edit targets</button>
+            <Button variant="outline" onClick={() => setEditing(!editing)}>Edit targets</Button>
           )}
         </div>
         {error && <p role="alert">{error}</p>}
@@ -346,7 +348,7 @@ export default function NutritionPage() {
                   </p>
                 </div>
                 {range === "day" && (
-                  <button
+                  <Button variant="outline"
                     disabled={saving || query.isError}
                     onClick={() => void toggle()}
                   >
@@ -355,7 +357,7 @@ export default function NutritionPage() {
                       : currentDay?.complete
                         ? "Reopen day"
                         : "Mark day complete"}
-                  </button>
+                  </Button>
                 )}
               </div>
               {!protocol && (
@@ -409,51 +411,51 @@ export default function NutritionPage() {
                     Gaps mean unknown intake.
                   </p>
                   <div className="nutrition-table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th>Logged {unitLabel(data.catalog[selected])}</th>
-                          <th>Target</th>
-                          <th>Coverage</th>
-                          <th>Day</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Logged {unitLabel(data.catalog[selected])}</TableHead>
+                          <TableHead>Target</TableHead>
+                          <TableHead>Coverage</TableHead>
+                          <TableHead>Day</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {days.map((d) => (
-                          <tr key={d.date}>
-                            <td>
-                              <button
+                          <TableRow key={d.date}>
+                            <TableCell>
+                              <Button variant="outline"
                                 className="nutrition-text-button"
                                 onClick={() => navigate(d.date, "day")}
                               >
                                 {d.date}
-                              </button>
-                            </td>
-                            <td>
+                              </Button>
+                            </TableCell>
+                            <TableCell>
                               {amount(d.nutrients[selected]?.known_subtotal)}
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                               {targetText(
                                 protocolForDate(protocols, d.date)?.targets[
                                   selected
                                 ],
                               )}
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                               {d.nutrients[selected]?.known_items ?? 0}/
                               {d.items} items
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                               {data.completion.find((c) => c.date === d.date)
                                 ?.complete
                                 ? "Complete"
                                 : "Partial / unlogged"}
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                   </div>
                 </section>
               )}

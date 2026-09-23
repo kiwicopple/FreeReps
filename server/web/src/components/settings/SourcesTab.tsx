@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
@@ -145,26 +146,26 @@ export default function SourcesTab() {
                   : "nothing stored"}
               </span>
               <span style={{ display: "flex", gap: 4, flex: "none" }}>
-                <button
+                <Button variant="outline"
                   type="button"
-                  className="btn btn-secondary"
+
                   style={{ fontSize: 11, padding: "4px 8px" }}
                   disabled={i === 0}
                   onClick={() => move(i, -1)}
                   aria-label={`Move ${sourceLabelLong(src)} up`}
                 >
                   ↑
-                </button>
-                <button
+                </Button>
+                <Button variant="outline"
                   type="button"
-                  className="btn btn-secondary"
+
                   style={{ fontSize: 11, padding: "4px 8px" }}
                   disabled={i === order.length - 1}
                   onClick={() => move(i, 1)}
                   aria-label={`Move ${sourceLabelLong(src)} down`}
                 >
                   ↓
-                </button>
+                </Button>
               </span>
             </div>
           );
@@ -184,14 +185,14 @@ export default function SourcesTab() {
       ) : null}
 
       <div style={{ paddingTop: 20 }}>
-        <button
+        <Button variant="default"
           type="button"
-          className="btn btn-primary"
+
           onClick={save}
           disabled={saving || !changed}
         >
           {saving ? "Saving…" : "Save order"}
-        </button>
+        </Button>
       </div>
 
       {overrides.length > 0 ? (
@@ -241,14 +242,14 @@ export default function SourcesTab() {
                 >
                   {rule.sources.map(sourceLabelLong).join(" → ")}
                 </span>
-                <button
+                <Button variant="ghost"
                   type="button"
-                  className="btn btn-ghost"
+
                   style={{ fontSize: 12, flex: "none" }}
                   onClick={() => removeOverride(rule.category)}
                 >
                   Remove
-                </button>
+                </Button>
               </div>
             ))}
           </div>

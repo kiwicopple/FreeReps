@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import type { FrontPageMetric } from "../../api";
 import Sparkline from "../Sparkline";
 import { deltaColor } from "../../utils/metricDirection";
@@ -22,9 +23,9 @@ export default function MetricRows({ groups, loading }: Props) {
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="row">
             <div className="flex-1">
-              <span className="skel" style={{ width: 120, height: 14 }} />
+              <Skeleton  style={{ width: 120, height: 14 }} />
             </div>
-            <span className="skel" style={{ width: 60, height: 14 }} />
+            <Skeleton  style={{ width: 60, height: 14 }} />
           </div>
         ))}
       </div>

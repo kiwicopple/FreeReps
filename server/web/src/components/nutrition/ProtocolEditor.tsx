@@ -1,3 +1,7 @@
+import { Input } from "@/components/ui/input";
+import Disclosure from "@/components/Disclosure";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import type { NutritionProtocol, NutritionTarget } from "../../nutritionApi";
 import { saveProtocol } from "../../nutritionApi";
@@ -67,7 +71,7 @@ export default function ProtocolEditor({
           </label>
           <label>
             Reason
-            <input
+            <Input
               required
               maxLength={1000}
               value={reason}
@@ -75,7 +79,7 @@ export default function ProtocolEditor({
             />
           </label>
         </div>
-        <details>
+        <Disclosure>
           <summary>Profile and preferences</summary>
           <div className="nutrition-form-grid">
             {(["age", "height_cm", "weight_kg"] as const).map((key) => (
@@ -115,7 +119,7 @@ export default function ProtocolEditor({
             </label>
             <label>
               Activity
-              <input
+              <Input
                 value={draft.profile.activity}
                 onChange={(e) =>
                   setDraft({
@@ -127,7 +131,7 @@ export default function ProtocolEditor({
             </label>
             <label>
               Goal
-              <input
+              <Input
                 value={draft.profile.goal}
                 onChange={(e) =>
                   setDraft({
@@ -140,7 +144,7 @@ export default function ProtocolEditor({
           </div>
           <label>
             Food preferences
-            <textarea
+            <Textarea
               value={draft.profile.preferences}
               onChange={(e) =>
                 setDraft({
@@ -153,9 +157,9 @@ export default function ProtocolEditor({
           <p className="nutrition-muted">
             Changing profile details does not automatically recalculate targets.
           </p>
-        </details>
+        </Disclosure>
         {Object.entries(draft.targets).map(([key, t]) => (
-          <details key={key}>
+          <Disclosure key={key}>
             <summary>
               {nutrientLabel(key)} · {t.value} {unitLabel(t.unit)}
             </summary>
@@ -223,7 +227,7 @@ export default function ProtocolEditor({
               )}
               <label>
                 Basis / label
-                <input
+                <Input
                   required
                   value={t.label}
                   onChange={(e) => update(key, { label: e.target.value })}
@@ -231,7 +235,7 @@ export default function ProtocolEditor({
               </label>
               <label>
                 Source
-                <input
+                <Input
                   required
                   value={t.source}
                   onChange={(e) => update(key, { source: e.target.value })}
@@ -271,7 +275,7 @@ export default function ProtocolEditor({
                 </label>
               )}
             </div>
-            <button
+            <Button variant="outline"
               type="button"
               onClick={() =>
                 setDraft((d) => ({
@@ -283,8 +287,8 @@ export default function ProtocolEditor({
               }
             >
               Remove target
-            </button>
-          </details>
+            </Button>
+          </Disclosure>
         ))}
         <div className="nutrition-toolbar">
           <select
@@ -302,7 +306,7 @@ export default function ProtocolEditor({
                 </option>
               ))}
           </select>
-          <button
+          <Button variant="outline"
             type="button"
             disabled={!add}
             onClick={() => {
@@ -317,23 +321,23 @@ export default function ProtocolEditor({
             }}
           >
             Add
-          </button>
+          </Button>
         </div>
         <label>
           Protocol notes
-          <textarea
+          <Textarea
             value={draft.notes}
             onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
           />
         </label>
         {error && <p role="alert">{error}</p>}
         <div className="nutrition-toolbar">
-          <button disabled={busy} type="submit">
+          <Button variant="outline" disabled={busy} type="submit">
             {busy ? "Saving…" : "Save targets"}
-          </button>
-          <button disabled={busy} type="button" onClick={onClose}>
+          </Button>
+          <Button variant="outline" disabled={busy} type="button" onClick={onClose}>
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
     </section>
