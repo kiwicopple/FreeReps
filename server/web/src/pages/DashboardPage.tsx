@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, lazy, Suspense } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { fetchFrontPage, type FrontPageMetric } from "../api";
 import PageHeader from "../components/PageHeader";
@@ -28,6 +28,7 @@ import RangeControl from "../components/RangeControl";
 import Sparkline from "../components/Sparkline";
 import HeroStrip from "../components/dashboard/HeroStrip";
 import MetricRows from "../components/dashboard/MetricRows";
+import DetailSheet from "../components/DetailSheet";
 import {
   displayDelta,
   displayRange,
@@ -43,11 +44,15 @@ import { sourceLabel } from "../utils/sourceLabel";
 
 const RANGES = ["1d", "7d", "30d", "90d", "1y"] as const;
 type DashboardRange = (typeof RANGES)[number];
+const MetricDetailContent = lazy(
+  () => import("../components/dashboard/MetricDetailContent"),
+);
 
 export default function DashboardPage() {
   const isDesktop = useIsDesktop();
   const [params, setParams] = useSearchParams();
-  const range = (params.get("range") as DashboardRange) ?? "30d";
+  const requestedRange = params.get("range") as DashboardRange;
+  const range = RANGES.includes(requestedRange) ? requestedRange : "30d";
 
   const query = useQuery({
     queryKey: ["front-page", range],
@@ -59,6 +64,16 @@ export default function DashboardPage() {
   const message = queryMessage(state, query.error);
 
   const [search, setSearch] = useState("");
+  const [detailMetric, setDetailMetric] = useState<FrontPageMetric | null>(
+    null,
+  );
+  const [detailOpen, setDetailOpen] = useState(false);
+  const detailTrigger = useRef<HTMLElement | null>(null);
+  const openMetric = (metric: FrontPageMetric, trigger: HTMLElement) => {
+    detailTrigger.current = trigger;
+    setDetailMetric(metric);
+    setDetailOpen(true);
+  };
   const groups = useMemo(
     () =>
       groupByCategory(
@@ -100,7 +115,11 @@ export default function DashboardPage() {
       />
 
       <PageContent className="space-y-6">
-        <HeroStrip metrics={heroes} loading={state === "loading"} />
+        <HeroStrip
+          metrics={heroes}
+          loading={state === "loading"}
+          onSelect={openMetric}
+        />
 
         <PageSection
           title="All metrics"
@@ -165,24 +184,56 @@ export default function DashboardPage() {
           ) : isDesktop ? (
             <MetricsTable
               groups={groups}
+              onSelect={openMetric}
               range={range}
               loading={state === "loading"}
             />
           ) : (
-            <MetricRows groups={groups} loading={state === "loading"} />
+            <MetricRows
+              groups={groups}
+              loading={state === "loading"}
+              onSelect={openMetric}
+            />
           )}
         </PageSection>
       </PageContent>
+      <DetailSheet
+        title={detailMetric?.label ?? "Metric details"}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        returnFocus={detailTrigger.current}
+      >
+        {detailOpen && detailMetric && (
+          <Suspense
+            fallback={
+              <Skeleton
+                className="h-56 w-full"
+                aria-label="Loading metric details"
+              />
+            }
+          >
+            <MetricDetailContent
+              key={detailMetric.metric_name}
+              metric={detailMetric}
+              initialRange={range}
+            />
+          </Suspense>
+        )}
+      </DetailSheet>
     </>
   );
 }
 
+type OpenMetric = (metric: FrontPageMetric, trigger: HTMLElement) => void;
+
 function MetricsTable({
   groups,
+  onSelect,
   range,
   loading,
 }: {
   groups: MetricGroupSection[];
+  onSelect: OpenMetric;
   range: DashboardRange;
   loading: boolean;
 }) {
@@ -208,7 +259,12 @@ function MetricsTable({
       <MetricTableHead range={range} />
       <TableBody>
         {groups.map((group) => (
-          <MetricGroup key={group.category} group={group} columns={columns} />
+          <MetricGroup
+            key={group.category}
+            group={group}
+            columns={columns}
+            onSelect={onSelect}
+          />
         ))}
       </TableBody>
     </Table>
@@ -236,9 +292,11 @@ function MetricTableHead({ range }: { range: DashboardRange }) {
 function MetricGroup({
   group,
   columns,
+  onSelect,
 }: {
   group: MetricGroupSection;
   columns: number;
+  onSelect: OpenMetric;
 }) {
   return (
     <>
@@ -248,22 +306,39 @@ function MetricGroup({
         </TableCell>
       </TableRow>
       {group.metrics.map((m) => (
-        <MetricRow key={m.metric_name} metric={m} />
+        <MetricRow key={m.metric_name} metric={m} onSelect={onSelect} />
       ))}
     </>
   );
 }
 
-function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
+function MetricRow({
+  metric: m,
+  onSelect,
+}: {
+  metric: FrontPageMetric;
+  onSelect: OpenMetric;
+}) {
   return (
-    <TableRow>
+    <TableRow
+      className="cursor-pointer hover:bg-accent/50"
+      onClick={(event) => {
+        const trigger = event.currentTarget.querySelector("button");
+        if (trigger) onSelect(m, trigger);
+      }}
+    >
       <TableCell style={{ fontWeight: 500 }}>
-        <Link
-          to={`/metrics?metric=${encodeURIComponent(m.metric_name)}`}
-          style={{ color: "inherit" }}
+        <Button
+          variant="ghost"
+          className="h-auto justify-start whitespace-normal p-0 text-left"
+          aria-label={`View ${m.label} details`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onSelect(m, event.currentTarget);
+          }}
         >
           {m.label || m.metric_name}
-        </Link>
+        </Button>
       </TableCell>
       <TableCell
         className="num"

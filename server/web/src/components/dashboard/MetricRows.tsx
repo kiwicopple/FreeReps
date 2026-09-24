@@ -1,3 +1,4 @@
+import { Button } from "../ui/button";
 import { Empty } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FrontPageMetric } from "../../api";
@@ -14,6 +15,7 @@ import {
 interface Props {
   groups: MetricGroupSection[];
   loading: boolean;
+  onSelect: (metric: FrontPageMetric, trigger: HTMLElement) => void;
 }
 
 /**
@@ -21,7 +23,7 @@ interface Props {
  * in the middle, value and delta right. The sparkline stays because it is
  * inline SVG and costs nothing.
  */
-export default function MetricRows({ groups, loading }: Props) {
+export default function MetricRows({ groups, loading, onSelect }: Props) {
   if (loading && groups.length === 0) {
     return (
       <div style={{ borderTop: "1px solid var(--border)" }}>
@@ -54,7 +56,7 @@ export default function MetricRows({ groups, loading }: Props) {
         <div key={group.category}>
           <div className="kick row-group">{group.label}</div>
           {group.metrics.map((m) => (
-            <MetricRow key={m.metric_name} metric={m} />
+            <MetricRow key={m.metric_name} metric={m} onSelect={onSelect} />
           ))}
         </div>
       ))}
@@ -62,13 +64,24 @@ export default function MetricRows({ groups, loading }: Props) {
   );
 }
 
-function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
+function MetricRow({
+  metric: m,
+  onSelect,
+}: {
+  metric: FrontPageMetric;
+  onSelect: Props["onSelect"];
+}) {
   const meta = [sourceLabel(m.source), m.time ? formatTimeAgo(m.time) : null]
     .filter(Boolean)
     .join(" · ");
 
   return (
-    <div className="row">
+    <Button
+      variant="ghost"
+      className="row h-auto w-full justify-between rounded-none whitespace-normal text-left"
+      aria-label={`View ${m.label} details`}
+      onClick={(event) => onSelect(m, event.currentTarget)}
+    >
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
@@ -124,6 +137,6 @@ function MetricRow({ metric: m }: { metric: FrontPageMetric }) {
           {displayDelta(m)}
         </div>
       </div>
-    </div>
+    </Button>
   );
 }
