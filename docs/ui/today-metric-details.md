@@ -62,9 +62,12 @@ scrolling and accessibility in Chromium and WebKit with both palettes at 320,
 390, 767, 768, 1024 and 1440px. Existing navigation, numerical and exact-payload
 acceptance checks remain in the full suite.
 
-Local verification on 2026-09-24 passed 226 browser checks (six intentional
-viewport skips), 17 component/unit checks and the existing four nutrition and
-recovery checks, plus the production build, Go build/vet/tests and lint.
+Local verification on 2026-09-24 passed the browser acceptance suite (six
+intentional viewport skips), 17 component/unit checks and the existing four
+nutrition and recovery checks, plus the production build, Go build/vet/tests
+and lint. Each viewport/theme audit is an independent browser test, retaining
+the normal timeout on slower CI runners. All 30 focused metric-sheet checks
+pass with this organization.
 
 All fixtures and review screenshots are invented. Generated screenshots remain
 ignored and are not committed. Live checks are read-only. Physical iPhone swipe,

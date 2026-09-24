@@ -217,12 +217,12 @@ test("metric history loading, failures and retry remain distinct", async ({
 
 // Sheets must not overflow, hide the close control, lose focus or clip the chart at any supported width.
 for (const colorScheme of ["light", "dark"] as const)
-  test(`metric sheet is accessible and responsive in ${colorScheme}`, async ({
-    safePage: page,
-  }, info) => {
-    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
-    await setup(page);
-    for (const width of [320, 390, 767, 768, 1024, 1440]) {
+  for (const width of [320, 390, 767, 768, 1024, 1440])
+    test(`metric sheet is accessible at ${width}px in ${colorScheme}`, async ({
+      safePage: page,
+    }, info) => {
+      await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+      await setup(page);
       await page.setViewportSize({ width, height: 900 });
       const trigger = rows(page).getByRole("button", {
         name: "View HRV details",
@@ -272,5 +272,4 @@ for (const colorScheme of ["light", "dark"] as const)
       await page.keyboard.press("Escape");
       await expect(sheet).toHaveCount(0);
       await expect(trigger).toBeFocused();
-    }
-  });
+    });
