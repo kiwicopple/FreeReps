@@ -74,14 +74,14 @@ export default function ResponsiveDetails({
       render={
         <Button
           variant="ghost"
-          className="h-auto w-full whitespace-normal text-left"
+          className="h-auto w-full whitespace-normal text-left sm:h-auto"
         />
       }
     />
   ) : (
     <Button
       variant="ghost"
-      className="nutrition-detail-trigger h-auto w-full justify-start whitespace-normal p-0 text-left"
+      className="nutrition-detail-trigger h-auto w-full justify-start whitespace-normal p-0 text-left sm:h-auto"
     />
   );
   const content = (

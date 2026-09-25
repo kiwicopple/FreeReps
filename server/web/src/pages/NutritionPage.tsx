@@ -213,7 +213,7 @@ export default function NutritionPage() {
     const comparison = (
       <>
         {(hero || (value != null && t)) && (
-          <span className="nutrition-muted col-span-full">
+          <span className="nutrition-muted">
             {range === "day" ? targetText(t) : "Daily average of known intake"}
           </span>
         )}
@@ -225,7 +225,7 @@ export default function NutritionPage() {
           Number.isFinite(meterTarget) &&
           meterTarget > 0 && (
             <Meter
-              className="col-span-full my-1"
+              className="my-1"
               aria-label={`${nutrientLabel(key)} logged versus target`}
               value={Math.max(0, Math.min(value, meterTarget))}
               max={meterTarget}
@@ -234,9 +234,13 @@ export default function NutritionPage() {
               }
             />
           )}
-        {value != null && <span className="nutrition-status">{status}</span>}
-        {range === "day" && value != null && !covered && (
-          <span className="nutrition-muted">Partial data</span>
+        {value != null && (
+          <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="nutrition-status">{status}</span>
+            {range === "day" && !covered && (
+              <span className="nutrition-muted">Partial data</span>
+            )}
+          </span>
         )}
       </>
     );
@@ -256,10 +260,14 @@ export default function NutritionPage() {
             />
           ) : (
             <>
-              <span className="nutrition-label">{nutrientLabel(key)}</span>
-              <span className="nutrition-value">
-                {amount(value)}
-                {value != null && <small> {unit}</small>}
+              <span className="flex min-w-0 items-baseline justify-between gap-3">
+                <span className="nutrition-label min-w-0">
+                  {nutrientLabel(key)}
+                </span>
+                <span className="nutrition-value shrink-0 whitespace-nowrap">
+                  {amount(value)}
+                  {value != null && <small> {unit}</small>}
+                </span>
               </span>
               {comparison}
             </>

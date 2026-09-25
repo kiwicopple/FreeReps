@@ -39,6 +39,11 @@ or API payload changes. The only new local preference is
   scrolling and visible Close actions. Trend actions wait for the outer sheet
   to finish closing before selecting Overview and focusing the trend section.
   Route, date and tab changes dismiss read-only sheets.
+  Nutrition detail triggers use automatic height at both default and responsive
+  button sizes. Compact nutrient rows stack their label/value header, coss Meter
+  and wrapping status text in normal flow; feedback cannot overlap the next row.
+  `nutrition-rows.spec.ts` checks actual content containment from 320–1440px,
+  including both sides of the 640px button breakpoint and nested detail sheets.
 - Editable settings use coss Field/FieldLabel/FieldDescription/FieldError;
   read-only rows and separate save operations remain distinct.
   Identity fields wait for their initial preferences before allowing edits,
