@@ -156,7 +156,7 @@ test("compact nutrient rows retain unknown, zero, partial data and honest meters
   ).toBeVisible();
 });
 
-// Moving the editor must keep keyboard users in context across cancel and save.
+// Async saves must restore focus after Edit targets is re-enabled, just as cancellation does.
 test("protocol editor focuses its heading and restores Edit targets after cancel and save", async ({
   safePage: page,
 }) => {

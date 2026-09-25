@@ -18,7 +18,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
@@ -109,9 +109,10 @@ export default function NutritionPage() {
   const start = shiftDate(date, 1 - count),
     end = shiftDate(date, 1);
   const editButton = useRef<HTMLButtonElement>(null);
+  const restoreEditFocus = useRef(false);
   function closeEditor() {
+    restoreEditFocus.current = true;
     setEditorSnapshot(null);
-    requestAnimationFrame(() => editButton.current?.focus());
   }
   const [editorSnapshot, setEditorSnapshot] = useState<{
     record: Parameters<typeof ProtocolEditor>[0]["record"];
@@ -122,6 +123,12 @@ export default function NutritionPage() {
   const rawTab = params.get("tab");
   const tab =
     rawTab === "food-log" || rawTab === "protocol" ? rawTab : "overview";
+  useLayoutEffect(() => {
+    if (!editing && restoreEditFocus.current) {
+      restoreEditFocus.current = false;
+      if (tab === "protocol") editButton.current?.focus();
+    }
+  }, [editing, tab]);
   function setTab(value: string) {
     const next = new URLSearchParams(params);
     next.set("tab", value);

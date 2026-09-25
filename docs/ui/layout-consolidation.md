@@ -83,6 +83,8 @@ failures retain a visible Retry action. There is no nutrition Refresh action; me
   survive section switches and responsive changes in memory only. Editing a
   nutrition protocol snapshots both its record and expected version; background
   refreshes cannot rebase the draft. Source ordering protects unsaved reordering.
+  Editor focus restoration runs after the closed state commits and re-enables
+  Edit targets. An animation-frame callback can run too early after an async save.
 - Today searches only loaded visible metrics and links to customization. Workout
   filtering uses a searchable counted selector and its existing page-reset rules;
   the detail breadcrumb returns to the filtered list. Successful empty detail
