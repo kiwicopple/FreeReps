@@ -297,7 +297,10 @@ export const test = base.extend<{ safePage: Page }>({
         });
         return;
       }
-      await route.fulfill({ json: routes[key] });
+      const data = key === "/timeseries" && url.searchParams.get("metric") === "respiratory_rate"
+        ? routes["/timeseries"].map((point, i) => ({ ...point, avg: 14 + (i % 3) / 2, min: 12.5, max: 17.5 }))
+        : routes[key];
+      await route.fulfill({ json: data });
     });
     await use(page);
     expect(unexpected, "Tests must never reach the real API").toEqual([]);

@@ -99,6 +99,7 @@
   --color-data-1: #76a4a4;
   --color-data-2: #538e8e;
   --color-data-3: #337475;
+  --color-respiratory: #087e96;
   --color-data-4: #1b5454;
   --color-data-5: #133b3b;
   --color-stage-deep: var(--color-data-5);
@@ -111,6 +112,7 @@
   --color-data-1: #185455;
   --color-data-2: #307475;
   --color-data-3: #469091;
+  --color-respiratory: #45cee5;
   --color-data-4: #63a8a8;
   --color-data-5: #8bc3c3;
   --color-stage-deep: var(--color-data-1);

@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import RecoveryScore from "../components/sleep/RecoveryScore";
 import { shiftDate, validDate } from "../utils/nutrition";
-import SleepHeartRate from "../components/sleep/SleepHeartRate";
+import SleepVitals from "../components/sleep/SleepVitals";
+import type { SleepOverlay } from "../utils/sleepVitals";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fetchSleep, type SleepSession, type SleepStage } from "../api";
 import PageHeader from "../components/PageHeader";
@@ -37,6 +38,7 @@ const RANGE_DAYS: Record<Range, number> = { "7d": 7, "30d": 30, "90d": 90 };
 
 export default function SleepPage() {
   const isDesktop = useIsDesktop();
+  const [overlay, setOverlay] = useState<SleepOverlay>("heart_rate");
   const [params, setParams] = useSearchParams();
   const rawRange = params.get("range");
   const range: Range = RANGES.includes(rawRange as Range)
@@ -143,6 +145,8 @@ export default function SleepPage() {
         </Empty>
       ) : isDesktop ? (
         <DesktopSleep
+          overlay={overlay}
+          onOverlayChange={setOverlay}
           session={last}
           stages={lastNightStages}
           totals={totals}
@@ -153,6 +157,8 @@ export default function SleepPage() {
         />
       ) : (
         <MobileSleep
+          overlay={overlay}
+          onOverlayChange={setOverlay}
           session={last}
           stages={lastNightStages}
           totals={totals}
@@ -164,6 +170,8 @@ export default function SleepPage() {
 }
 
 function DesktopSleep({
+  overlay,
+  onOverlayChange,
   session,
   stages,
   totals,
@@ -172,6 +180,8 @@ function DesktopSleep({
   averageHours,
   awakenings,
 }: {
+  overlay: SleepOverlay;
+  onOverlayChange: (value: SleepOverlay) => void;
   session: SleepSession;
   stages: SleepStage[];
   totals: StageTotals;
@@ -225,7 +235,11 @@ function DesktopSleep({
           className="sleep-chart"
           description={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)} · ${awakenings} awakening${awakenings === 1 ? "" : "s"}`}
         >
-          <SleepHeartRate stages={stages} />
+          <SleepVitals
+            stages={stages}
+            value={overlay}
+            onValueChange={onOverlayChange}
+          />
         </PageSection>
 
         <PageSection title="Stage composition" className="sleep-composition">
@@ -256,11 +270,15 @@ function DesktopSleep({
 }
 
 function MobileSleep({
+  overlay,
+  onOverlayChange,
   session,
   stages,
   totals,
   sessions,
 }: {
+  overlay: SleepOverlay;
+  onOverlayChange: (value: SleepOverlay) => void;
   session: SleepSession;
   stages: SleepStage[];
   totals: StageTotals;
@@ -302,7 +320,12 @@ function MobileSleep({
           title="Hypnogram"
           description={`${formatClock(session.SleepStart)} → ${formatClock(session.SleepEnd)}`}
         >
-          <SleepHeartRate stages={stages} compact />
+          <SleepVitals
+            stages={stages}
+            compact
+            value={overlay}
+            onValueChange={onOverlayChange}
+          />
         </PageSection>
         <PageSection title="Stage composition">
           <StageComposition totals={totals} compact />

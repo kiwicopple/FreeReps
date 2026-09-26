@@ -2,6 +2,7 @@ import { Empty } from "@/components/ui/empty";
 import type { ReactNode } from "react";
 import type { SleepStage } from "../../api";
 import { STAGE_LANES, stageColor } from "../../utils/stageColors";
+import { sleepWindow } from "../../utils/sleepVitals";
 
 const LANE_HEIGHT = 44;
 const BLOCK_HEIGHT = 26;
@@ -9,7 +10,7 @@ const LABEL_GUTTER = 52;
 
 interface Props {
   stages: SleepStage[];
-  /** The phone gets four 10px rows in a 108px SVG, without lane labels. */
+  /** The phone gets a compact stage chart without the desktop label gutter. */
   compact?: boolean;
   overlay?: ReactNode;
 }
@@ -20,7 +21,8 @@ interface Props {
  * plot.
  */
 export default function Hypnogram({ stages, compact = false, overlay }: Props) {
-  if (stages.length === 0) {
+  const window = sleepWindow(stages);
+  if (!window) {
     return (
       <Empty style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
         No stage data for this night.
@@ -30,10 +32,7 @@ export default function Hypnogram({ stages, compact = false, overlay }: Props) {
 
   // The axis still spans everything the night carries, "In Bed" included, so
   // the plot starts at bedtime and ends at wake-up the way the ring reports it.
-  const startMs = Math.min(
-    ...stages.map((s) => new Date(s.StartTime).getTime()),
-  );
-  const endMs = Math.max(...stages.map((s) => new Date(s.EndTime).getTime()));
+  const { start: startMs, end: endMs } = window;
   const totalMs = endMs - startMs;
   if (totalMs <= 0) return null;
 
@@ -50,6 +49,7 @@ export default function Hypnogram({ stages, compact = false, overlay }: Props) {
 
     const from = new Date(s.StartTime).getTime();
     const to = new Date(s.EndTime).getTime();
+    if (!Number.isFinite(from) || !Number.isFinite(to) || to <= from) return [];
     return [
       {
         key: `${s.StartTime}-${i}`,
@@ -72,7 +72,7 @@ export default function Hypnogram({ stages, compact = false, overlay }: Props) {
         <svg
           viewBox={`0 0 100 ${height}`}
           preserveAspectRatio="none"
-          style={{ width: "100%", height: 108, display: "block" }}
+          style={{ width: "100%", height: 176, display: "block" }}
           role="img"
           aria-label="Sleep stages through the night"
         >
@@ -155,11 +155,9 @@ export default function Hypnogram({ stages, compact = false, overlay }: Props) {
 export function hourTicks(
   stages: SleepStage[],
 ): { label: string; pct: number }[] {
-  if (stages.length === 0) return [];
-  const startMs = Math.min(
-    ...stages.map((s) => new Date(s.StartTime).getTime()),
-  );
-  const endMs = Math.max(...stages.map((s) => new Date(s.EndTime).getTime()));
+  const window = sleepWindow(stages);
+  if (!window) return [];
+  const { start: startMs, end: endMs } = window;
   const totalMs = endMs - startMs;
   if (totalMs <= 0) return [];
 
