@@ -1,3 +1,4 @@
+import { localToday } from "../../utils/localDate";
 import { Field, FieldLabel } from "../ui/field";
 import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
@@ -19,7 +20,7 @@ import { MONO } from "./parts";
 
 /** Today as YYYY-MM-DD, the default ingest cutoff. */
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localToday();
 }
 
 export default function HevyTab() {

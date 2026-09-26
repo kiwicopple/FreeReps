@@ -1,3 +1,5 @@
+import { useLocalDay } from "../hooks/useLocalDay";
+import { localToday, shiftDate } from "../utils/localDate";
 import Choice from "@/components/Choice";
 import { SummarySkeleton } from "@/components/SummaryValue";
 import PageContent from "@/components/PageContent";
@@ -67,17 +69,15 @@ export default function WorkoutsPage() {
   const page = Math.max(0, parseInt(params.get("page") ?? "0", 10));
 
   const days = RANGE_DAYS[range];
-  const end = new Date();
-  const start = new Date(end.getTime() - days * 86400000);
-  const endISO = end.toISOString().split("T")[0];
-  const startISO = start.toISOString().split("T")[0];
+  const { today: endISO, timezone } = useLocalDay();
+  const startISO = shiftDate(endISO, 1 - days);
 
   const workoutsQuery = useQuery({
-    queryKey: ["workouts", startISO, endISO],
+    queryKey: ["workouts", startISO, endISO, timezone],
     queryFn: () => fetchWorkouts(startISO, endISO),
   });
   const zonesQuery = useQuery({
-    queryKey: ["workout-zones", startISO, endISO],
+    queryKey: ["workout-zones", startISO, endISO, timezone],
     queryFn: () => fetchWorkoutZones(startISO, endISO),
   });
 
@@ -592,7 +592,7 @@ function groupByDate(workouts: Workout[]): DateGroup[] {
   const groups: DateGroup[] = [];
   for (const w of workouts) {
     const date = new Date(w.StartTime);
-    const key = date.toISOString().split("T")[0];
+    const key = localToday(undefined, date);
     const existing = groups.find((g) => g.key === key);
     if (existing) existing.workouts.push(w);
     else groups.push({ key, label: formatShortDate(date), workouts: [w] });

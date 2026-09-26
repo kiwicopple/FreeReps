@@ -26,27 +26,7 @@ export const amount = (v: number | null | undefined) =>
   v == null
     ? "Unknown"
     : new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(v);
-export function localToday(zone = "Asia/Singapore", now = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: zone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(now);
-}
-export function validDate(s: string | null): s is string {
-  return (
-    !!s &&
-    /^\d{4}-\d{2}-\d{2}$/.test(s) &&
-    !Number.isNaN(Date.parse(s)) &&
-    new Date(s).toISOString().slice(0, 10) === s
-  );
-}
-export function shiftDate(date: string, days: number) {
-  const d = new Date(date + "T12:00:00Z");
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-}
+export { localToday, validDate, shiftDate } from "./localDate.ts";
 export function protocolForDate(records: ProtocolRecord[], date: string) {
   return records
     .filter((r) => r.protocol.effective_date <= date)

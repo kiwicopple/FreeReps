@@ -1,14 +1,11 @@
+import { dateOnlyToLocalDate } from "../../utils/localDate";
 import { Empty } from "@/components/ui/empty";
 import { useMemo } from "react";
 import type { SleepSession, SleepStage } from "../../api";
 import { stageColor } from "../../utils/stageColors";
 
-/* The Y axis is clock time, not duration: 22:00 at the top through 09:00 at
-   the bottom, so bedtime drift and wake-time drift are both visible. Hours are
-   counted from midday so an evening bedtime and a morning wake sit on one
-   continuous scale. */
-const AXIS_START = 22;
-const AXIS_END = 33; // 09:00 the next day
+/* Start with the usual overnight window, expanding it for daytime sleep and
+   earlier records viewed after travel. Hours run from noon through the next day. */
 const PLOT_HEIGHT = 300;
 const HOUR_GUTTER = 46;
 
@@ -31,8 +28,15 @@ export default function NightsChart({ sessions, stages }: Props) {
     );
   }
 
+  const blocks = nights.flatMap((n) => n.blocks);
+  const axisStart =
+    Math.floor(Math.min(22, ...blocks.map((b) => b.start)) / 2) * 2;
+  const axisEnd = Math.ceil(Math.max(33, ...blocks.map((b) => b.end)) / 2) * 2;
+  const yFor = (hour: number) =>
+    ((hour - axisStart) / (axisEnd - axisStart)) * PLOT_HEIGHT;
   const hourLines: number[] = [];
-  for (let h = AXIS_START; h <= AXIS_END; h += 2) hourLines.push(h);
+  for (let h = axisStart; h <= axisEnd; h += axisEnd - axisStart > 20 ? 4 : 2)
+    hourLines.push(h);
 
   return (
     <div style={{ display: "flex" }}>
@@ -73,8 +77,14 @@ export default function NightsChart({ sessions, stages }: Props) {
                       position: "absolute",
                       left: "22%",
                       right: "22%",
-                      top: b.top,
-                      height: b.height,
+                      top: yFor(b.start),
+                      height: Math.min(
+                        PLOT_HEIGHT - yFor(b.start),
+                        Math.max(
+                          yFor(b.end) - yFor(b.start),
+                          PLOT_HEIGHT * 0.01,
+                        ),
+                      ),
                       background: b.color,
                     }}
                   />
@@ -130,10 +140,6 @@ export default function NightsChart({ sessions, stages }: Props) {
   );
 }
 
-function yFor(hour: number): number {
-  return ((hour - AXIS_START) / (AXIS_END - AXIS_START)) * PLOT_HEIGHT;
-}
-
 /** Hours since midday, so an evening bedtime and a morning wake are ordered. */
 function axisHour(d: Date): number {
   const h = d.getHours() + d.getMinutes() / 60;
@@ -144,7 +150,7 @@ interface Night {
   key: string;
   label: string;
   title: string;
-  blocks: { top: number; height: number; color: string }[];
+  blocks: { start: number; end: number; color: string }[];
 }
 
 function buildNights(sessions: SleepSession[], stages: SleepStage[]): Night[] {
@@ -160,23 +166,23 @@ function buildNights(sessions: SleepSession[], stages: SleepStage[]): Night[] {
       return t >= from && t < to;
     });
 
-    const blocks = nightStages
-      .map((s) => {
-        const top = yFor(axisHour(new Date(s.StartTime)));
-        const bottom = yFor(axisHour(new Date(s.EndTime)));
-        return {
-          top,
-          // Minimum height so a two-minute awakening still renders. 3px
-          // rather than the 1.35px this was: Awake sits at the light end of
-          // the data ramp, where 2.4:1 against the ground does not carry a
-          // hairline.
-          height: Math.max(bottom - top, PLOT_HEIGHT * 0.01),
-          color: stageColor(s.Stage),
-        };
-      })
-      .filter((b) => b.top >= 0 && b.top <= PLOT_HEIGHT);
+    const blocks = nightStages.map((s) => {
+      const from = new Date(s.StartTime),
+        to = new Date(s.EndTime);
+      const start = axisHour(from);
+      let end = axisHour(to);
+      if (end <= start) {
+        // Crossing noon wraps the clock axis. A repeated DST hour is only its
+        // actual duration, not an extra 24 hours on the history chart.
+        end =
+          from.getHours() < 12 && to.getHours() >= 12
+            ? end + 24
+            : start + (to.getTime() - from.getTime()) / 3_600_000;
+      }
+      return { start, end, color: stageColor(s.Stage) };
+    });
 
-    const date = new Date(session.Date);
+    const date = dateOnlyToLocalDate(session.Date);
     return {
       key: session.Date,
       label: date.toLocaleDateString("en-GB", {

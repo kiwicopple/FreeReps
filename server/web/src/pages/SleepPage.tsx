@@ -1,3 +1,5 @@
+import { dateOnlyToLocalDate } from "../utils/localDate";
+import { useLocalDay } from "../hooks/useLocalDay";
 import PageContent from "@/components/PageContent";
 import { Empty } from "@/components/ui/empty";
 import { Alert } from "@/components/ui/alert";
@@ -7,7 +9,7 @@ import SummaryValue, { SummaryGrid } from "@/components/SummaryValue";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import RecoveryScore from "../components/sleep/RecoveryScore";
-import { localToday, shiftDate, validDate } from "../utils/nutrition";
+import { shiftDate, validDate } from "../utils/nutrition";
 import SleepHeartRate from "../components/sleep/SleepHeartRate";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -42,7 +44,7 @@ export default function SleepPage() {
     : "30d";
   const rawDate = params.get("date");
   const selectedDate = validDate(rawDate) ? rawDate : null;
-  const today = localToday();
+  const { today } = useLocalDay();
   const endISO = selectedDate ?? today;
   const startISO = shiftDate(endISO, 1 - RANGE_DAYS[range]);
 
@@ -235,8 +237,11 @@ function DesktopSleep({
         description={
           averageHours != null ? (
             <>
-              {formatDayMonth(new Date(sessions[sessions.length - 1].Date))} –{" "}
-              {formatDayMonth(new Date(sessions[0].Date))} · average{" "}
+              {formatDayMonth(
+                dateOnlyToLocalDate(sessions[sessions.length - 1].Date),
+              )}{" "}
+              – {formatDayMonth(dateOnlyToLocalDate(sessions[0].Date))} ·
+              average{" "}
               <span style={{ fontWeight: 700, color: "var(--foreground)" }}>
                 {formatHoursMinutes(averageHours)}
               </span>
@@ -327,7 +332,7 @@ function NightRow({ session }: { session: SleepSession }) {
       <span
         style={{ font: "500 13px var(--font-body)", width: 44, flex: "none" }}
       >
-        {new Date(session.Date).toLocaleDateString("en-GB", {
+        {dateOnlyToLocalDate(session.Date).toLocaleDateString("en-GB", {
           weekday: "short",
         })}
       </span>

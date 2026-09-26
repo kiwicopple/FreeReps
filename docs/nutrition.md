@@ -38,8 +38,10 @@ these tools; creating the database alone does not connect an unrelated chat.
    conversion rules. Supplemental minerals should use the elemental amount.
    Total fat, fat subtypes, omega-3, EPA/DHA, sugar and carbohydrate are overlapping
    measures, not additive ingredients for a grand nutrient total.
-5. Use the stated consumption date/time. Default date timezone for this user is
-   Asia/Singapore unless they say otherwise. If only the date is known, use
+5. Use the stated consumption date/time and the user's current location/timezone.
+   Do not assume the server's timezone or an older protocol's timezone during travel.
+   If the local date or timezone is unclear, ask before recording it. Keep historical
+   entries in the timezone where they were recorded. If only the date is known, use
    `time_precision=date_only` and omit `eaten_at`; do not invent a meal time.
    Exact or approximate timestamps must agree with the local date and timezone.
 6. Read that day's log before writing. Give each distinct eating event a new UUID,
@@ -135,8 +137,9 @@ conflicting corrections, preserved history, void/restore and user isolation on
 ## Nutrition dashboard and protocol
 
 The `/nutrition` tab shows a selected local date or a 7-/30-day window ending on
-that date. The default date zone is Asia/Singapore. It refreshes on focus and every
-60 seconds while visible. Mobile navigation links Trends from More.
+that date. Today follows the viewing device's IANA timezone, including midnight,
+travel and daylight-saving changes. Historical food dates and their recorded
+zones stay intact. It refreshes on focus and every 60 seconds while visible. Mobile navigation links Trends from More.
 
 `GET /api/v1/nutrition/protocol` returns immutable revisions in version order.
 `PUT` at the same path accepts `{expected_version, reason, protocol}`. The

@@ -1,3 +1,4 @@
+import { useLocalDay } from "@/hooks/useLocalDay";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -39,13 +40,14 @@ export default function MetricDetailContent({
 }) {
   const [range, setRange] = useState(initialRange);
   const desktop = useIsDesktop();
+  const { timezone, today } = useLocalDay();
   const query = useQuery({
-    queryKey: ["front-page", range],
+    queryKey: ["front-page", range, timezone, today],
     queryFn: () => fetchFrontPage(range),
     staleTime: 60_000,
   });
   const baseline = useQuery({
-    queryKey: ["front-page", "30d"],
+    queryKey: ["front-page", "30d", timezone, today],
     queryFn: () => fetchFrontPage("30d"),
     staleTime: 60_000,
   });

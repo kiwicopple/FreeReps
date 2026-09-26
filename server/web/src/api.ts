@@ -1,3 +1,4 @@
+import { localTimeZone } from "./utils/localDate";
 import { metricLabel } from "./utils/metricLabel";
 
 const BASE = "/api/v1";
@@ -105,7 +106,7 @@ export interface FrontPageResponse {
 export async function fetchFrontPage(
   range: string = "30d",
 ): Promise<FrontPageResponse> {
-  const res = await fetch(`${BASE}/metrics/latest?range=${range}`);
+  const res = await fetch(`${BASE}/metrics/latest?${new URLSearchParams({ range, timezone: localTimeZone() })}`);
   if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
   const data: FrontPageResponse = await res.json();
   return { ...data, metrics: data.metrics.map((m) => ({
@@ -186,7 +187,7 @@ export async function fetchTimeSeries(
   end: string,
   agg: string = "daily"
 ): Promise<TimeSeriesPoint[]> {
-  const params = new URLSearchParams({ metric, start, end, agg });
+  const params = new URLSearchParams({ metric, start, end, agg, timezone: localTimeZone() });
   const res = await fetch(`${BASE}/timeseries?${params}`);
   if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
   return res.json();
@@ -197,7 +198,7 @@ export async function fetchMetricStats(
   start: string,
   end: string
 ): Promise<MetricStats> {
-  const params = new URLSearchParams({ metric, start, end });
+  const params = new URLSearchParams({ metric, start, end, timezone: localTimeZone() });
   const res = await fetch(`${BASE}/metrics/stats?${params}`);
   if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
   return res.json();
@@ -295,7 +296,7 @@ export async function fetchWorkouts(
   end: string,
   type?: string
 ): Promise<Workout[]> {
-  const params = new URLSearchParams({ start, end });
+  const params = new URLSearchParams({ start, end, timezone: localTimeZone() });
   if (type) params.set("type", type);
   const res = await fetch(`${BASE}/workouts?${params}`);
   if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
@@ -318,7 +319,7 @@ export async function fetchWorkoutZones(
   start: string,
   end: string,
 ): Promise<WorkoutZonesResponse> {
-  const params = new URLSearchParams({ start, end });
+  const params = new URLSearchParams({ start, end, timezone: localTimeZone() });
   const res = await fetch(`${BASE}/workouts/zones?${params}`);
   if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
   return res.json();

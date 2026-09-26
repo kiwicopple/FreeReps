@@ -66,6 +66,11 @@ func (s *Server) handleLatestMetrics(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	loc, err := requestTimeZone(r)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return
+	}
 	ctx := r.Context()
 
 	available, err := s.db.GetAvailableMetrics(ctx, uid)
@@ -94,8 +99,7 @@ func (s *Server) handleLatestMetrics(w http.ResponseWriter, r *http.Request) {
 		bufferDays = storage.DeltaWindowDays
 	}
 
-	end := time.Now().Truncate(24*time.Hour).AddDate(0, 0, 1)
-	start := end.AddDate(0, 0, -bufferDays)
+	start, end := localDayWindow(time.Now(), loc, bufferDays)
 	windowStart := end.AddDate(0, 0, -windowDays)
 
 	var (

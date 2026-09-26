@@ -5,6 +5,21 @@
 - Frontend stub for Go build: `mkdir -p server/web/dist && touch server/web/dist/.gitkeep`
 - Frontend build: `cd server/web && npm ci && npm run build`
 
+## Calendar dates and travel
+
+The dashboard sends the device's IANA `timezone` on metric and workout queries.
+Date-only bounds then mean local midnight through the next local midnight; use
+calendar arithmetic rather than adding 24 hours because DST days vary in length.
+Clients omitting the parameter retain UTC. Daily aggregation and cumulative source
+selection must use the same zone, or counters spanning midnight can double-count.
+
+Sleep-session dates and food-log dates are recorded calendar labels, not instants.
+Keep those labels unchanged during travel. Sleep stages and heart-rate windows use
+the session's actual timestamps, which can extend beyond its recorded UTC date.
+The UI refreshes its local day/zone on focus, visibility changes and midnight;
+query cache keys for instant-based data include the zone. Travel regression tests
+use synthetic Pacific, Eastern and Singapore contexts and a scratch database.
+
 ## Integration tests
 
 `go test ./...` skips them. They need a PostgreSQL server in `FREEREPS_TEST_DSN`

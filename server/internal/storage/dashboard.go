@@ -65,7 +65,7 @@ func (db *DB) GetDailySeries(ctx context.Context, userID int, metricNames []stri
 	// over the user's whole history before the filter applies.
 	cte := dedupCTEMultiMetricRange(
 		db.resolvePrioritiesFor(ctx, userID, metricNames), metricNames,
-		"$1", inClause, startParam, endParam)
+		"$1", inClause, startParam, endParam, start.Location())
 
 	// One CASE covers both aggregations: metric_name is in the GROUP BY, so the
 	// branch is decided per group rather than per row. The inner stage computes
@@ -88,7 +88,7 @@ func (db *DB) GetDailySeries(ctx context.Context, userID int, metricNames []stri
 	query := fmt.Sprintf(
 		`%s, windowed AS (
 			SELECT metric_name,
-			       time_bucket('1 day', time) AS day,
+			       %s AS day,
 			       %s AS sub,
 			       SUM(COALESCE(qty, avg_val)) AS total,
 			       AVG(COALESCE(qty, avg_val)) AS mean
@@ -101,7 +101,7 @@ func (db *DB) GetDailySeries(ctx context.Context, userID int, metricNames []stri
 		 GROUP BY metric_name, day
 		 HAVING %s IS NOT NULL
 		 ORDER BY metric_name, day ASC`,
-		cte, dedupBucket, aggExpr, aggExpr)
+		cte, timeBucketSQL("'1 day'", start.Location()), dedupBucket, aggExpr, aggExpr)
 
 	rows, err := db.Pool.Query(ctx, query, args...)
 	if err != nil {
@@ -135,10 +135,14 @@ const DeltaWindowDays = 14
 // the series and the stated range follow the selection.
 func BuildDashboardMetric(points []DailyPoint, start time.Time, bufferDays, seriesDays int) (series []*float64, delta, deltaPct, low, high *float64) {
 	buffer := make([]*float64, bufferDays)
-	startDay := start.Truncate(24 * time.Hour)
+	// Index calendar labels rather than elapsed 24-hour chunks: DST days are 23/25 hours.
+	slots := make(map[string]int, bufferDays)
+	for i := range bufferDays {
+		slots[start.AddDate(0, 0, i).Format("2006-01-02")] = i
+	}
 	for _, p := range points {
-		idx := int(p.Day.Truncate(24*time.Hour).Sub(startDay) / (24 * time.Hour))
-		if idx >= 0 && idx < bufferDays {
+		idx, ok := slots[p.Day.In(start.Location()).Format("2006-01-02")]
+		if ok {
 			v := p.Value
 			buffer[idx] = &v
 		}

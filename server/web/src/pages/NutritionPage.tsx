@@ -1,3 +1,4 @@
+import { useLocalDay } from "../hooks/useLocalDay";
 import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs";
 import VisitedTabPanel from "@/components/VisitedTabPanel";
 import { SummarySkeleton } from "@/components/SummaryValue";
@@ -41,7 +42,6 @@ import type {
 import {
   amount,
   averageKnown,
-  localToday,
   nutrientLabel,
   protocolForDate,
   shiftDate,
@@ -101,8 +101,9 @@ function targetText(t: NutritionTarget | undefined) {
 }
 export default function NutritionPage() {
   const [params, setParams] = useSearchParams();
+  const { today } = useLocalDay();
   const rawDate = params.get("date");
-  const date = validDate(rawDate) ? rawDate : localToday();
+  const date = validDate(rawDate) ? rawDate : today;
   const rawRange = params.get("range");
   const range = rawRange === "7d" || rawRange === "30d" ? rawRange : "day";
   const count = range === "day" ? 1 : range === "7d" ? 7 : 30;
@@ -181,9 +182,10 @@ export default function NutritionPage() {
     );
   const completeDays = data?.completion.filter((d) => d.complete).length ?? 0;
   const displayProtocol = editorSnapshot?.record ?? protocol;
-  function navigate(d: string, r = range, nextTab = tab) {
+  function navigate(d: string | null, r = range, nextTab = tab) {
     const next = new URLSearchParams(params);
-    next.set("date", d);
+    if (d) next.set("date", d);
+    else next.delete("date");
     next.set("range", r);
     next.set("tab", nextTab);
     setParams(next);
@@ -308,7 +310,11 @@ export default function NutritionPage() {
               onClick={() =>
                 close(() => {
                   setSelected(key);
-                  navigate(date, range === "day" ? "7d" : range, "overview");
+                  navigate(
+                    validDate(rawDate) ? date : null,
+                    range === "day" ? "7d" : range,
+                    "overview",
+                  );
                   setFocusTrend(true);
                 })
               }
@@ -382,7 +388,7 @@ export default function NutritionPage() {
           <RangeControl
             options={["day", "7d", "30d"]}
             value={range}
-            onChange={(r) => navigate(date, r)}
+            onChange={(r) => navigate(validDate(rawDate) ? date : null, r)}
             name="nutrition-range"
           />
         }
@@ -393,7 +399,7 @@ export default function NutritionPage() {
           onValueChange={(value) => navigate(value)}
           onPrevious={() => navigate(shiftDate(date, -1))}
           onNext={() => navigate(shiftDate(date, 1))}
-          onReset={() => navigate(localToday())}
+          onReset={() => navigate(null)}
           resetLabel="Today"
         />
       </PageHeader>

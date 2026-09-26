@@ -1,3 +1,4 @@
+import { useLocalDay } from "@/hooks/useLocalDay";
 import { Search, X } from "lucide-react";
 import {
   InputGroup,
@@ -54,8 +55,9 @@ export default function DashboardPage() {
   const requestedRange = params.get("range") as DashboardRange;
   const range = RANGES.includes(requestedRange) ? requestedRange : "30d";
 
+  const { timezone, today } = useLocalDay();
   const query = useQuery({
-    queryKey: ["front-page", range],
+    queryKey: ["front-page", range, timezone, today],
     queryFn: () => fetchFrontPage(range),
     staleTime: 60_000,
   });

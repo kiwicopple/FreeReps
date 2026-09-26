@@ -1,3 +1,5 @@
+import { dateOnlyToLocalDate, shiftDate } from "../utils/localDate";
+import { useLocalDay } from "@/hooks/useLocalDay";
 import InfoPopover from "@/components/InfoPopover";
 import { Card, CardPanel } from "@/components/ui/card";
 import { SummarySkeleton } from "@/components/SummaryValue";
@@ -52,8 +54,9 @@ export default function TrendsPage() {
 
   // The same payload the dashboard uses: one request, and the fit is computed
   // on exactly the series the chart draws.
+  const { timezone, today } = useLocalDay();
   const query = useQuery({
-    queryKey: ["front-page", range],
+    queryKey: ["front-page", range, timezone, today],
     queryFn: () => fetchFrontPage(range),
     staleTime: 60_000,
   });
@@ -83,8 +86,8 @@ export default function TrendsPage() {
   };
 
   const days = RANGE_DAYS[range];
-  const end = new Date();
-  const start = new Date(end.getTime() - days * 86400000);
+  const end = dateOnlyToLocalDate(today);
+  const start = dateOnlyToLocalDate(shiftDate(today, 1 - days));
 
   return (
     <>

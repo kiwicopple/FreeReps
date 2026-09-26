@@ -22,7 +22,6 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, info)
 }
 
-
 func (s *Server) handleIngest(w http.ResponseWriter, r *http.Request) {
 	var payload models.HealthPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
@@ -194,7 +193,7 @@ func (s *Server) handleQuerySleep(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	start, end, err := parseTimeRange(r)
+	start, end, err := parseTimeRangeInLocation(r, time.UTC)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
@@ -205,7 +204,8 @@ func (s *Server) handleQuerySleep(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stages, err := s.db.QuerySleepStages(r.Context(), start, end, uid)
+	stageStart, stageEnd := sleepStageWindow(start, end, sessions)
+	stages, err := s.db.QuerySleepStages(r.Context(), stageStart, stageEnd, uid)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
@@ -592,36 +592,44 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 }
 
 func parseTimeRange(r *http.Request) (start, end time.Time, err error) {
+	loc, err := requestTimeZone(r)
+	if err != nil {
+		return time.Time{}, time.Time{}, err
+	}
+	return parseTimeRangeInLocation(r, loc)
+}
+
+func parseTimeRangeInLocation(r *http.Request, loc *time.Location) (start, end time.Time, err error) {
 	startStr := r.URL.Query().Get("start")
 	endStr := r.URL.Query().Get("end")
 
 	if startStr == "" {
 		// Default: last 7 days
-		end = time.Now()
+		end = time.Now().In(loc)
 		start = end.AddDate(0, 0, -7)
 		return
 	}
 
 	start, err = time.Parse(time.RFC3339, startStr)
 	if err != nil {
-		start, err = time.Parse("2006-01-02", startStr)
+		start, err = time.ParseInLocation("2006-01-02", startStr, loc)
 		if err != nil {
 			return time.Time{}, time.Time{}, err
 		}
 	}
 
 	if endStr == "" {
-		end = time.Now()
+		end = time.Now().In(loc)
 	} else {
 		end, err = time.Parse(time.RFC3339, endStr)
 		if err != nil {
-			end, err = time.Parse("2006-01-02", endStr)
+			end, err = time.ParseInLocation("2006-01-02", endStr, loc)
 			if err != nil {
 				return time.Time{}, time.Time{}, err
 			}
 			// End of day for date-only
-			end = end.Add(24 * time.Hour)
+			end = end.AddDate(0, 0, 1)
 		}
 	}
-	return
+	return start.In(loc), end.In(loc), nil
 }

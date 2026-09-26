@@ -1,3 +1,4 @@
+import { localToday } from "./localDate";
 import type { FrontPageMetric } from "../api";
 
 const DAY = 86_400_000;
@@ -6,12 +7,12 @@ export interface MetricDay {
   value: number | null;
 }
 
-/** The API's daily buckets are UTC; retain their labels regardless of browser zone. */
+/** Use calendar coordinates for daily labels; never add elapsed hours across DST. */
 export function metricDays(
   metric: FrontPageMetric,
   windowStart: string,
 ): MetricDay[] {
-  const start = Date.parse(windowStart);
+  const start = Date.parse(windowStart.slice(0, 10) + "T00:00:00Z");
   if (!Number.isFinite(start)) return [];
   return metric.series.map((raw, index) => ({
     time: start + index * DAY,
@@ -35,7 +36,7 @@ export function personalComparison(
   days: MetricDay[],
   now: number = Date.now(),
 ) {
-  const today = Math.floor(now / DAY) * DAY;
+  const today = Date.parse(localToday(undefined, new Date(now)) + "T00:00:00Z");
   const recorded = days.filter(
     (p): p is MetricDay & { value: number } =>
       p.value != null &&

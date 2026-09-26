@@ -191,7 +191,7 @@ test("metric history loading, failures and retry remain distinct", async ({
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
-  await page.route("**/api/v1/metrics/latest?range=90d", async (r) => {
+  await page.route(url => url.pathname === "/api/v1/metrics/latest" && url.searchParams.get("range") === "90d", async (r) => {
     await gate;
     await r.fulfill(
       fail

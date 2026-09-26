@@ -1,3 +1,5 @@
+import { useLocalDay } from "../hooks/useLocalDay";
+import { shiftDate } from "../utils/localDate";
 import { SummarySkeleton } from "@/components/SummaryValue";
 import PageContent from "@/components/PageContent";
 import PageSection from "@/components/PageSection";
@@ -55,10 +57,8 @@ export default function MetricsPage() {
   }, [metric, options, params, setParams]);
 
   const days = RANGE_DAYS[range];
-  const end = new Date();
-  const start = new Date(end.getTime() - days * 86400000);
-  const endISO = end.toISOString().split("T")[0];
-  const startISO = start.toISOString().split("T")[0];
+  const { today: endISO, timezone } = useLocalDay();
+  const startISO = shiftDate(endISO, 1 - days);
 
   const selected = lookup.get(metric);
   const multiplier = selected?.multiplier ?? 1;
@@ -69,13 +69,13 @@ export default function MetricsPage() {
   const agg = range === "1d" ? "hourly" : "daily";
 
   const seriesQuery = useQuery({
-    queryKey: ["timeseries", metric, startISO, endISO, agg],
+    queryKey: ["timeseries", metric, startISO, endISO, agg, timezone],
     queryFn: () => fetchTimeSeries(metric, startISO, endISO, agg),
     enabled: !!metric && isDesktop,
   });
 
   const statsQuery = useQuery({
-    queryKey: ["metric-stats", metric, startISO, endISO],
+    queryKey: ["metric-stats", metric, startISO, endISO, timezone],
     queryFn: () => fetchMetricStats(metric, startISO, endISO),
     enabled: !!metric && isDesktop,
   });

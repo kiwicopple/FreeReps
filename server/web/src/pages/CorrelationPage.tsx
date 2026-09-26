@@ -1,3 +1,5 @@
+import { useLocalDay } from "../hooks/useLocalDay";
+import { localToday, shiftDate } from "../utils/localDate";
 import { SummarySkeleton } from "@/components/SummaryValue";
 import PageContent from "@/components/PageContent";
 import PageSection from "@/components/PageSection";
@@ -56,19 +58,16 @@ export default function CorrelationPage() {
   const yMetric = params.get("y") ?? "heart_rate_variability";
 
   const days = RANGE_DAYS[range];
-  const end = new Date();
-  // Fetch a few extra days so a lagged pairing does not lose the window's edge.
-  const start = new Date(end.getTime() - (days + LAGS.length) * 86400000);
-  const endISO = end.toISOString().split("T")[0];
-  const startISO = start.toISOString().split("T")[0];
+  const { today: endISO, timezone } = useLocalDay();
+  const startISO = shiftDate(endISO, 1 - days - LAGS.length);
 
   const xQuery = useQuery({
-    queryKey: ["timeseries", xMetric, startISO, endISO, "daily"],
+    queryKey: ["timeseries", xMetric, startISO, endISO, "daily", timezone],
     queryFn: () => fetchTimeSeries(xMetric, startISO, endISO, "daily"),
     enabled: isDesktop && !!xMetric,
   });
   const yQuery = useQuery({
-    queryKey: ["timeseries", yMetric, startISO, endISO, "daily"],
+    queryKey: ["timeseries", yMetric, startISO, endISO, "daily", timezone],
     queryFn: () => fetchTimeSeries(yMetric, startISO, endISO, "daily"),
     enabled: isDesktop && !!yMetric,
   });
@@ -506,16 +505,14 @@ function pairWithLag(
   const pairs: { x: number; y: number }[] = [];
   for (const p of xs) {
     if (p.avg == null) continue;
-    const shifted = new Date(p.time);
-    shifted.setDate(shifted.getDate() + lag);
-    const y = yByDay.get(dayKey(shifted.toISOString()));
+    const y = yByDay.get(shiftDate(dayKey(p.time), lag));
     if (y != null) pairs.push({ x: p.avg * xMultiplier, y });
   }
   return pairs;
 }
 
 function dayKey(iso: string): string {
-  return iso.split("T")[0];
+  return localToday(undefined, new Date(iso));
 }
 
 function exportPairs(
