@@ -44,7 +44,7 @@ test("sidebar preference and mobile More preserve navigation", async ({
   ).toBeHidden();
   await page.setViewportSize({ width: 390, height: 844 });
   const nav = page.getByRole("navigation", { name: "Main navigation" });
-  await expect(nav.getByRole("link")).toHaveCount(4);
+  await expect(nav.getByRole("link")).toHaveCount(5);
   const more = nav.getByRole("button", { name: "More", exact: true });
   await more.click();
   const drawer = page.getByRole("dialog", { name: "More", exact: true });

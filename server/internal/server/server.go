@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/claude/freereps/internal/alerts"
+	"github.com/claude/freereps/internal/chat"
 	"github.com/claude/freereps/internal/hevy"
 	"github.com/claude/freereps/internal/ingest/alpha"
 	"github.com/claude/freereps/internal/ingest/health"
@@ -23,12 +24,13 @@ import (
 
 // Server holds dependencies for HTTP handlers.
 type Server struct {
-	db     *storage.DB
-	health *health.Provider
-	alpha  *alpha.Provider
-	log    *slog.Logger
-	lc     *local.Client
-	router chi.Router
+	chatClient *chat.Client
+	db         *storage.DB
+	health     *health.Provider
+	alpha      *alpha.Provider
+	log        *slog.Logger
+	lc         *local.Client
+	router     chi.Router
 
 	// Oura integration (nil if disabled)
 	ouraTokenMgr *oura.TokenManager
@@ -134,11 +136,12 @@ var Version = "dev"
 // New creates a new Server with all routes configured.
 func New(db *storage.DB, healthProvider *health.Provider, alphaProvider *alpha.Provider, log *slog.Logger) *Server {
 	s := &Server{
-		db:     db,
-		health: healthProvider,
-		alpha:  alphaProvider,
-		log:    log,
-		router: chi.NewRouter(),
+		db:         db,
+		chatClient: chat.NewClient(),
+		health:     healthProvider,
+		alpha:      alphaProvider,
+		log:        log,
+		router:     chi.NewRouter(),
 	}
 	s.routes()
 	return s
@@ -206,6 +209,10 @@ func (s *Server) routes() {
 
 		// Unified import with auto-detection
 		r.Post("/api/v1/import", s.handleUnifiedImport)
+
+		r.Get("/api/v1/chat", s.handleChat)
+		r.Post("/api/v1/chat", s.handleSendChat)
+		r.Put("/api/v1/chat/connection", s.handleChatKey)
 
 		// User identity
 		r.Get("/api/v1/me", s.handleMe)

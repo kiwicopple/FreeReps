@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   Activity,
+  MessageCircle,
   Apple,
   BedDouble,
   Dumbbell,
@@ -36,6 +37,7 @@ import {
   DrawerFooter,
 } from "./ui/drawer";
 
+const CHAT = { to: "/chat", label: "Chat", icon: MessageCircle, end: false };
 const PRIMARY = [
   { to: "/", label: "Today", icon: Activity, end: true },
   { to: "/nutrition", label: "Nutrition", icon: Apple },
@@ -48,7 +50,7 @@ const ANALYSIS = [
   { to: "/correlations", label: "Correlations", icon: GitCompareArrows },
 ];
 const SETTINGS = { to: "/settings", label: "Settings", icon: Settings };
-const MOBILE = [PRIMARY[0], PRIMARY[2], PRIMARY[3], PRIMARY[1]];
+const MOBILE = [CHAT, PRIMARY[0], PRIMARY[2], PRIMARY[3], PRIMARY[1]];
 const SIDEBAR_KEY = "protocol.sidebar.collapsed";
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -107,7 +109,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </Link>
             <ScrollArea className="min-h-0 flex-1">
               <nav aria-label="Main navigation" className="space-y-1 px-2">
-                {PRIMARY.map(navItem)}
+                {[CHAT, ...PRIMARY].map(navItem)}
                 <Separator className="my-4" />
                 <p className="sidebar-label px-3 pb-2 text-xs text-muted-foreground">
                   Analysis

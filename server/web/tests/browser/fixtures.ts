@@ -84,6 +84,7 @@ export const protocol = {
   },
 };
 export const routes: Record<string, unknown> = {
+  "/chat": { turns: [], configured: false, has_more: false },
   "/me": { login: "synthetic", display_name: "Test Person" },
   "/version": { version: "test" },
   "/stats": {
