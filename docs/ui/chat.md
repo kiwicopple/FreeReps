@@ -115,3 +115,16 @@ new replies never scroll the outer document. The composer uses a 16px input font
 to avoid Safari focus zoom. Browser regression coverage simulates simultaneous
 height changes and viewport panning, plus keyboard dismissal and draft retention.
 Physical iPhone keyboard behavior still requires device verification.
+
+### Photo-estimate validation repair
+
+A two-photo request reached estimate validation, then failed both attempts with
+`invalid_reason`. That legacy code covered meal/notes length, reason text, and
+expected version, so the exact rejected field cannot be recovered. The provider
+schema now bounds descriptive strings, defines short meal/audit fields, and the
+chat adapter distinguishes these validation failures with actionable repair
+instructions. Existing food validation remains unchanged; no truncation or
+nutrition-value substitution is used. Tests cover all five text/version cases
+and confirm both images survive the bounded retry. An isolated real-provider
+check read two synthetic package/label images, calculated half a labelled
+serving, and passed food validation without writing to the food log.

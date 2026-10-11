@@ -67,3 +67,52 @@ func TestStructuredFoodValidation(t *testing.T) {
 		}
 	}
 }
+
+// Text validation formerly collapsed meal, notes, reason and version into the
+// same invalid_reason code, leaving photo retries unable to repair the field.
+func TestPhotoTextRepair(t *testing.T) {
+	for _, tc := range []struct{ name, old, replacement, rule, hint string }{
+		{"meal", `"meal":"Lunch"`, `"meal":"` + strings.Repeat("x", 121) + `"`, "invalid_meal", "120"},
+		{"notes", `"notes":"Assumed serving"`, `"notes":"` + strings.Repeat("x", 4001) + `"`, "invalid_notes", "4000"},
+		{"reason", `"reason":"Synthetic estimate"`, `"reason":""`, "invalid_reason", "1000"},
+		{"long reason", `"reason":"Synthetic estimate"`, `"reason":"` + strings.Repeat("x", 1001) + `"`, "invalid_reason", "1000"},
+		{"version", `"expected_version":0`, `"expected_version":-1`, "invalid_expected_version", "expected_version"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			calls := 0
+			provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				calls++
+				var body map[string]any
+				if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+					t.Fatal(err)
+				}
+				encoded, _ := json.Marshal(body["input"])
+				for _, photo := range []string{"data:image/png;base64,synthetic-front", "data:image/png;base64,synthetic-label"} {
+					if !strings.Contains(string(encoded), photo) {
+						t.Error("lost photo on generation or repair")
+					}
+				}
+				food := syntheticFood
+				if calls == 1 {
+					food = strings.Replace(food, tc.old, tc.replacement, 1)
+				} else {
+					messages := body["input"].([]any)
+					feedback := messages[len(messages)-1].(map[string]any)["content"].(string)
+					if !strings.Contains(feedback, tc.rule) || !strings.Contains(feedback, tc.hint) {
+						t.Errorf("missing precise repair guidance: %s", feedback)
+					}
+				}
+				raw, _ := json.Marshal(map[string]any{"reply": "Synthetic label estimate", "food_record": json.RawMessage(food)})
+				_ = json.NewEncoder(w).Encode(map[string]any{"status": "completed", "output": []any{map[string]any{"type": "message", "content": []any{map[string]any{"type": "output_text", "text": string(raw)}}}}})
+			}))
+			defer provider.Close()
+			client := NewClient()
+			client.URL = provider.URL
+			client.HTTP = provider.Client()
+			proposal, err := client.Generate(context.Background(), "sk-synthetic", Input{Request: models.ChatRequest{Message: "Log two synthetic crackers", Images: []string{"data:image/png;base64,synthetic-front", "data:image/png;base64,synthetic-label"}}})
+			if err != nil || proposal.FoodJSON == nil || calls != 2 {
+				t.Fatalf("repair failed: calls=%d err=%v", calls, err)
+			}
+		})
+	}
+}

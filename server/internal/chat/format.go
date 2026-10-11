@@ -3,6 +3,7 @@ package chat
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -13,6 +14,9 @@ import (
 // contents escape Structured Outputs validation. Units come from our catalog.
 func responseSchema() map[string]any {
 	str := map[string]any{"type": "string"}
+	text := func(limit int, description string) map[string]any {
+		return map[string]any{"type": "string", "pattern": fmt.Sprintf(`^[\s\S]{0,%d}$`, limit), "description": description}
+	}
 	nullableNumber := map[string]any{"type": []string{"number", "null"}, "minimum": 0}
 	enum := func(values ...string) map[string]any { return map[string]any{"type": "string", "enum": values} }
 	object := func(properties map[string]any) map[string]any {
@@ -28,10 +32,10 @@ func responseSchema() map[string]any {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	nutrient := object(map[string]any{"name": enum(keys...), "value": map[string]any{"type": "number", "minimum": 0}, "low": nullableNumber, "high": nullableNumber, "basis": enum("label", "database", "estimate", "measured"), "confidence": enum("low", "medium", "high"), "reference": str})
-	item := object(map[string]any{"name": str, "kind": enum("food", "drink", "supplement"), "portion": str, "grams": nullableNumber, "portion_basis": enum("user", "label", "weighed", "photo_estimate"), "assumptions": str, "nutrients": map[string]any{"type": "array", "items": nutrient}})
-	entry := object(map[string]any{"id": str, "local_date": str, "timezone": str, "time_precision": enum("date_only", "approximate", "exact"), "eaten_at": map[string]any{"type": []string{"string", "null"}}, "meal": str, "notes": str, "status": enum("recorded"), "items": map[string]any{"type": "array", "minItems": 1, "maxItems": 100, "items": item}})
-	food := object(map[string]any{"expected_version": map[string]any{"type": "integer", "minimum": 0}, "reason": str, "entry": entry})
+	nutrient := object(map[string]any{"name": enum(keys...), "value": map[string]any{"type": "number", "minimum": 0}, "low": nullableNumber, "high": nullableNumber, "basis": enum("label", "database", "estimate", "measured"), "confidence": enum("low", "medium", "high"), "reference": text(1500, "Brief source description.")})
+	item := object(map[string]any{"name": text(300, "Short item name."), "kind": enum("food", "drink", "supplement"), "portion": text(500, "Consumed amount, not the whole package."), "grams": nullableNumber, "portion_basis": enum("user", "label", "weighed", "photo_estimate"), "assumptions": text(4000, "Concise portion and ingredient assumptions."), "nutrients": map[string]any{"type": "array", "items": nutrient}})
+	entry := object(map[string]any{"id": str, "local_date": str, "timezone": str, "time_precision": enum("date_only", "approximate", "exact"), "eaten_at": map[string]any{"type": []string{"string", "null"}}, "meal": text(120, "Short meal category, e.g. Snack or Lunch; not the food description."), "notes": text(4000, "Brief context; avoid repeating item assumptions."), "status": enum("recorded"), "items": map[string]any{"type": "array", "minItems": 1, "maxItems": 100, "items": item}})
+	food := object(map[string]any{"expected_version": map[string]any{"type": "integer", "minimum": 0}, "reason": text(1000, "Required nonblank short audit reason, e.g. Initial photo log or Portion correction. One sentence, not the analysis."), "entry": entry})
 	return object(map[string]any{"reply": str, "food_record": map[string]any{"anyOf": []any{food, map[string]any{"type": "null"}}}})
 }
 
@@ -85,6 +89,18 @@ func decodeProposal(raw []byte) (Proposal, error) {
 		}
 		food.Entry.Items = append(food.Entry.Items, value)
 	}
+	// Preserve the exact existing validation limits, but distinguish the fields
+	// hidden behind the model validator's combined text/version error.
+	switch {
+	case len(food.Entry.Meal) > 120:
+		return Proposal{}, errors.New("invalid_meal")
+	case len(food.Entry.Notes) > 4000:
+		return Proposal{}, errors.New("invalid_notes")
+	case len(food.Reason) > 1000 || strings.TrimSpace(food.Reason) == "":
+		return Proposal{}, errors.New("invalid_reason")
+	case food.ExpectedVersion < 0:
+		return Proposal{}, errors.New("invalid_expected_version")
+	}
 	if err := food.Validate(); err != nil {
 		return Proposal{}, errors.New(validationCode(err))
 	}
@@ -110,4 +126,21 @@ func validationCode(err error) string {
 		}
 	}
 	return "invalid_food"
+}
+
+// Repair instructions are controlled text; neither logs nor instructions copy
+// private validator values. UTF-8 byte limits also cover multi-byte text.
+func repairHint(code string) string {
+	switch code {
+	case "invalid_meal":
+		return "entry.meal must be a short category such as Snack, at most 120 UTF-8 bytes; put food details in items."
+	case "invalid_notes":
+		return "entry.notes must be at most 4000 UTF-8 bytes. Summarize without repeating item details."
+	case "invalid_reason":
+		return "food_record.reason must be nonblank and at most 1000 UTF-8 bytes. Use a short audit sentence such as Initial photo log; do not put analysis here."
+	case "invalid_expected_version":
+		return "expected_version must be 0 for new records or the supplied current version for corrections, never negative."
+	default:
+		return "Follow the field definitions and validation constraints in the instructions."
+	}
 }
