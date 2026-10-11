@@ -46,6 +46,13 @@ Return food_record as the schema's object (not encoded JSON). New entry expected
 Do not claim an entry was saved in your reply. Describe the estimate or correction; the server displays the actual save result. If no record is proposed, do not claim to have logged/updated anything. There are no other actions: do not claim to change goals, complete days, inspect unprovided health readings or remember all old messages. The recent conversation and food records provided are the available context. Briefly describe relevant photo content in the reply because photos are not retained for later turns.`
 
 func (c *Client) Generate(ctx context.Context, key string, in Input) (Proposal, error) {
+	started := time.Now()
+	defer func() { Diagnostic(ctx, "generation.finished", "duration_ms", time.Since(started).Milliseconds()) }()
+	imageBytes := 0
+	for _, image := range in.Request.Images {
+		imageBytes += len(image)
+	}
+	Diagnostic(ctx, "generation.started", "photos", len(in.Request.Images), "image_encoded_bytes", imageBytes, "message_bytes", len(in.Request.Message), "history_turns", len(in.History))
 	messages := []any{}
 	contextJSON, err := json.Marshal(map[string]any{"local_date": in.Request.LocalDate, "timezone": in.Request.Timezone, "nutrient_units": models.NutrientUnits, "food": in.FoodContext})
 	if err != nil {
@@ -77,16 +84,19 @@ func (c *Client) Generate(ctx context.Context, key string, in Input) (Proposal, 
 	messages = append(messages, map[string]any{"role": "user", "content": content})
 	body := map[string]any{"model": c.Model, "instructions": instructions, "store": false, "input": messages, "max_output_tokens": 6000, "reasoning": map[string]string{"effort": "low"}, "text": map[string]any{"format": map[string]any{"type": "json_schema", "name": "nutrition_reply", "strict": true, "schema": responseSchema()}}}
 	for attempt := 0; attempt < 2; attempt++ {
+		Diagnostic(ctx, "provider.attempt", "attempt", attempt+1)
 		raw, err := c.complete(ctx, key, body)
 		if err != nil {
 			return Proposal{}, err
 		}
 		proposal, err := decodeProposal(raw)
 		if err == nil {
+			Diagnostic(ctx, "proposal.valid", "attempt", attempt+1, "food_proposed", proposal.FoodJSON != nil)
 			return proposal, nil
 		}
 		// The error is a controlled rule code, never a meal, reply or credential.
 		slog.Warn("chat estimate validation", "rule", err.Error(), "attempt", attempt+1)
+		Diagnostic(ctx, "proposal.invalid", "rule", err.Error(), "attempt", attempt+1)
 		messages = append(messages, map[string]any{"role": "assistant", "content": string(raw)}, map[string]any{"role": "developer", "content": "The proposed response failed validation: " + err.Error() + ". " + repairHint(err.Error()) + " Correct that rule and return the complete structured response. Keep the same intended meal and amounts unless needed to fix an invalid value. Do not add another meal."})
 		body["input"] = messages
 	}
@@ -104,10 +114,13 @@ func (c *Client) complete(ctx context.Context, key string, body map[string]any) 
 	}
 	req.Header.Set("Authorization", "Bearer "+key)
 	req.Header.Set("Content-Type", "application/json")
+	started := time.Now()
 	res, err := c.HTTP.Do(req)
 	if err != nil {
+		Diagnostic(ctx, "provider.transport_failed", "duration_ms", time.Since(started).Milliseconds(), "context_canceled", ctx.Err() != nil)
 		return nil, errors.New("OpenAI could not be reached; your message was not logged as food. Retry when connected")
 	}
+	Diagnostic(ctx, "provider.response", "status", res.StatusCode, "duration_ms", time.Since(started).Milliseconds(), "request_bytes", len(raw))
 	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != 200 {
 		switch res.StatusCode {
@@ -121,6 +134,10 @@ func (c *Client) complete(ctx context.Context, key string, body map[string]any) 
 	}
 	var response struct {
 		Status string `json:"status"`
+		Usage  struct {
+			Input  int `json:"input_tokens"`
+			Output int `json:"output_tokens"`
+		} `json:"usage"`
 		Output []struct {
 			Type    string `json:"type"`
 			Content []struct {
@@ -130,8 +147,10 @@ func (c *Client) complete(ctx context.Context, key string, body map[string]any) 
 		} `json:"output"`
 	}
 	if err = json.NewDecoder(io.LimitReader(res.Body, 512*1024)).Decode(&response); err != nil {
+		Diagnostic(ctx, "provider.decode_failed")
 		return nil, errors.New("OpenAI returned an unreadable reply; nothing was logged")
 	}
+	Diagnostic(ctx, "provider.decoded", "completed", response.Status == "completed", "input_tokens", response.Usage.Input, "output_tokens", response.Usage.Output)
 	if response.Status != "completed" {
 		return nil, errors.New("the reply was incomplete; nothing was logged. Try a shorter message")
 	}

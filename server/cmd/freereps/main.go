@@ -47,6 +47,9 @@ func main() {
 	}
 	log := slog.New(slog.NewTextHandler(logOutput, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	log.Info("FreeReps starting", "version", Version)
+	if os.Getenv("PROTOCOL_CHAT_VERBOSE") == "1" {
+		log.Info("verbose chat diagnostics enabled", "payload_logging", false)
+	}
 
 	// Load config
 	cfg, err := config.Load(*configPath)

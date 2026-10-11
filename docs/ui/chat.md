@@ -128,3 +128,14 @@ nutrition-value substitution is used. Tests cover all five text/version cases
 and confirm both images survive the bounded retry. An isolated real-provider
 check read two synthetic package/label images, calculated half a labelled
 serving, and passed food validation without writing to the food log.
+
+### Verbose local diagnostics
+
+Set `PROTOCOL_CHAT_VERBOSE=1` on the app container while iterating. Remove it or
+set it to `0` to disable verbose chat events. No global debug switch is needed.
+Each HTTP attempt gets a random trace identifier connecting request stages,
+photo count/encoded size, provider attempt/status/timing, token counts,
+validation rule, and prepare/save/replay outcomes. Logs do not include messages,
+photos, food records, credentials, raw errors or provider response bodies.
+Inspect with `docker logs --since 30m freereps-local-app-1 2>&1` and filter for
+`chat diagnostic`. Local deployment configuration remains ignored by Git.

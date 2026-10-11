@@ -108,12 +108,16 @@ func (s *Server) handleChatKey(w http.ResponseWriter, r *http.Request) {
 // stable UUID + payload makes a lost response safe to retry without another meal.
 func (s *Server) finishChat(ctx context.Context, uid int, t models.ChatTurn) (models.ChatTurn, error) {
 	if t.FoodRequest != nil {
+		chat.Diagnostic(ctx, "food.save_started", "correction", t.FoodRequest.ExpectedVersion > 0)
 		saved, err := s.db.SaveFoodEntry(ctx, uid, *t.FoodRequest)
 		if errors.Is(err, storage.ErrFoodConflict) || errors.Is(err, storage.ErrFoodNotFound) {
+			chat.Diagnostic(ctx, "food.save_conflict")
 			t.Reply = "This correction was not saved because the food entry changed or is no longer available. Tell me the correction again so I can use the current entry."
 		} else if err != nil {
+			chat.Diagnostic(ctx, "food.save_failed")
 			return t, err
 		} else {
+			chat.Diagnostic(ctx, "food.saved")
 			t.SavedEntryID = &saved.Entry.ID
 			t.SavedDate = saved.Entry.LocalDate
 			t.Reply += "\n\nSaved to your nutrition log for " + saved.Entry.LocalDate + "."
@@ -122,23 +126,36 @@ func (s *Server) finishChat(ctx context.Context, uid int, t models.ChatTurn) (mo
 	if err := s.db.CompleteChatTurn(ctx, uid, t.ID, t.Reply, t.SavedEntryID); err != nil {
 		return t, err
 	}
+	chat.Diagnostic(ctx, "turn.completed", "food_saved", t.SavedEntryID != nil)
 	t.Status = "complete"
 	return t, nil
 }
 func (s *Server) handleSendChat(w http.ResponseWriter, r *http.Request) {
+	r = r.WithContext(chat.DiagnosticContext(r.Context()))
+	started := time.Now()
+	stage := "authorize"
+	chat.Diagnostic(r.Context(), "request.started")
+	defer func() {
+		chat.Diagnostic(r.Context(), "request.finished", "stage", stage, "duration_ms", time.Since(started).Milliseconds())
+	}()
+
 	uid, ok := s.chatUser(w, r)
 	if !ok {
 		return
 	}
+	stage = "decode"
 	var req models.ChatRequest
 	if err := decodeChatJSON(w, r, &req, 9*1024*1024); err != nil {
 		writeJSON(w, 400, map[string]string{"error": err.Error()})
 		return
 	}
+	stage = "validate_request"
 	if err := req.Validate(); err != nil {
 		writeJSON(w, 400, map[string]string{"error": err.Error()})
 		return
 	}
+	chat.Diagnostic(r.Context(), "request.valid", "photos", len(req.Images), "message_bytes", len(req.Message))
+	stage = "lock"
 	release, err := s.db.LockChat(r.Context(), uid)
 	if err != nil {
 		status := 500
@@ -153,6 +170,7 @@ func (s *Server) handleSendChat(w http.ResponseWriter, r *http.Request) {
 	defer release()
 	// Finish any prepared write before considering a new message. The model is
 	// never asked to regenerate a proposal that might already have been saved.
+	stage = "recover_prepared"
 	prepared, err := s.db.PreparedChatTurns(r.Context(), uid)
 	if err != nil {
 		writeJSON(w, 500, map[string]string{"error": "could not recover chat; retry"})
@@ -164,6 +182,7 @@ func (s *Server) handleSendChat(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	stage = "start_turn"
 	turn, err := s.db.StartChatTurn(r.Context(), uid, req)
 	if err != nil {
 		status := 500
@@ -176,14 +195,17 @@ func (s *Server) handleSendChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if turn.Status == "complete" {
+		stage = "replayed_complete"
 		writeJSON(w, 200, turn)
 		return
 	}
+	stage = "credentials"
 	key, err := s.db.ChatKey(r.Context(), uid)
 	if err != nil || key == "" {
 		writeJSON(w, 503, map[string]string{"error": "Connect OpenAI before sending a message"})
 		return
 	}
+	stage = "history"
 	history, err := s.db.ChatHistory(r.Context(), uid, 0)
 	if err != nil {
 		writeJSON(w, 500, map[string]string{"error": "could not load recent conversation"})
@@ -191,6 +213,7 @@ func (s *Server) handleSendChat(w http.ResponseWriter, r *http.Request) {
 	}
 	day, _ := time.Parse("2006-01-02", req.LocalDate)
 	start, end := day.AddDate(0, 0, -6).Format("2006-01-02"), day.AddDate(0, 0, 1).Format("2006-01-02")
+	stage = "food_context"
 	records, err := s.db.ListFoodEntries(r.Context(), uid, start, end)
 	if err != nil {
 		writeJSON(w, 500, map[string]string{"error": "could not read your recent food log; nothing new was logged"})
@@ -205,11 +228,13 @@ func (s *Server) handleSendChat(w http.ResponseWriter, r *http.Request) {
 	if len(records) > 60 {
 		records = records[len(records)-60:]
 	}
+	stage = "generate"
 	proposal, err := s.chatClient.Generate(r.Context(), key, chat.Input{Request: req, History: history, FoodContext: map[string]any{"recent_entries": records, "today_logged_totals": totals, "entry_window_start": start, "entry_limit": 60}})
 	if err != nil {
 		writeJSON(w, 502, map[string]string{"error": err.Error()})
 		return
 	}
+	stage = "validate_proposal"
 	var food *models.SaveFoodRequest
 	if proposal.FoodJSON != nil {
 		// Validate the proposed mutation through the same contract as ordinary food
@@ -240,16 +265,19 @@ func (s *Server) handleSendChat(w http.ResponseWriter, r *http.Request) {
 		}
 		food = &decoded
 	}
+	stage = "prepare_save"
 	if err = s.db.PrepareChatTurn(r.Context(), uid, req.ID, proposal.Reply, food); err != nil {
 		writeJSON(w, 500, map[string]string{"error": "could not prepare reply; nothing was logged; retry"})
 		return
 	}
 	turn.Reply = proposal.Reply
 	turn.FoodRequest = food
+	stage = "finish_save"
 	turn, err = s.finishChat(r.Context(), uid, turn)
 	if err != nil {
 		writeJSON(w, 503, map[string]string{"error": "The reply is awaiting save confirmation. Retry this message; do not send it as a new meal"})
 		return
 	}
+	stage = "complete"
 	writeJSON(w, 200, turn)
 }
