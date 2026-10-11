@@ -55,21 +55,36 @@ export default function ChatPage() {
   const screen = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const viewport = window.visualViewport;
+    let fullHeight = window.innerHeight;
+    let width = window.innerWidth;
     const resize = () => {
       if (!screen.current) return;
+      // Standalone iOS can shrink innerHeight along with visualViewport.height.
+      // Keep the pre-keyboard height, resetting it when orientation changes.
+      if (width !== window.innerWidth) {
+        width = window.innerWidth;
+        fullHeight = window.innerHeight;
+      }
+      fullHeight = Math.max(fullHeight, window.innerHeight);
+      screen.current.style.setProperty(
+        "--chat-viewport-top",
+        `${viewport?.offsetTop ?? 0}px`,
+      );
       screen.current.style.setProperty(
         "--chat-viewport-height",
         `${viewport?.height ?? window.innerHeight}px`,
       );
       screen.current.dataset.keyboard = String(
-        window.innerHeight - (viewport?.height ?? window.innerHeight) > 150,
+        fullHeight - (viewport?.height ?? window.innerHeight) > 150,
       );
     };
     resize();
     viewport?.addEventListener("resize", resize);
+    viewport?.addEventListener("scroll", resize);
     window.addEventListener("resize", resize);
     return () => {
       viewport?.removeEventListener("resize", resize);
+      viewport?.removeEventListener("scroll", resize);
       window.removeEventListener("resize", resize);
     };
   }, []);
@@ -81,7 +96,8 @@ export default function ChatPage() {
   const configured = history.data?.configured ?? false;
   const latestID = current[current.length - 1]?.id;
   useEffect(() => {
-    end.current?.scrollIntoView({ block: "nearest" });
+    const scroller = end.current?.closest(".chat-scroll");
+    if (scroller) scroller.scrollTop = scroller.scrollHeight;
   }, [latestID, sending]);
   // Returning from another tab reloads the one server-side conversation.
   useEffect(() => {

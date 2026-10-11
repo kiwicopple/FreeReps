@@ -105,3 +105,13 @@ server-assigned units, and one bounded repair for semantic validation failures.
 Synthetic tests exercise invalid portion metadata and preserve strict ranges,
 provenance and correction versions. A real-provider synthetic estimate passed
 without a production food write. This does not make model estimates measurements.
+
+### Mobile keyboard viewport
+
+The mobile chat surface is fixed to the visual viewport, tracking both its height
+and vertical offset. Keyboard detection retains the pre-keyboard height because
+standalone iOS can shrink `innerHeight` too. Only conversation history scrolls;
+new replies never scroll the outer document. The composer uses a 16px input font
+to avoid Safari focus zoom. Browser regression coverage simulates simultaneous
+height changes and viewport panning, plus keyboard dismissal and draft retention.
+Physical iPhone keyboard behavior still requires device verification.

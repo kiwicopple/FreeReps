@@ -366,3 +366,36 @@ test("composer follows the keyboard viewport", async ({ safePage: page }) => {
   });
   await expect(page.locator(".mobile-nav")).toBeVisible();
 });
+
+// iOS standalone mode may shrink innerHeight too and pan the visual viewport on focus.
+// A height-only keyboard simulation misses the off-screen header and composer regression.
+test("keyboard keeps chat inside a panned standalone viewport", async ({ safePage: page }) => {
+  await connected(page);
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/chat");
+  await page.getByLabel("Message", { exact: true }).fill("Synthetic draft");
+  await page.evaluate(() => {
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 500 });
+    Object.defineProperty(window.visualViewport!, "height", { configurable: true, value: 500 });
+    Object.defineProperty(window.visualViewport!, "offsetTop", { configurable: true, value: 140 });
+    window.visualViewport!.dispatchEvent(new Event("resize"));
+    window.visualViewport!.dispatchEvent(new Event("scroll"));
+  });
+  await expect(page.locator(".mobile-nav")).toBeHidden();
+  await expect.poll(async () => {
+    const box = await page.locator(".chat-screen").boundingBox();
+    return Math.abs(box!.y - 140);
+  }).toBeLessThanOrEqual(2);
+  await expect.poll(async () => {
+    const box = await page.locator(".chat-composer").boundingBox();
+    return Math.abs(box!.y + box!.height - 628);
+  }).toBeLessThanOrEqual(2);
+  await page.evaluate(() => {
+    Reflect.deleteProperty(window, "innerHeight");
+    Reflect.deleteProperty(window.visualViewport!, "height");
+    Reflect.deleteProperty(window.visualViewport!, "offsetTop");
+    window.visualViewport!.dispatchEvent(new Event("resize"));
+  });
+  await expect(page.locator(".mobile-nav")).toBeVisible();
+  await expect(page.getByLabel("Message", { exact: true })).toHaveValue("Synthetic draft");
+});

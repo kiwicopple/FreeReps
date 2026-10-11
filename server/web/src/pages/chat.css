@@ -87,7 +87,18 @@
   overflow-y: auto;
 }
 @media (max-width: 767px) {
+  body:has(.chat-screen) {
+    overflow: hidden;
+  }
+  .chat-composer textarea {
+    /* Prevent Safari's focus zoom from changing the visual viewport scale. */
+    font-size: 16px;
+  }
   .chat-screen {
+    position: fixed;
+    top: var(--chat-viewport-top, 0px);
+    inset-inline: 0;
+
     height: calc(
       var(--chat-viewport-height, 100dvh) - 65px -
         env(safe-area-inset-bottom, 0px)
