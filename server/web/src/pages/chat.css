@@ -1,6 +1,39 @@
+.app-main:has(.chat-screen) {
+  padding-bottom: 0;
+}
+.chat-screen {
+  height: var(--chat-viewport-height, 100dvh);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.chat-screen .page-header {
+  flex: none;
+  margin-bottom: 0;
+}
 .chat-page {
   max-width: 900px;
-  min-height: calc(100dvh - 160px);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-block: 16px;
+}
+.chat-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 8px;
+}
+.chat-error {
+  flex: none;
+  max-height: 120px;
+  overflow-y: auto;
 }
 .chat-history {
   display: flex;
@@ -40,9 +73,7 @@
   border: 1px solid var(--border);
 }
 .chat-composer {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
+  flex: none;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -56,7 +87,19 @@
   overflow-y: auto;
 }
 @media (max-width: 767px) {
-  .chat-composer {
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  .chat-screen {
+    height: calc(
+      var(--chat-viewport-height, 100dvh) - 65px -
+        env(safe-area-inset-bottom, 0px)
+    );
+  }
+  .chat-screen[data-keyboard="true"] {
+    height: var(--chat-viewport-height);
+  }
+  .app-shell:has(.chat-screen[data-keyboard="true"]) .mobile-nav {
+    display: none;
+  }
+  .chat-page {
+    padding-block: 12px;
   }
 }

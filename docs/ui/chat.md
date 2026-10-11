@@ -27,8 +27,11 @@ claim to remember the entire conversation. History can load older messages.
 ## Provider and data boundaries
 
 `internal/chat` calls the OpenAI Responses API with `gpt-5-mini`, image inputs,
-`store: false`, and strict structured output. The output contains a reply and an
-optional food proposal. It has no unrestricted tools, SQL access or credentials
+`store: false`, and strict structured output for the full food record, including nutrient names and
+provenance enums. The server assigns canonical nutrient units. One automatic
+repair attempt handles cross-field validation errors before any food write.
+Only controlled validation rule codes are logged, never meal data. The output
+contains a reply and an optional food proposal. It has no unrestricted tools, SQL access or credentials
 in model context. User text and image/food content are untrusted input. Package
 labels take precedence over model estimates. Unknown nutrients remain absent;
 photo portions and nutrient amounts are explicitly estimates, not measurements.
@@ -64,8 +67,12 @@ and return `Cache-Control: no-store`.
   idempotent/versioned API preserves history and reopens affected completed days.
   Complete the turn only after save confirmation. A later send recovers prepared
   proposals without asking the model to generate a second meal.
-- Known generation/validation failures leave the draft editable. Unknown save
-  failures keep retry identity; the UI must not encourage submitting a new meal.
+- Known generation/validation failures automatically leave the draft editable.
+  There is one Send action. Unknown save failures keep the message identity and
+  lock editing until Send confirms its status, preventing duplicate meals.
+- The composer sits below an independently scrolling conversation, above mobile
+  navigation. Its viewport height adjusts to the software keyboard. Failed
+  pending turns are hidden once their editable draft is restored.
 
 No food, health-calculation or ingestion contract changes. The additive chat
 migration is compatible with rolling back the app image; do not drop chat tables
@@ -84,5 +91,17 @@ error draft preservation, keyboard controls, both themes and overflow from
 320–1440px in Chromium/WebKit. No real meals are posted during live smoke checks.
 
 Physical iPhone camera/HEIC behavior, keyboard resizing and home-screen safe areas
-still require a real-device check; WebKit emulation is not that check. An actual
-OpenAI completion requires the user's key and is separate from mock verification.
+still require a real-device check; WebKit emulation is not that check. A real OpenAI call with a synthetic best-guess meal also passed food validation
+on 2026-10-11 without writing to the live nutrition log.
+
+### Estimate validation follow-up — 2026-10-11
+
+The initial schema constrained `food_record_json` only as a string, leaving its
+contents outside Structured Outputs validation. A reported 502 reached the food
+validator after a completed provider response. The rejected payload was not
+retained and its exact failing field cannot be recovered from the old logs.
+The replacement uses a typed food object and named nutrient array, canonical
+server-assigned units, and one bounded repair for semantic validation failures.
+Synthetic tests exercise invalid portion metadata and preserve strict ranges,
+provenance and correction versions. A real-provider synthetic estimate passed
+without a production food write. This does not make model estimates measurements.

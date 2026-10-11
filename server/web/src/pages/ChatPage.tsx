@@ -45,7 +45,6 @@ export default function ChatPage() {
   const [pending, setPending] = useState<ChatRequest | null>(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
-  const [editableError, setEditableError] = useState(false);
   const [connection, setConnection] = useState(false);
   const [key, setKey] = useState("");
   const [savingKey, setSavingKey] = useState(false);
@@ -53,9 +52,32 @@ export default function ChatPage() {
   const gallery = useRef<HTMLInputElement>(null);
   const end = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
+  const screen = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    const resize = () => {
+      if (!screen.current) return;
+      screen.current.style.setProperty(
+        "--chat-viewport-height",
+        `${viewport?.height ?? window.innerHeight}px`,
+      );
+      screen.current.dataset.keyboard = String(
+        window.innerHeight - (viewport?.height ?? window.innerHeight) > 150,
+      );
+    };
+    resize();
+    viewport?.addEventListener("resize", resize);
+    window.addEventListener("resize", resize);
+    return () => {
+      viewport?.removeEventListener("resize", resize);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
   const current = history.data?.turns ?? [];
   const ids = new Set(current.map((t) => t.id));
-  const turns = [...older.filter((t) => !ids.has(t.id)), ...current];
+  const turns = [...older.filter((t) => !ids.has(t.id)), ...current].filter(
+    (t) => t.status !== "pending" || t.id === pending?.id,
+  );
   const configured = history.data?.configured ?? false;
   const latestID = current[current.length - 1]?.id;
   useEffect(() => {
@@ -106,7 +128,6 @@ export default function ChatPage() {
     setPending(body);
     setSending(true);
     setError("");
-    setEditableError(false);
     try {
       const result = await sendChat(body);
       cache.setQueryData(
@@ -132,9 +153,10 @@ export default function ChatPage() {
       setError(
         e instanceof Error
           ? e.message
-          : "Connection lost. Retry this message to check its save status.",
+          : "Connection lost. Press Send again to check its save status.",
       );
-      setEditableError(e instanceof ChatError && [400, 502].includes(e.status));
+      if (e instanceof ChatError && [400, 502].includes(e.status))
+        setPending(null);
       void history.refetch();
     } finally {
       setSending(false);
@@ -171,7 +193,7 @@ export default function ChatPage() {
   }
   const locked = sending || preparing || !!pending;
   return (
-    <>
+    <div className="chat-screen" ref={screen}>
       <PageHeader
         title="Chat"
         actions={
@@ -190,145 +212,156 @@ export default function ChatPage() {
         }
       />
       <PageContent className="chat-page">
-        {history.isPending && <Skeleton className="h-28 w-full" />}
-        {history.isError && (
-          <Alert role="alert">
-            Could not load chat.{" "}
-            <Button variant="outline" onClick={() => void history.refetch()}>
-              Retry
-            </Button>
-          </Alert>
-        )}
-        {history.data && (!configured || connection) && (
-          <PageSection
-            title="Connect OpenAI"
-            description="Use your OpenAI API key for this private chat."
-          >
-            <form onSubmit={saveKey} className="space-y-4">
-              <Field>
-                <FieldLabel htmlFor="chat-api-key">OpenAI API key</FieldLabel>
-                <Input
-                  id="chat-api-key"
-                  type="password"
-                  autoComplete="off"
-                  value={key}
-                  onChange={(e) => setKey(e.target.value)}
-                  placeholder="sk-…"
-                  required
-                  maxLength={512}
-                  disabled={savingKey}
-                />
-                <FieldDescription>
-                  The key is kept on your server and is never included in chat
-                  replies. API usage is billed to that key.
-                </FieldDescription>
-              </Field>
-              <div className="flex gap-2">
-                <Button type="submit" disabled={savingKey || !key.trim()}>
-                  {savingKey ? "Saving…" : "Save connection"}
-                </Button>
-                {configured && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => {
-                      setConnection(false);
-                      setKey("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                )}
-              </div>
-            </form>
-          </PageSection>
-        )}
-        {!history.isPending && !history.isError && (
-          <div className="chat-history" role="region" aria-label="Conversation">
-            {!!turns.length && history.data?.has_more && more && (
-              <Button
-                variant="ghost"
-                disabled={loadingOlder}
-                onClick={loadOlder}
-              >
-                {loadingOlder ? "Loading…" : "Older messages"}
+        <div className="chat-scroll">
+          {history.isPending && <Skeleton className="h-28 w-full" />}
+          {history.isError && (
+            <Alert role="alert">
+              Could not load chat.{" "}
+              <Button variant="outline" onClick={() => void history.refetch()}>
+                Retry
               </Button>
-            )}
-            {!turns.length && (
-              <div className="chat-empty">
-                <MessageCircle
-                  className="mx-auto mb-3 size-8 text-muted-foreground"
-                  aria-hidden
-                />
-                <h2>Food, photos, and a quick chat</h2>
-                <p>
-                  Tell me what you ate, take a photo, or ask about a menu.
-                  Everything stays in this one conversation.
-                </p>
-              </div>
-            )}
-            {turns.map((turn) => (
-              <div key={turn.id} className="chat-turn">
-                <article
-                  aria-label="Your message"
-                  className="chat-message chat-message-user"
-                >
-                  {turn.message && <p>{turn.message}</p>}
-                  {turn.image_count > 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      {turn.image_count} photo{turn.image_count > 1 ? "s" : ""}{" "}
-                      sent · image not stored
-                    </p>
+            </Alert>
+          )}
+          {history.data && (!configured || connection) && (
+            <PageSection
+              title="Connect OpenAI"
+              description="Use your OpenAI API key for this private chat."
+            >
+              <form onSubmit={saveKey} className="space-y-4">
+                <Field>
+                  <FieldLabel htmlFor="chat-api-key">OpenAI API key</FieldLabel>
+                  <Input
+                    id="chat-api-key"
+                    type="password"
+                    autoComplete="off"
+                    value={key}
+                    onChange={(e) => setKey(e.target.value)}
+                    placeholder="sk-…"
+                    required
+                    maxLength={512}
+                    disabled={savingKey}
+                  />
+                  <FieldDescription>
+                    The key is kept on your server and is never included in chat
+                    replies. API usage is billed to that key.
+                  </FieldDescription>
+                </Field>
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={savingKey || !key.trim()}>
+                    {savingKey ? "Saving…" : "Save connection"}
+                  </Button>
+                  {configured && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        setConnection(false);
+                        setKey("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
                   )}
-                </article>
-                {turn.status === "complete" ? (
+                </div>
+              </form>
+            </PageSection>
+          )}
+          {!history.isPending && !history.isError && (
+            <div
+              className="chat-history"
+              role="region"
+              aria-label="Conversation"
+            >
+              {!!turns.length && history.data?.has_more && more && (
+                <Button
+                  variant="ghost"
+                  disabled={loadingOlder}
+                  onClick={loadOlder}
+                >
+                  {loadingOlder ? "Loading…" : "Older messages"}
+                </Button>
+              )}
+              {!turns.length && (
+                <div className="chat-empty">
+                  <MessageCircle
+                    className="mx-auto mb-3 size-8 text-muted-foreground"
+                    aria-hidden
+                  />
+                  <h2>Food, photos, and a quick chat</h2>
+                  <p>
+                    Tell me what you ate, take a photo, or ask about a menu.
+                    Everything stays in this one conversation.
+                  </p>
+                </div>
+              )}
+              {turns.map((turn) => (
+                <div key={turn.id} className="chat-turn">
                   <article
-                    aria-label="Protocol reply"
-                    className="chat-message chat-message-assistant"
+                    aria-label="Your message"
+                    className="chat-message chat-message-user"
                   >
-                    <p>{turn.reply}</p>
-                    {turn.saved_entry_id && (
-                      <Button
-                        variant="link"
-                        className="mt-2 px-0"
-                        render={
-                          <Link
-                            to={`/nutrition?date=${turn.saved_date ?? turn.local_date}&range=day&tab=food-log`}
-                          />
-                        }
-                      >
-                        View nutrition log
-                      </Button>
+                    {turn.message && <p>{turn.message}</p>}
+                    {turn.image_count > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        {turn.image_count} photo
+                        {turn.image_count > 1 ? "s" : ""} sent · image not
+                        stored
+                      </p>
                     )}
                   </article>
-                ) : (
-                  turn.id !== pending?.id && (
-                    <p className="text-sm text-muted-foreground">
-                      {turn.status === "prepared"
-                        ? "Reply awaiting save confirmation. Sending your next message will recover it."
-                        : "No completed reply. You can resend the message; attach photos again if needed."}
-                    </p>
-                  )
-                )}
-              </div>
-            ))}
-            {pending && !turns.some((t) => t.id === pending.id) && (
-              <article
-                aria-label="Your pending message"
-                className="chat-message chat-message-user"
-              >
-                <p>{pending.message || "Photo message"}</p>
-              </article>
-            )}
-            {sending && (
-              <p role="status" className="text-sm text-muted-foreground">
-                Looking at your message…
-              </p>
-            )}
-            <div ref={end} />
-          </div>
+                  {turn.status === "complete" ? (
+                    <article
+                      aria-label="Protocol reply"
+                      className="chat-message chat-message-assistant"
+                    >
+                      <p>{turn.reply}</p>
+                      {turn.saved_entry_id && (
+                        <Button
+                          variant="link"
+                          className="mt-2 px-0"
+                          render={
+                            <Link
+                              to={`/nutrition?date=${turn.saved_date ?? turn.local_date}&range=day&tab=food-log`}
+                            />
+                          }
+                        >
+                          View nutrition log
+                        </Button>
+                      )}
+                    </article>
+                  ) : (
+                    turn.id !== pending?.id && (
+                      <p className="text-sm text-muted-foreground">
+                        {turn.status === "prepared"
+                          ? "Reply awaiting save confirmation. Sending your next message will recover it."
+                          : "No completed reply. You can resend the message; attach photos again if needed."}
+                      </p>
+                    )
+                  )}
+                </div>
+              ))}
+              {pending && !turns.some((t) => t.id === pending.id) && (
+                <article
+                  aria-label="Your pending message"
+                  className="chat-message chat-message-user"
+                >
+                  <p>{pending.message || "Photo message"}</p>
+                </article>
+              )}
+              {sending && (
+                <p role="status" className="text-sm text-muted-foreground">
+                  Looking at your message…
+                </p>
+              )}
+              <div ref={end} />
+            </div>
+          )}
+        </div>
+        {error && (
+          <Alert className="chat-error" role="alert">
+            {error}
+          </Alert>
         )}
-        {error && <Alert role="alert">{error}</Alert>}
         {configured && !history.isError && (
           <form
             onSubmit={submit}
@@ -421,19 +454,6 @@ export default function ChatPage() {
                 >
                   <ImagePlus />
                 </Button>
-                {editableError && pending && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => {
-                      setPending(null);
-                      setError("");
-                      setEditableError(false);
-                    }}
-                  >
-                    Edit message
-                  </Button>
-                )}
               </div>
               <Button
                 type="submit"
@@ -442,14 +462,9 @@ export default function ChatPage() {
                 }
               >
                 <Send />
-                {sending ? "Sending…" : pending ? "Retry message" : "Send"}
+                {sending ? "Sending…" : "Send"}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Messages, recent food logs and attached photos are sent to OpenAI.
-              Protocol keeps the conversation text, not photos. Photo nutrition
-              is an estimate.
-            </p>
             {preparing && (
               <p role="status" className="text-sm text-muted-foreground">
                 Preparing photos…
@@ -458,6 +473,6 @@ export default function ChatPage() {
           </form>
         )}
       </PageContent>
-    </>
+    </div>
   );
 }

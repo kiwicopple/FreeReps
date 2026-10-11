@@ -88,7 +88,7 @@ test("retry retains message identity and saved historical date", async ({
     "Awaiting save confirmation",
   );
   await expect(page.getByLabel("Message", { exact: true })).toBeDisabled();
-  await page.getByRole("button", { name: "Retry message" }).click();
+  await page.getByRole("button", { name: "Send", exact: true }).click();
   await expect(
     page.getByRole("article", { name: "Protocol reply" }),
   ).toContainText("400 kcal");
@@ -193,11 +193,16 @@ test("failed estimate retains draft and permits editing", async ({
   await page.getByLabel("Message", { exact: true }).fill("Synthetic meal");
   await page.getByRole("button", { name: "Send", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("Nothing was logged");
-  await page.getByRole("button", { name: "Edit message" }).click();
+  await expect(
+    page.getByRole("button", { name: /Edit message|Retry message/ }),
+  ).toHaveCount(0);
   await expect(page.getByLabel("Message", { exact: true })).toBeEnabled();
   await expect(page.getByLabel("Message", { exact: true })).toHaveValue(
     "Synthetic meal",
   );
+  await page
+    .getByLabel("Message", { exact: true })
+    .fill("Synthetic meal, half a bowl");
 });
 
 // Local dates and timezone are sampled when sending, not hardcoded to the server's country.
@@ -289,4 +294,75 @@ test("responsive chat, keyboard, and accessibility", async ({
       });
     }
   }
+});
+
+// The composer is a viewport footer, not a sticky element whose position depends on history length.
+test("composer stays anchored with empty and long history", async ({
+  safePage: page,
+}) => {
+  await connected(page);
+  await page.goto("/chat");
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect
+      .poll(async () => {
+        const composer = await page.locator(".chat-composer").boundingBox();
+        const nav =
+          width < 768 ? await page.locator(".mobile-nav").boundingBox() : null;
+        return Math.abs(
+          composer!.y +
+            composer!.height -
+            ((nav?.y ?? 900) - (width < 768 ? 12 : 16)),
+        );
+      })
+      .toBeLessThanOrEqual(2);
+    const before = await page.locator(".chat-composer").boundingBox();
+    await page.locator(".chat-history").evaluate((el) => {
+      const p = document.createElement("p");
+      p.textContent = "Synthetic history ".repeat(2000);
+      el.appendChild(p);
+    });
+    await page.locator(".chat-scroll").evaluate((el) => {
+      el.scrollTop = el.scrollHeight;
+    });
+    const after = await page.locator(".chat-composer").boundingBox();
+    expect(Math.abs(after!.y - before!.y)).toBeLessThanOrEqual(1);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollHeight <= innerHeight + 1,
+      ),
+    ).toBe(true);
+  }
+  await expect(
+    page.getByText("Messages, recent food logs and attached photos", {
+      exact: false,
+    }),
+  ).toHaveCount(0);
+});
+
+// A reduced visual viewport represents the software keyboard; keep Send above it.
+test("composer follows the keyboard viewport", async ({ safePage: page }) => {
+  await connected(page);
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/chat");
+  await expect(page.getByLabel("Message", { exact: true })).toBeVisible();
+  await page.evaluate(() => {
+    Object.defineProperty(window.visualViewport!, "height", {
+      configurable: true,
+      value: 500,
+    });
+    window.visualViewport!.dispatchEvent(new Event("resize"));
+  });
+  await expect(page.locator(".mobile-nav")).toBeHidden();
+  await expect
+    .poll(async () => {
+      const composer = await page.locator(".chat-composer").boundingBox();
+      return Math.abs(composer!.y + composer!.height - 488);
+    })
+    .toBeLessThanOrEqual(2);
+  await page.evaluate(() => {
+    Reflect.deleteProperty(window.visualViewport!, "height");
+    window.visualViewport!.dispatchEvent(new Event("resize"));
+  });
+  await expect(page.locator(".mobile-nav")).toBeVisible();
 });

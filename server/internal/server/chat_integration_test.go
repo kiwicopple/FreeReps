@@ -66,7 +66,26 @@ func TestChatPersistence(t *testing.T) {
 		if r.Header.Get("Authorization") != "Bearer sk-synthetic" {
 			t.Error("credential missing")
 		}
-		raw, _ := json.Marshal(proposal)
+		var food any
+		if proposal.FoodJSON != nil {
+			var decoded map[string]any
+			_ = json.Unmarshal([]byte(*proposal.FoodJSON), &decoded)
+			if entry, ok := decoded["entry"].(map[string]any); ok {
+				for _, rawItem := range entry["items"].([]any) {
+					item := rawItem.(map[string]any)
+					nutrients := []any{}
+					for name, rawNutrient := range item["nutrients"].(map[string]any) {
+						n := rawNutrient.(map[string]any)
+						n["name"] = name
+						delete(n, "unit")
+						nutrients = append(nutrients, n)
+					}
+					item["nutrients"] = nutrients
+				}
+			}
+			food = decoded
+		}
+		raw, _ := json.Marshal(map[string]any{"reply": proposal.Reply, "food_record": food})
 		_ = json.NewEncoder(w).Encode(map[string]any{"status": "completed", "output": []any{map[string]any{"type": "message", "content": []any{map[string]any{"type": "output_text", "text": string(raw)}}}}})
 	}))
 	defer provider.Close()

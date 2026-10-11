@@ -25,7 +25,7 @@ func TestGenerateWireContract(t *testing.T) {
 			t.Error("provider persistence/model changed")
 		}
 		encoded, _ := json.Marshal(body)
-		for _, want := range []string{"input_image", "data:image/png;base64,synthetic", "America/Los_Angeles", "2025-01-14", "json_schema", "food_record_json", "prior reply"} {
+		for _, want := range []string{"input_image", "data:image/png;base64,synthetic", "America/Los_Angeles", "2025-01-14", "json_schema", "food_record", "prior reply"} {
 			if !strings.Contains(string(encoded), want) {
 				t.Errorf("missing %s", want)
 			}
@@ -34,7 +34,7 @@ func TestGenerateWireContract(t *testing.T) {
 			t.Error("key included in model context")
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"status":"completed","output":[{"type":"message","content":[{"type":"output_text","text":"{\"reply\":\"Which items did you eat?\",\"food_record_json\":null}"}]}]}`))
+		_, _ = w.Write([]byte(`{"status":"completed","output":[{"type":"message","content":[{"type":"output_text","text":"{\"reply\":\"Which items did you eat?\",\"food_record\":null}"}]}]}`))
 	}))
 	defer provider.Close()
 	client := NewClient()
