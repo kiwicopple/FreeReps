@@ -10,6 +10,9 @@ done
 node -e 'if (Number(process.versions.node.split(".")[0]) < 24) { console.error("Use Node 24 or newer (for example: nvm use 24)."); process.exit(1); }'
 docker info >/dev/null
 
+echo 'Checking tracked files for private data'
+python3 tools/check-private-files.py
+python3 -m unittest discover -s tools/tests
 echo 'Checking documentation'
 tools/check-docs.sh --all
 echo 'Installing locked frontend dependencies and checking the UI'

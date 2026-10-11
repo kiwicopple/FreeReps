@@ -94,3 +94,17 @@ apple_health_export/
 # Browser verification artifacts (never capture personal health data)
 server/web/test-results/
 server/web/playwright-report/
+
+# Unverified legacy screenshots and generated App Store captures stay local.
+docs/screenshots/claude-mcp.png
+docs/screenshots/ios/
+release/screenshots/
+release/framed/
+# Additional logical backup formats
+*.backup
+*.sql.gz
+*.sql.zst
+
+# Python local test caches
+__pycache__/
+*.pyc

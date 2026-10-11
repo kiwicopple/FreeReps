@@ -210,3 +210,11 @@ configuration. Use synthetic fixtures in tests. Before each commit and push,
 review the staged paths and diff for private data; ignore rules do not protect
 files already tracked. Keep actual data in the local database or ignored private
 directories. This repository is public, so a commit can disclose it permanently.
+
+## Local backups and privacy guard
+
+Run `bash tools/backup-db.sh` before risky data operations and for periodic local
+backups. Keep all dumps under the ignored `backups/` directory; never stage them.
+See `docs/operations/backups.md` for restore verification and limitations.
+Install the local commit/push guard with `git config core.hooksPath .githooks`.
+Why: ignore rules alone do not protect tracked files or forced additions.

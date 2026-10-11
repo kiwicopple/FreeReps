@@ -40,10 +40,6 @@ capture is a screenshot of Claude Desktop, so it has one version only.
 |:-:|:-:|
 | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/correlations-dark.png"><img alt="Correlations" src="docs/screenshots/correlations.png"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/trends-dark.png"><img alt="Trends" src="docs/screenshots/trends.png"></picture> |
 
-| MCP |
-|:-:|
-| ![Claude MCP](docs/screenshots/claude-mcp.png) |
-
 ## iOS companion app
 
 An iOS companion app that syncs HealthKit directly to the server exists, but it

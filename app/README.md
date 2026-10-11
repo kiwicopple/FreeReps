@@ -11,12 +11,6 @@
 
 FreeReps is an iOS companion app that syncs Apple HealthKit data to a FreeReps server via HTTP. Your health data flows from HealthKit on your phone to your self-hosted server — no cloud services, no third parties.
 
-## Screenshots
-
-| | | | |
-|:-:|:-:|:-:|:-:|
-| ![Main](../docs/screenshots/ios/framed-main.png) | ![Sync](../docs/screenshots/ios/framed-sync.png) | ![Settings](../docs/screenshots/ios/framed-settings.png) | ![Permissions](../docs/screenshots/ios/framed-permissions.png) |
-
 ## Acknowledgements
 
 This app is based on [HealthBeat](https://github.com/kempu/HealthBeat) by kempu, an open-source iOS app for syncing Apple Health data. HealthBeat was adapted into the FreeReps companion app for the self-hosted FreeReps server. Licensed under the MIT License.
