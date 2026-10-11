@@ -136,8 +136,8 @@ are unchanged; this exception does not establish a physical VoiceOver audit.
 Run type checking/production build, Vitest and existing numerical suites,
 Chromium/WebKit acceptance tests, Go build/vet/tests, golangci-lint and the
 repository document check. Review synthetic snapshots in both themes. Push the
-focused commits to the existing GitHub fork and confirm Web parity CI before
-one app-only Docker deployment. Preserve the previously deployed image for
+focused commits to the existing GitHub fork after `bash tools/verify-local.sh`
+passes, before one app-only Docker deployment. Preserve the previously deployed image for
 rollback and leave data volumes untouched. Live smoke checks are read-only.
 
 The image preceding this dashboard release is preserved as

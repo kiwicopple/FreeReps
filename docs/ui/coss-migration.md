@@ -168,9 +168,11 @@ npm run test:e2e
 PW_SCREENSHOTS=1 npm run test:e2e
 ```
 
-The GitHub fork's `.github/workflows/web.yml` runs type checking (as part of the
-build), production build, tests and Chromium/WebKit browser checks alongside
-existing Forgejo checks. There is no artifact-upload step. `test-results` and
+The GitHub fork uses `bash tools/verify-local.sh` for local type checking,
+production build, unit tests and Chromium/WebKit browser checks, plus Go and
+document checks. GitHub Actions workflows have been removed; pushes only store
+source. Upstream Forgejo configuration remains separate. There is no artifact-upload
+step. `test-results` and
 Playwright reports are ignored; traces, screenshots and video are off by default.
 
 Browser tests use a separate Vite port, a fixed synthetic time and an allowlisted

@@ -39,30 +39,28 @@ when working under those paths.
 
 ## Repository & CI/CD
 
-**Forgejo is the source of truth**: `git.coydog-fence.ts.net/meltforce.net/freereps`
-(`origin`). `github.com/meltforce/FreeReps` is a push mirror — never push there
-directly. The mirror is `git push --mirror`: it force-pushes *and* prunes refs
-that don't exist on Forgejo, so anything that must survive on GitHub has to
-exist on Forgejo first (a GitHub-only branch is deleted at the next sync).
+This working fork pushes directly to `github.com/kiwicopple/FreeReps`.
+GitHub is source storage only: all GitHub Actions workflows are removed,
+including web checks, iOS builds and automatic releases. Run
+`bash tools/verify-local.sh` locally before pushing or deploying. This avoids
+hosted-runner billing dependencies while retaining the same test gates.
 
-| Where | What runs | Triggered by |
-|---|---|---|
-| `.forgejo/workflows/ci.yml` | Go build/vet/test/lint, frontend tsc + build, document contract check, then build → `git.coydog-fence.ts.net/meltforce.net/freereps:edge` → redeploy on `freereps-lxc` | push/PR on `main` |
-| `.github/workflows/ios.yml` | Xcode build (no macOS runner exists on Forgejo) | mirror push |
-| `.github/workflows/release.yml` | Docker Hub image + GitHub Release with `freereps-upload` binaries | tag push, carried over by the mirror |
+Use Node 24+ and Docker Desktop. Install browser binaries once with
+`cd server/web && npx playwright install chromium webkit` after `npm ci`.
+The local script installs locked dependencies, checks documentation, builds and
+tests the frontend (including Chromium/WebKit), then builds, vets, tests and
+lints Go in Docker. It does not push, deploy, or access the live health database.
 
-Deploy runs through the shared reusable workflow
-`meltforce.net/ci-workflows/.forgejo/workflows/build-push-deploy.yml@v4` with
-`sync_compose: false` — **the deployed compose belongs to the homelab repo**
-(`docker/stacks/freereps/compose.yaml`, plus the catalog entry in
-`configuration/docker-stacks/stacks/freereps.yml`, which renders `.env` and
-`config.yaml`). Change the image ref, ports or volumes there, not here.
-`server/docker-compose.yml` is for local development only.
+Storage changes also require the scratch-database integration checks in
+`server/CLAUDE.md`. iOS changes require the local Xcode build in `app/CLAUDE.md`.
+Neither conditional check is implied by a successful dashboard verification.
 
-Runner labels: `docker` (normal jobs), `docker-buildx` (image builds), `host`
-(runs on the runner LXC itself — needed for Tailscale SSH into deploy targets).
-The Forgejo org `meltforce.net` already provides `REGISTRY_USER`,
-`REGISTRY_TOKEN`, `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`; no repo secrets.
+Deploy the local app container only after checks pass, preserving the previous
+image and all data volumes. Keep synthetic browser artifacts out of Git.
+
+The `.forgejo` workflows are retained as upstream configuration; they do not
+run on GitHub. The upstream Forgejo and Docker Hub release infrastructure is
+separate from this fork's local deployment.
 
 ## Data source documentation
 

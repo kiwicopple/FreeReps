@@ -5,8 +5,13 @@ description: Run the checks that have to pass before a FreeReps commit lands —
 
 # Verify
 
-Run from the repo root. The order below is cheapest-first: a failure in step 1
-makes the rest irrelevant.
+For this GitHub fork, run `bash tools/verify-local.sh` from the repo root with
+Node 24+ and Docker Desktop. All checks run locally; no GitHub Actions workflows
+remain. Browser binaries must be installed once using
+`cd server/web && npm ci && npx playwright install chromium webkit`.
+The script includes the full synthetic Chromium/WebKit suite and stops on failure.
+It neither pushes nor deploys. The individual commands below are useful for
+focused checks; storage integration and iOS checks remain conditional on changes.
 
 ## 1. Go
 
@@ -49,8 +54,8 @@ contents.
 cd server && golangci-lint run ./...
 ```
 
-CI pins v2.10.1 (`.forgejo/workflows/ci.yml`). A local version that differs can
-pass where CI fails; on a disagreement, the pinned version decides.
+The local script and upstream CI pin v2.13.2 (`.forgejo/workflows/ci.yml`).
+A local version that differs can pass where CI fails; on a disagreement, the pinned version decides.
 
 ## 3. Frontend
 
@@ -73,7 +78,7 @@ prevent. On a German hit that is a verbatim quote of upstream output, add that
 specific line to `tools/check-docs.allow` with a reason — do not weaken the
 pattern in the script.
 
-## What CI repeats, and what it does not
+## Upstream CI reference (not this fork)
 
 `.forgejo/workflows/ci.yml` runs steps 1 through 4 on every push and PR against
 `main`. It does **not** run the integration tests, and it does not build the iOS
