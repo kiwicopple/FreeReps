@@ -1,3 +1,5 @@
+import { Badge } from "../ui/badge";
+import { Card, CardContent } from "../ui/card";
 import { localToday } from "../../utils/localDate";
 import { Field, FieldLabel } from "../ui/field";
 import PageSection from "../PageSection";
@@ -156,65 +158,38 @@ export default function HevyTab() {
         </div>
       ) : (
         <>
-          <div className="mt-5 rounded-xl bg-muted p-4">
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              <span
-                style={{
-                  width: 11,
-                  height: 11,
-                  background: "var(--primary)",
-                }}
-              />
-              <span style={{ font: "600 14px var(--font-body)" }}>
-                Connected
-              </span>
-              <span
-                style={{
-                  marginLeft: "auto",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 8,
-                }}
-              >
-                <Button
-                  variant="outline"
-                  type="button"
+          <Card className="mt-5">
+            <CardContent>
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant="outline">Connected</Badge>
+                <span className="ml-auto flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    type="button"
 
-                  style={{ fontSize: 12 }}
-                  onClick={handleSync}
-                  disabled={syncing}
-                  loading={syncing}
-                >
-                  {syncing ? "Syncing…" : "Sync now"}
-                </Button>
-                <ConnectionMenu
-                  provider="Hevy"
-                  onEdit={() => setEditingCredentials(true)}
-                  description="The API key is removed. Previously imported sets remain available."
-                  onDisconnect={handleDisconnect}
-                />
-              </span>
-            </div>
-            <div
-              style={{
-                font: "400 12px var(--font-body)",
-                color: "var(--muted-foreground)",
-                marginTop: 8,
-              }}
-            >
-              Importing workouts from {status.sync_from}
-              {status.last_sync
-                ? ` · last sync ${new Date(status.last_sync).toLocaleString("en-GB")}`
-                : ""}
-            </div>
-          </div>
+                    size="sm"
+                    onClick={handleSync}
+                    disabled={syncing}
+                    loading={syncing}
+                  >
+                    {syncing ? "Syncing…" : "Sync now"}
+                  </Button>
+                  <ConnectionMenu
+                    provider="Hevy"
+                    onEdit={() => setEditingCredentials(true)}
+                    description="The API key is removed. Previously imported sets remain available."
+                    onDisconnect={handleDisconnect}
+                  />
+                </span>
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                Importing workouts from {status.sync_from}
+                {status.last_sync
+                  ? ` · last sync ${new Date(status.last_sync).toLocaleString("en-GB")}`
+                  : ""}
+              </div>
+            </CardContent>
+          </Card>
 
           {editingCredentials && (
             <div className="mt-6 max-w-lg">

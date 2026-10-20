@@ -68,3 +68,15 @@ and production build, unit/calculation tests, 304 Chromium/WebKit browser tests
 and mobile/desktop screenshots were reviewed. The dependency audit reported zero
 known vulnerabilities. Physical iPhone checks have not been performed for this
 release and remain separate from the passing WebKit emulation.
+
+### Follow-up style consolidation
+
+Nutrition logging status and Other nutrients, personal metric comparisons, and
+integration connection panels use the shared Card/CardContent instead of custom
+rounded boxes. Connection indicators use Badge. The import drop zone uses standard
+spacing, text and radius utilities. Mobile navigation inherits the Studio button
+radius. Removed the separate nutrition panel CSS and redundant summary border
+color override. Shared cards retain the pinned Supabase source's 8px rounding.
+
+Responsive layout, safe-area handling, chat keyboard geometry, measurement colors
+and accessible focus behavior remain application responsibilities.

@@ -1,3 +1,4 @@
+import { Card, CardContent } from "../ui/card";
 import { useLocalDay } from "@/hooks/useLocalDay";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -162,89 +163,90 @@ export default function MetricDetailContent({
           !query.isError && <Empty>No readings in this period.</Empty>
         )}
       </section>
-      <section
-        aria-label="Compared with you"
-        className="space-y-3 rounded-xl border p-4"
-      >
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="font-semibold">Compared with you</h3>
-          {hasComparison && <Badge variant="outline">{movement}</Badge>}
-        </div>
-        {baseline.isError ? (
-          <Alert variant="error">
-            Could not refresh your personal comparison.
-            <Button variant="outline" onClick={() => baseline.refetch()}>
-              Retry comparison
-            </Button>
-          </Alert>
-        ) : baseline.isPending ? (
-          <Skeleton
-            className="h-16 w-full"
-            aria-label="Loading personal comparison"
-          />
-        ) : (
-          <>
-            <dl className="grid grid-cols-2 gap-4 text-xs">
-              <div>
-                <dt className="text-muted-foreground">Recent 7-day average</dt>
-                <dd className="text-base font-semibold tabular-nums">
-                  {format(comparison.recentMean)} {initial.unit}
-                </dd>
-                <dd className="text-muted-foreground">
-                  {comparison.recentCount}/7 days recorded
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">
-                  Previous 7-day average
-                </dt>
-                <dd className="text-base font-semibold tabular-nums">
-                  {format(comparison.previousMean)} {initial.unit}
-                </dd>
-                <dd className="text-muted-foreground">
-                  {comparison.previousCount}/7 days recorded
-                </dd>
-              </div>
-            </dl>
-            {hasComparison ? (
-              <>
-                <p>
-                  {formatDelta(comparison.change!)} {initial.unit} compared with
-                  the previous week.
-                  {moving && info.direction !== "context" && (
-                    <span>
-                      {" "}
-                      {favorable
-                        ? "A potentially favorable direction"
-                        : "Moving against the generally favorable direction"}{" "}
-                      for this metric; context still matters.
-                    </span>
-                  )}
-                  {moving &&
-                    info.direction === "context" &&
-                    " A change here is not inherently good or bad."}
+      <Card render={<section aria-label="Compared with you" />}>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-semibold">Compared with you</h3>
+            {hasComparison && <Badge variant="outline">{movement}</Badge>}
+          </div>
+          {baseline.isError ? (
+            <Alert variant="error">
+              Could not refresh your personal comparison.
+              <Button variant="outline" onClick={() => baseline.refetch()}>
+                Retry comparison
+              </Button>
+            </Alert>
+          ) : baseline.isPending ? (
+            <Skeleton
+              className="h-16 w-full"
+              aria-label="Loading personal comparison"
+            />
+          ) : (
+            <>
+              <dl className="grid grid-cols-2 gap-4 text-xs">
+                <div>
+                  <dt className="text-muted-foreground">
+                    Recent 7-day average
+                  </dt>
+                  <dd className="text-base font-semibold tabular-nums">
+                    {format(comparison.recentMean)} {initial.unit}
+                  </dd>
+                  <dd className="text-muted-foreground">
+                    {comparison.recentCount}/7 days recorded
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">
+                    Previous 7-day average
+                  </dt>
+                  <dd className="text-base font-semibold tabular-nums">
+                    {format(comparison.previousMean)} {initial.unit}
+                  </dd>
+                  <dd className="text-muted-foreground">
+                    {comparison.previousCount}/7 days recorded
+                  </dd>
+                </div>
+              </dl>
+              {hasComparison ? (
+                <>
+                  <p>
+                    {formatDelta(comparison.change!)} {initial.unit} compared
+                    with the previous week.
+                    {moving && info.direction !== "context" && (
+                      <span>
+                        {" "}
+                        {favorable
+                          ? "A potentially favorable direction"
+                          : "Moving against the generally favorable direction"}{" "}
+                        for this metric; context still matters.
+                      </span>
+                    )}
+                    {moving &&
+                      info.direction === "context" &&
+                      " A change here is not inherently good or bad."}
+                  </p>
+                </>
+              ) : (
+                <p className="text-muted-foreground">
+                  Not enough history for a weekly comparison. At least four
+                  recorded days in each of the two complete weeks are needed.
                 </p>
-              </>
-            ) : (
-              <p className="text-muted-foreground">
-                Not enough history for a weekly comparison. At least four
-                recorded days in each of the two complete weeks are needed.
-              </p>
-            )}
-            {comparison.typical && (
-              <p className="text-xs text-muted-foreground">
-                Your earlier typical range:{" "}
-                <strong className="font-medium text-foreground">
-                  {format(comparison.typical[0])}–
-                  {format(comparison.typical[1])} {initial.unit}
-                </strong>
-                . This is the middle half of {comparison.referenceCount}{" "}
-                recorded days before the recent week, not a medical target.
-              </p>
-            )}
-          </>
-        )}
-      </section>
+              )}
+              {comparison.typical && (
+                <p className="text-xs text-muted-foreground">
+                  Your earlier typical range:{" "}
+                  <strong className="font-medium text-foreground">
+                    {format(comparison.typical[0])}–
+                    {format(comparison.typical[1])} {initial.unit}
+                  </strong>
+                  . This is the middle half of {comparison.referenceCount}{" "}
+                  recorded days before the recent week, not a medical target.
+                </p>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
       <section aria-label="How to read it" className="space-y-2">
         <h3 className="font-semibold">What good looks like</h3>
         <p className="text-muted-foreground">{info.guidance}</p>

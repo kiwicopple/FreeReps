@@ -1,3 +1,4 @@
+import { Card, CardContent } from "@/components/ui/card";
 import { useLocalDay } from "../hooks/useLocalDay";
 import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs";
 import VisitedTabPanel from "@/components/VisitedTabPanel";
@@ -431,41 +432,40 @@ export default function NutritionPage() {
               >
                 {HERO.map((k) => nutrient(k, true))}
               </SummaryGrid>
-              <section
-                aria-label="Logging status"
-                className="rounded-xl border bg-card p-4"
-              >
-                <div className="nutrition-intro">
-                  <div>
-                    <strong>
-                      {range === "day"
-                        ? currentDay?.complete
-                          ? "Day marked complete"
-                          : "Day in progress"
-                        : `${completeDays} of ${count} days marked complete`}
-                    </strong>
-                    <p className="nutrition-muted">
-                      {range === "day"
-                        ? "Log everything you consume, then mark the day complete."
-                        : "Averages include days with values, including partial days. Missing days are excluded."}{" "}
-                      Unknown nutrients are never counted as zero.
-                    </p>
+              <Card render={<section aria-label="Logging status" />}>
+                <CardContent>
+                  <div className="nutrition-intro">
+                    <div>
+                      <strong>
+                        {range === "day"
+                          ? currentDay?.complete
+                            ? "Day marked complete"
+                            : "Day in progress"
+                          : `${completeDays} of ${count} days marked complete`}
+                      </strong>
+                      <p className="nutrition-muted">
+                        {range === "day"
+                          ? "Log everything you consume, then mark the day complete."
+                          : "Averages include days with values, including partial days. Missing days are excluded."}{" "}
+                        Unknown nutrients are never counted as zero.
+                      </p>
+                    </div>
+                    {range === "day" && (
+                      <Button
+                        variant="outline"
+                        disabled={saving || query.isError}
+                        onClick={() => void toggle()}
+                      >
+                        {saving
+                          ? "Saving…"
+                          : currentDay?.complete
+                            ? "Reopen day"
+                            : "Mark day complete"}
+                      </Button>
+                    )}
                   </div>
-                  {range === "day" && (
-                    <Button
-                      variant="outline"
-                      disabled={saving || query.isError}
-                      onClick={() => void toggle()}
-                    >
-                      {saving
-                        ? "Saving…"
-                        : currentDay?.complete
-                          ? "Reopen day"
-                          : "Mark day complete"}
-                    </Button>
-                  )}
-                </div>
-              </section>
+                </CardContent>
+              </Card>
               {!protocol && (
                 <p className="nutrition-notice">
                   No protocol applies to this date. Intake is still available;
@@ -586,24 +586,30 @@ export default function NutritionPage() {
                       {MICRO.map((k) => nutrient(k))}
                     </div>
                   </PageSection>
-                  <ResponsiveDetails
-                    title="Other nutrients"
-                    className="nutrition-section"
-                    trigger={
-                      <>
-                        <h2 style={{ display: "inline" }}>Other nutrients</h2>
-                      </>
-                    }
-                  >
-                    <div className="nutrition-grid">
-                      {Object.keys(data.catalog)
-                        .filter(
-                          (k) => ![...HERO, ...SECONDARY, ...MICRO].includes(k),
-                        )
-                        .sort()
-                        .map((k) => nutrient(k))}
-                    </div>
-                  </ResponsiveDetails>
+                  <Card>
+                    <CardContent>
+                      <ResponsiveDetails
+                        title="Other nutrients"
+                        trigger={
+                          <>
+                            <h2 className="text-sm font-medium">
+                              Other nutrients
+                            </h2>
+                          </>
+                        }
+                      >
+                        <div className="nutrition-grid">
+                          {Object.keys(data.catalog)
+                            .filter(
+                              (k) =>
+                                ![...HERO, ...SECONDARY, ...MICRO].includes(k),
+                            )
+                            .sort()
+                            .map((k) => nutrient(k))}
+                        </div>
+                      </ResponsiveDetails>
+                    </CardContent>
+                  </Card>
                 </VisitedTabPanel>
                 <VisitedTabPanel
                   active={tab}

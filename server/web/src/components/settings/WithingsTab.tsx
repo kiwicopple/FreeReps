@@ -1,3 +1,5 @@
+import { Badge } from "../ui/badge";
+import { Card, CardContent } from "../ui/card";
 import { Field, FieldLabel } from "../ui/field";
 import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
@@ -228,80 +230,53 @@ function StatusPanel({
 
   return (
     <>
-      <div className="mt-5 rounded-xl bg-muted p-4">
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          <span
-            style={{
-              width: 11,
-              height: 11,
-              background: connected
-                ? "var(--primary)"
-                : "var(--muted-foreground)",
-            }}
-          />
-          <span style={{ font: "600 14px var(--font-body)" }}>
-            {connected ? "Connected" : "Credentials saved"}
-          </span>
-          <span
-            style={{
-              marginLeft: "auto",
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 8,
-            }}
-          >
-            {connected ? (
-              <Button
-                variant="outline"
-                type="button"
+      <Card className="mt-5">
+        <CardContent>
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge variant="outline">
+              {connected ? "Connected" : "Credentials saved"}
+            </Badge>
+            <span className="ml-auto flex flex-wrap gap-2">
+              {connected ? (
+                <Button
+                  variant="outline"
+                  type="button"
 
-                style={{ fontSize: 12 }}
-                onClick={onSync}
-                disabled={syncing}
-                loading={syncing}
-              >
-                {syncing ? "Syncing…" : "Sync now"}
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                type="button"
+                  size="sm"
+                  onClick={onSync}
+                  disabled={syncing}
+                  loading={syncing}
+                >
+                  {syncing ? "Syncing…" : "Sync now"}
+                </Button>
+              ) : (
+                <Button
+                  variant="default"
+                  type="button"
 
-                style={{ fontSize: 12 }}
-                onClick={onConnect}
-              >
-                Authorize with Withings
-              </Button>
-            )}
-            <ConnectionMenu
-              provider="Withings"
-              onEdit={onEdit}
-              description="This removes stored tokens and credentials. Previously imported data remains available."
-              onDisconnect={onDisconnect}
-            />
-          </span>
-        </div>
-        <div
-          style={{
-            font: "400 12px var(--font-body)",
-            color: "var(--muted-foreground)",
-            marginTop: 8,
-          }}
-        >
-          {connected
-            ? status.expires_at
-              ? `Token valid until ${new Date(status.expires_at).toLocaleString("en-GB")}`
-              : "Token stored"
-            : "Not authorized yet — the app cannot read your data until you do."}
-        </div>
-      </div>
+                  size="sm"
+                  onClick={onConnect}
+                >
+                  Authorize with Withings
+                </Button>
+              )}
+              <ConnectionMenu
+                provider="Withings"
+                onEdit={onEdit}
+                description="This removes stored tokens and credentials. Previously imported data remains available."
+                onDisconnect={onDisconnect}
+              />
+            </span>
+          </div>
+          <div className="mt-2 text-xs text-muted-foreground">
+            {connected
+              ? status.expires_at
+                ? `Token valid until ${new Date(status.expires_at).toLocaleString("en-GB")}`
+                : "Token stored"
+              : "Not authorized yet — the app cannot read your data until you do."}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="mt-5 max-w-lg space-y-4">
         <Label className="kick" htmlFor="withings-client">

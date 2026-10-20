@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import PageSection from "../PageSection";
 import { Alert } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
@@ -78,16 +79,11 @@ export default function ImportTab() {
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        style={{
-          borderRadius: 12,
-          border: `1px dashed ${dragOver || selectedFile ? "var(--primary)" : "var(--border)"}`,
-          background: dragOver ? "var(--success-soft)" : "transparent",
-          padding: 30,
-          textAlign: "center",
-          cursor: "pointer",
-          marginTop: 20,
-          maxWidth: 620,
-        }}
+        className={cn(
+          "mt-5 max-w-xl rounded-lg border border-dashed p-6 text-center",
+          (dragOver || selectedFile) && "border-primary",
+          dragOver && "bg-accent",
+        )}
       >
         <Input
           nativeInput
@@ -95,26 +91,19 @@ export default function ImportTab() {
           type="file"
           aria-label="CSV file"
           accept=".csv,text/csv"
-          style={{ display: "none" }}
+          className="hidden"
           onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
         />
         {selectedFile ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-            }}
-          >
-            <span style={{ font: "500 13.5px var(--font-body)" }}>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <span className="break-all text-sm font-medium">
               {selectedFile.name}
             </span>
             <Button
               variant="ghost"
               type="button"
 
-              style={{ fontSize: 12 }}
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 handleFileSelect(null);
@@ -125,15 +114,7 @@ export default function ImportTab() {
             </Button>
           </div>
         ) : (
-          <p
-            style={{
-              font: "400 13px var(--font-body)",
-              color: "var(--muted-foreground)",
-              margin: 0,
-            }}
-          >
-            Drop a CSV file here
-          </p>
+          <p className="text-sm text-muted-foreground">Drop a CSV file here</p>
         )}
         <Button
           variant="outline"
@@ -149,7 +130,7 @@ export default function ImportTab() {
           variant="default"
           type="button"
 
-          style={{ marginTop: 16 }}
+          className="mt-4"
           onClick={handleUpload}
           disabled={uploading}
         >
@@ -158,30 +139,15 @@ export default function ImportTab() {
       ) : null}
 
       {error ? (
-        <Alert
-          variant="error"
-          style={{
-            fontSize: 13,
-            marginTop: 16,
-          }}
-        >
+        <Alert variant="error" className="mt-4">
           {error}
         </Alert>
       ) : null}
 
       {result ? (
-        <Alert variant="success" role="status" style={{ marginTop: 16 }}>
-          <p style={{ font: "600 13.5px var(--font-body)", margin: 0 }}>
-            Upload complete
-          </p>
-          <p
-            className="num"
-            style={{
-              font: "400 12.5px var(--font-body)",
-              color: "var(--muted-foreground)",
-              margin: "6px 0 0",
-            }}
-          >
+        <Alert variant="success" role="status" className="mt-4">
+          <p className="text-sm font-medium">Upload complete</p>
+          <p className="num mt-1.5 text-sm text-muted-foreground">
             {formatNumber(result.sets_received)} sets parsed ·{" "}
             {formatNumber(result.sets_inserted)} new ·{" "}
             {formatNumber(result.sets_received - result.sets_inserted)} already

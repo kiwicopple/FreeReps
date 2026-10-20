@@ -158,7 +158,6 @@
   position: relative;
   align-items: stretch;
   justify-content: flex-start;
-  border-color: var(--border);
 }
 @media (min-width: 768px) {
   .page-header {
@@ -275,7 +274,6 @@
   flex-direction: column;
   gap: 3px;
   font-size: 10px;
-  border-radius: 8px;
   color: var(--muted-foreground);
 }
 .mobile-nav-item svg {
