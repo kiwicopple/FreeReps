@@ -31,7 +31,7 @@ test("metric search preserves selection and CSV values with display multipliers"
   await page.goto("/metrics?metric=height");
   await expect(
     page.getByRole("combobox", { name: "Metric", exact: true }),
-  ).toHaveValue("Height");
+  ).toHaveText("Height");
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: /CSV/ }).click();
   const download = await downloadPromise;
@@ -56,14 +56,19 @@ test("metric combobox and correlation controls retain query keys", async ({
   });
   await page.goto("/metrics?metric=heart_rate");
   const select = page.getByRole("combobox", { name: "Metric", exact: true });
-  await expect(select).toHaveValue("Heart Rate");
-  await select.fill("HRV");
+  await expect(select).toHaveText("Heart Rate");
+  await select.click();
+  const search = page.getByRole("combobox", {
+    name: "Search Metric",
+    exact: true,
+  });
+  await search.fill("HRV");
   await expect(
     page.getByRole("option", { name: "HRV", exact: true }),
   ).toBeVisible();
   releaseStats();
   await expect(page.getByText("60", { exact: true }).first()).toBeVisible();
-  await expect(select).toHaveValue("HRV");
+  await expect(search).toHaveValue("HRV");
   await page.getByRole("option", { name: "HRV", exact: true }).click();
   await expect(page).toHaveURL(/metric=heart_rate_variability/);
   await page.goto("/correlations?x=heart_rate&y=heart_rate_variability");
@@ -89,7 +94,10 @@ test("workout pagination resets on type changes and opens detail and back", asyn
   await page.goto("/workouts");
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page).toHaveURL(/page=1/);
-  await page.getByRole("combobox", { name: "Workout type" }).fill("Indoor Run");
+  await page.getByRole("combobox", { name: "Workout type" }).click();
+  await page
+    .getByRole("combobox", { name: "Search Workout type" })
+    .fill("Indoor Run");
   await page.getByRole("option", { name: /Indoor Run/ }).click();
   await expect(page).not.toHaveURL(/page=1/);
   await expect(

@@ -20,7 +20,7 @@ test("range selection, keyboard dismissal and focus restoration", async ({
   } else await page.getByRole("radio", { name: "7d", exact: true }).click();
   await expect(page).toHaveURL(/range=7d/);
 });
-test("theme preference and system changes preserve black and green", async ({
+test("theme preference and system changes preserve Supabase theme selection", async ({
   safePage: page,
 }) => {
   await page.emulateMedia({ colorScheme: "dark" });
@@ -32,7 +32,7 @@ test("theme preference and system changes preserve black and green", async ({
       .evaluate((el) =>
         getComputedStyle(el).getPropertyValue("--background").trim(),
       ),
-  ).toBe("#000000");
+  ).toContain("oklch(");
   await page.getByRole("radio", { name: "Light", exact: true }).click();
   await expect(page.locator("html")).not.toHaveClass(/dark/);
   await page.reload();
@@ -76,7 +76,9 @@ test("long nutrition drawer scrolls independently", async ({
     name: "Other nutrients",
     exact: true,
   });
-  const viewport = dialog.locator('[data-slot="scroll-area-viewport"]');
+  const viewport = dialog.locator(
+    '[data-slot="sheet-panel"], [data-slot="drawer-panel"]',
+  );
   await expect
     .poll(() => viewport.evaluate((el) => el.scrollHeight > el.clientHeight))
     .toBe(true);

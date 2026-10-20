@@ -8,7 +8,7 @@ import NumericField from "../src/components/NumericField";
 import { calendarDay } from "../src/components/DateControl";
 import Disclosure from "../src/components/Disclosure";
 import { Input } from "../src/components/ui/input";
-describe("coss control contracts", () => {
+describe("Supabase control contracts", () => {
   it("keeps empty numbers distinct from zero", async () => {
     const values: (number | null)[] = [];
     function Example() {
@@ -26,7 +26,7 @@ describe("coss control contracts", () => {
     }
     render(<Example />);
     await userEvent.clear(screen.getByLabelText("Target"));
-    expect(screen.getByLabelText("Target")).toHaveValue("");
+    expect(screen.getByLabelText("Target")).toHaveValue(null);
     expect(values.at(-1)).toBe(null);
     await userEvent.type(screen.getByLabelText("Target"), "0");
     expect(values.at(-1)).toBe(0);
@@ -83,4 +83,24 @@ it("allows independent disclosures to remain expanded", async () => {
   await userEvent.click(screen.getByRole("button", { name: "Second" }));
   expect(screen.getByLabelText("First draft")).toBeVisible();
   expect(screen.getByLabelText("Second draft")).toBeVisible();
+});
+
+// Native fields must announce actual validation failures, never empty alert regions.
+it("shows native validation errors only until the field becomes valid", async () => {
+  const { Field, FieldLabel, FieldError } =
+    await import("../src/components/ui/field");
+  const { fireEvent } = await import("@testing-library/react");
+  render(
+    <Field>
+      <FieldLabel>Amount</FieldLabel>
+      <Input type="number" required min={1} />
+      <FieldError />
+    </Field>,
+  );
+  expect(screen.queryByRole("alert")).toBeNull();
+  const input = screen.getByLabelText("Amount");
+  fireEvent.invalid(input);
+  expect(screen.getByRole("alert")).not.toBeEmptyDOMElement();
+  await userEvent.type(input, "2");
+  expect(screen.queryByRole("alert")).toBeNull();
 });

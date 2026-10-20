@@ -64,8 +64,8 @@ export default function WorkoutDetailPage() {
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink render={<Link to={backTo} />}>
-            Workouts
+          <BreadcrumbLink asChild>
+            <Link to={backTo}>Workouts</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />

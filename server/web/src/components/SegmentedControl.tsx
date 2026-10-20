@@ -22,7 +22,7 @@ export default function SegmentedControl<T extends string>({
       name={name}
       aria-label={label}
       value={value}
-      onValueChange={onChange}
+      onValueChange={(next) => onChange(next as T)}
       className={segmentedControlRootClassName}
     >
       {options.map((option) => (

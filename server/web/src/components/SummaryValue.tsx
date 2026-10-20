@@ -50,7 +50,7 @@ export function SummaryContent({
       </span>
       <span
         data-slot="summary-value"
-        className="num flex flex-wrap items-baseline gap-x-1.5 gap-y-1 font-bold text-2xl leading-tight tracking-tight md:text-3xl"
+        className="num flex flex-wrap items-baseline gap-x-1.5 gap-y-1 font-medium text-2xl leading-tight tracking-tight md:text-3xl"
       >
         {value ?? "—"}
         {unit && (

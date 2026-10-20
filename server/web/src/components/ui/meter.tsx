@@ -1,80 +1,38 @@
-"use client";
-
-import { Meter as MeterPrimitive } from "@base-ui/react/meter";
-import type React from "react";
+import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
-
+/** A measurement (not task progress); clamp the fill while retaining the caller's full accessible description. */
 export function Meter({
+  value,
+  max = 100,
+  min = 0,
+  getAriaValueText,
   className,
-  children,
   ...props
-}: MeterPrimitive.Root.Props): React.ReactElement {
+}: Omit<ComponentProps<"div">, "children"> & {
+  value: number;
+  max?: number;
+  min?: number;
+  getAriaValueText?: () => string;
+}) {
+  const fill = Math.max(0, Math.min(100, (100 * (value - min)) / (max - min)));
   return (
-    <MeterPrimitive.Root
-      className={cn("flex w-full flex-col gap-2", className)}
+    <div
+      role="meter"
+      aria-valuenow={value}
+      aria-valuemin={min}
+      aria-valuemax={max}
+      aria-valuetext={getAriaValueText?.()}
+      className={cn(
+        "relative h-2 w-full overflow-hidden rounded-full bg-secondary",
+        className,
+      )}
       {...props}
     >
-      {children ? (
-        children
-      ) : (
-        <MeterTrack>
-          <MeterIndicator />
-        </MeterTrack>
-      )}
-    </MeterPrimitive.Root>
+      <div
+        data-slot="meter-indicator"
+        className="h-full bg-primary transition-transform motion-reduce:transition-none"
+        style={{ width: `${fill}%` }}
+      />
+    </div>
   );
 }
-
-export function MeterLabel({
-  className,
-  ...props
-}: MeterPrimitive.Label.Props): React.ReactElement {
-  return (
-    <MeterPrimitive.Label
-      className={cn("font-medium text-foreground text-sm", className)}
-      data-slot="meter-label"
-      {...props}
-    />
-  );
-}
-
-export function MeterTrack({
-  className,
-  ...props
-}: MeterPrimitive.Track.Props): React.ReactElement {
-  return (
-    <MeterPrimitive.Track
-      className={cn("block h-2 w-full overflow-hidden bg-input", className)}
-      data-slot="meter-track"
-      {...props}
-    />
-  );
-}
-
-export function MeterIndicator({
-  className,
-  ...props
-}: MeterPrimitive.Indicator.Props): React.ReactElement {
-  return (
-    <MeterPrimitive.Indicator
-      className={cn("bg-primary transition-all duration-500", className)}
-      data-slot="meter-indicator"
-      {...props}
-    />
-  );
-}
-
-export function MeterValue({
-  className,
-  ...props
-}: MeterPrimitive.Value.Props): React.ReactElement {
-  return (
-    <MeterPrimitive.Value
-      className={cn("text-foreground text-sm tabular-nums", className)}
-      data-slot="meter-value"
-      {...props}
-    />
-  );
-}
-
-export { MeterPrimitive };

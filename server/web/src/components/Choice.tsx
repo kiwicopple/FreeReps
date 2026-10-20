@@ -1,31 +1,31 @@
-import { useMemo, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Select,
   SelectTrigger,
   SelectValue,
-  SelectPopup,
+  SelectContent,
   SelectItem,
   SelectGroup,
-  SelectGroupLabel,
+  SelectLabel,
 } from "./ui/select";
+import { Popover, PopoverTrigger, PopoverPopup } from "./ui/popover";
 import {
-  Combobox,
-  ComboboxInput,
-  ComboboxPopup,
-  ComboboxList,
-  ComboboxItem,
-  ComboboxEmpty,
-  ComboboxGroup,
-  ComboboxGroupLabel,
-  ComboboxCollection,
-} from "./ui/combobox";
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "./ui/supabase-command";
+import { Button } from "./ui/button";
+import { useField } from "./ui/field";
 export type ChoiceOption = {
   value: string;
   label: string;
   group?: string;
   disabled?: boolean;
 };
-/** A common composition for short choices and searchable, grouped metric lists. */
 export default function Choice({
   options,
   value,
@@ -51,83 +51,105 @@ export default function Choice({
   name?: string;
   "aria-label"?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const field = useField();
   const groups = useMemo(
     () =>
-      [...new Set(options.map((o) => o.group ?? ""))].map((value) => ({
-        value,
-        items: options.filter((o) => (o.group ?? "") === value),
+      [...new Set(options.map((o) => o.group ?? ""))].map((group) => ({
+        group,
+        items: options.filter((o) => (o.group ?? "") === group),
       })),
     [options],
   );
-  const selected = options.find((o) => o.value === String(value)) ?? null;
+  const selected = options.find((o) => o.value === String(value));
   if (searchable)
     return (
-      <div className={className} style={style}>
-        <Combobox
-          items={groups}
-          value={selected}
-          onValueChange={(item) => {
-            if (item) onValueChange(item.value);
-          }}
-          isItemEqualToValue={(a, b) => a.value === b.value}
-          disabled={disabled}
-          required={required}
-          name={name}
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          render={
+            <Button
+              id={id ?? field?.id}
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              disabled={disabled}
+              {...label}
+              className={className}
+              style={style}
+            />
+          }
         >
-          <ComboboxInput
-            id={id}
-            triggerProps={{ "aria-label": "Show options" }}
-            {...label}
-            placeholder="Search…"
-          />
-          <ComboboxPopup>
-            <ComboboxEmpty>No matching options.</ComboboxEmpty>
-            <ComboboxList>
-              {(group: { value: string; items: ChoiceOption[] }) => (
-                <ComboboxGroup key={group.value} items={group.items}>
-                  {group.value && (
-                    <ComboboxGroupLabel>{group.value}</ComboboxGroupLabel>
-                  )}
-                  <ComboboxCollection>
-                    {(item: ChoiceOption) => (
-                      <ComboboxItem
-                        key={item.value}
-                        value={item}
-                        disabled={item.disabled}
-                      >
-                        {item.label}
-                      </ComboboxItem>
-                    )}
-                  </ComboboxCollection>
-                </ComboboxGroup>
-              )}
-            </ComboboxList>
-          </ComboboxPopup>
-        </Combobox>
-      </div>
+          {selected?.label ?? "Select…"}
+          <ChevronsUpDown aria-hidden />
+        </PopoverTrigger>
+        <PopoverPopup className="w-[max(260px,var(--radix-popover-trigger-width))] max-w-[calc(100vw-32px)] p-0">
+          <Command>
+            <CommandInput
+              aria-label={
+                label["aria-label"]
+                  ? `Search ${label["aria-label"]}`
+                  : "Search options"
+              }
+              placeholder="Search…"
+            />
+            <CommandList>
+              <CommandEmpty>No matching options.</CommandEmpty>
+              {groups.map((g) => (
+                <CommandGroup key={g.group} heading={g.group || undefined}>
+                  {g.items.map((item) => (
+                    <CommandItem
+                      key={item.value}
+                      value={item.label}
+                      disabled={item.disabled}
+                      onSelect={() => {
+                        onValueChange(item.value);
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        aria-hidden
+                        className={
+                          item.value === String(value)
+                            ? "size-4"
+                            : "invisible size-4"
+                        }
+                      />
+                      {item.label}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              ))}
+            </CommandList>
+          </Command>
+        </PopoverPopup>
+      </Popover>
     );
+  // Radix reserves the empty string for no selection, so encode a blank option locally.
+  const empty = "__protocol_empty__";
   return (
     <Select
-      value={String(value)}
-      onValueChange={(next) => {
-        if (next !== null) onValueChange(next);
-      }}
-      items={options}
+      value={String(value) || empty}
+      onValueChange={(next) => onValueChange(next === empty ? "" : next)}
       disabled={disabled}
       required={required}
       name={name}
     >
-      <SelectTrigger id={id} className={className} style={style} {...label}>
+      <SelectTrigger
+        id={id ?? field?.id}
+        className={className}
+        style={style}
+        {...label}
+      >
         <SelectValue />
       </SelectTrigger>
-      <SelectPopup>
-        {groups.map((group) => (
-          <SelectGroup key={group.value}>
-            {group.value && <SelectGroupLabel>{group.value}</SelectGroupLabel>}
-            {group.items.map((item) => (
+      <SelectContent>
+        {groups.map((g) => (
+          <SelectGroup key={g.group}>
+            {g.group && <SelectLabel>{g.group}</SelectLabel>}
+            {g.items.map((item) => (
               <SelectItem
                 key={item.value}
-                value={item.value}
+                value={item.value || empty}
                 disabled={item.disabled}
               >
                 {item.label}
@@ -135,7 +157,7 @@ export default function Choice({
             ))}
           </SelectGroup>
         ))}
-      </SelectPopup>
+      </SelectContent>
     </Select>
   );
 }

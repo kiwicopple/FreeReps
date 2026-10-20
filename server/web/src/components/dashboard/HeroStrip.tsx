@@ -3,7 +3,6 @@ import type { FrontPageMetric } from "../../api";
 import Sparkline from "../Sparkline";
 import { SummaryContent, SummaryGrid } from "../SummaryValue";
 import { Card } from "../ui/card";
-import { Button } from "../ui/button";
 import { ChevronRight } from "lucide-react";
 import { deltaColor } from "../../utils/metricDirection";
 import { formatTimeAgo } from "../../utils/format";
@@ -29,8 +28,8 @@ export default function HeroStrip({
           className="summary-card"
           render={
             m ? (
-              <Button
-                variant="ghost"
+              <button
+                type="button"
                 className="h-auto w-full whitespace-normal text-left"
                 aria-label={`View ${m.label} details`}
                 onClick={(event) => onSelect(m, event.currentTarget)}

@@ -208,7 +208,7 @@ test("nutrition period totals, trend selection, food details and protocol histor
   await expect(page).toHaveURL(/range=7d/);
   await expect(
     page.getByRole("combobox", { name: "Trend nutrient" }),
-  ).toHaveValue("Calories");
+  ).toHaveText("Calories");
   expect(
     urls.some(
       (url) =>
@@ -233,9 +233,12 @@ test("nutrition period totals, trend selection, food details and protocol histor
     )
     .toBe(true);
   const nutrient = page.getByRole("combobox", { name: "Trend nutrient" });
-  await nutrient.fill("Protein");
+  await nutrient.click();
+  await page
+    .getByRole("combobox", { name: "Search Trend nutrient" })
+    .fill("Protein");
   await page.getByRole("option", { name: "Protein", exact: true }).click();
-  await expect(nutrient).toHaveValue("Protein");
+  await expect(nutrient).toHaveText("Protein");
   await page.getByRole("button", { name: "2025-01-15", exact: true }).click();
   await expect(page).toHaveURL(/range=day/);
   await page.getByRole("tab", { name: "Protocol", exact: true }).click();
@@ -284,7 +287,8 @@ test("nutrition profile edits and target addition and removal preserve the paylo
   await editor.getByRole("combobox", { name: "Reference sex" }).click();
   await page.getByRole("option", { name: "Female", exact: true }).click();
   const add = editor.getByRole("combobox", { name: "Nutrient to add" });
-  await add.fill("Fiber");
+  await add.click();
+  await page.getByPlaceholder("Search…").fill("Fiber");
   await page.getByRole("option", { name: "Fiber", exact: true }).click();
   await editor.getByRole("button", { name: "Add", exact: true }).click();
   const fiber = editor.getByRole("button", { name: "Fiber · 1 g" });
@@ -301,7 +305,8 @@ test("nutrition profile edits and target addition and removal preserve the paylo
   });
   await editor.getByRole("button", { name: "Remove target" }).click();
   await expect(fiber).toHaveCount(0);
-  await add.fill("Protein");
+  await add.click();
+  await page.getByPlaceholder("Search…").fill("Protein");
   await page.getByRole("option", { name: "Protein", exact: true }).click();
   await editor.getByRole("button", { name: "Add", exact: true }).click();
   await expect(

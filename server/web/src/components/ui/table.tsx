@@ -1,151 +1,215 @@
-"use client";
+import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
+import type { ComponentProps } from "react";
+import * as React from "react";
 
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
-import type React from "react";
 import { cn } from "@/lib/utils";
+function ShadowScrollArea(props: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="table-container"
+      className="w-full overflow-x-auto"
+      {...props}
+    />
+  );
+}
 
-export type TableVariant = "default" | "card";
+interface TableProps extends React.HTMLAttributes<HTMLTableElement> {
+  variant?: "default" | "card";
+  containerProps?: Partial<ComponentProps<typeof ShadowScrollArea>>;
+}
 
-export type TableProps = React.ComponentProps<"table"> & {
-  variant?: TableVariant;
-  render?: useRender.ComponentProps<"div">["render"];
-};
+const Table = React.forwardRef<HTMLTableElement, TableProps>(
+  ({ className, containerProps, variant: _variant, ...props }, ref) => {
+    return (
+      <ShadowScrollArea {...containerProps}>
+        <table
+          ref={ref}
+          className={cn("group/table w-full caption-bottom text-sm", className)}
+          {...props}
+        />
+      </ShadowScrollArea>
+    );
+  },
+);
+Table.displayName = "Table";
 
-export function Table({
+const TableHeader = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <thead
+    ref={ref}
+    className={cn("[&_tr]:border-b [&>tr]:bg-200", className)}
+    {...props}
+  />
+));
+TableHeader.displayName = "TableHeader";
+
+const TableBody = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <tbody
+    ref={ref}
+    className={cn(
+      "[&_tr:last-child]:border-0",
+      // :where() keeps this at lower specificity than a row's own hover:* class, so rows can opt out (e.g. loading/empty states)
+      "[:where(&)>tr]:hover:bg-surface-200",
+      className,
+    )}
+    {...props}
+  />
+));
+TableBody.displayName = "TableBody";
+
+const TableFooter = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <tfoot
+    ref={ref}
+    className={cn("border-t font-medium", className)}
+    {...props}
+  />
+));
+TableFooter.displayName = "TableFooter";
+
+const TableRow = React.forwardRef<
+  HTMLTableRowElement,
+  React.HTMLAttributes<HTMLTableRowElement>
+>(({ className, ...props }, ref) => (
+  <tr
+    ref={ref}
+    className={cn("border-b group data-[state=selected]:bg-muted", className)}
+    {...props}
+  />
+));
+TableRow.displayName = "TableRow";
+
+const TableHead = React.forwardRef<
+  HTMLTableCellElement,
+  React.ThHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+  <th
+    ref={ref}
+    className={cn(
+      "h-10 px-4 text-left align-middle heading-meta whitespace-nowrap text-foreground-lighter [&:has([role=checkbox])]:pr-0",
+      // Transition text color when NoSearchResults or NoFilterResults empty state is shown
+      "transition-colors",
+      className,
+    )}
+    {...props}
+  />
+));
+TableHead.displayName = "TableHead";
+
+interface TableHeadSortProps<TColumn extends string = string> {
+  column: TColumn;
+  currentSort: string;
+  onSortChange: (column: TColumn) => void;
+  children: React.ReactNode;
+  className?: string;
+}
+
+function TableHeadSort<TColumn extends string = string>({
+  column,
+  currentSort,
+  onSortChange,
+  children,
   className,
-  variant = "default",
-  render,
-  ...props
-}: TableProps): React.ReactElement {
-  const defaultProps = {
-    children: (
-      <table
-        className={cn(
-          "w-full caption-bottom in-data-[variant=card]:border-separate in-data-[variant=card]:border-spacing-0 text-sm",
-          className,
-        )}
-        data-slot="table"
-        {...props}
-      />
-    ),
-    className: "relative w-full overflow-x-auto",
-    "data-slot": "table-container",
-    "data-variant": variant,
+}: TableHeadSortProps<TColumn>) {
+  const [currentCol, currentOrder] = currentSort.split(":");
+  const isActive = currentCol === column;
+  const isAsc = isActive && currentOrder === "asc";
+  const isDesc = isActive && currentOrder === "desc";
+
+  const getSortIcon = () => {
+    const baseIconClass = "w-3 h-3 absolute inset-0";
+
+    return (
+      <>
+        <ArrowUp
+          className={cn(
+            baseIconClass,
+            "transition-transform",
+            isAsc ? "translate-y-0" : "translate-y-full",
+          )}
+        />
+        <ArrowDown
+          className={cn(
+            baseIconClass,
+            "transition-transform",
+            isDesc ? "translate-y-0" : "-translate-y-full",
+          )}
+        />
+        <ChevronsUpDown
+          className={cn(
+            baseIconClass,
+            "transition-opacity opacity-80 md:opacity-40",
+            !isActive ? "group-hover/table-head-sort:opacity-80" : "opacity-0!",
+          )}
+        />
+      </>
+    );
   };
 
-  return useRender({
-    defaultTagName: "div",
-    props: mergeProps<"div">(defaultProps, {}),
-    render,
-  });
-}
-
-export function TableHeader({
-  className,
-  ...props
-}: React.ComponentProps<"thead">): React.ReactElement {
   return (
-    <thead
-      className={cn("[&_tr]:border-b", className)}
-      data-slot="table-header"
-      {...props}
-    />
-  );
-}
-
-export function TableBody({
-  className,
-  ...props
-}: React.ComponentProps<"tbody">): React.ReactElement {
-  return (
-    <tbody
+    <button
+      type="button"
+      tabIndex={0}
       className={cn(
-        "relative in-data-[variant=card]:rounded-xl in-data-[variant=card]:shadow-xs/5 before:pointer-events-none before:absolute before:inset-px not-in-data-[variant=card]:before:hidden before:rounded-[calc(var(--radius-xl)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] dark:before:shadow-[0_-1px_--theme(--color-white/8%)] [&_tr:last-child]:border-0 in-data-[variant=card]:*:[tr]:border-0 in-data-[variant=card]:*:[tr]:*:[td]:border-b in-data-[variant=card]:*:[tr]:*:[td]:bg-card in-data-[variant=card]:*:[tr]:first:*:[td]:first:rounded-ss-xl in-data-[variant=card]:*:[tr]:*:[td]:first:border-s in-data-[variant=card]:*:[tr]:first:*:[td]:border-t in-data-[variant=card]:*:[tr]:last:*:[td]:last:rounded-ee-xl in-data-[variant=card]:*:[tr]:*:[td]:last:border-e in-data-[variant=card]:*:[tr]:first:*:[td]:last:rounded-se-xl in-data-[variant=card]:*:[tr]:last:*:[td]:first:rounded-es-xl in-data-[variant=card]:*:[tr]:hover:*:[td]:bg-[color-mix(in_srgb,var(--card),var(--color-black)_2%)] in-data-[variant=card]:*:[tr]:data-[state=selected]:*:[td]:bg-[color-mix(in_srgb,var(--card),var(--color-black)_4%)] dark:in-data-[variant=card]:*:[tr]:data-[state=selected]:*:[td]:bg-[color-mix(in_srgb,var(--card),var(--color-white)_4%)] dark:in-data-[variant=card]:*:[tr]:hover:*:[td]:bg-[color-mix(in_srgb,var(--card),var(--color-white)_2%)]",
+        "group/table-head-sort heading-meta whitespace-nowrap flex items-center gap-1 cursor-pointer select-none bg-transparent! border-none p-0 w-full text-left",
         className,
       )}
-      data-slot="table-body"
-      {...props}
-    />
+      onClick={() => onSortChange(column)}
+    >
+      {children}
+      <div className="w-3 h-3 relative overflow-hidden">{getSortIcon()}</div>
+    </button>
   );
 }
+TableHeadSort.displayName = "TableHeadSort";
 
-export function TableFooter({
-  className,
-  ...props
-}: React.ComponentProps<"tfoot">): React.ReactElement {
-  return (
-    <tfoot
-      className={cn(
-        "border-t in-data-[variant=card]:border-none bg-transparent not-in-data-[variant=card]:bg-[color-mix(in_srgb,var(--card),var(--color-black)_2%)] font-medium dark:not-in-data-[variant=card]:bg-[color-mix(in_srgb,var(--card),var(--color-white)_2%)] [&>tr]:last:border-b-0",
-        className,
-      )}
-      data-slot="table-footer"
-      {...props}
-    />
-  );
-}
+const TableCell = React.forwardRef<
+  HTMLTableCellElement,
+  React.TdHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+  <td
+    ref={ref}
+    className={cn(
+      "transition-colors p-4 align-middle [&:has([role=checkbox])]:pr-0",
+      className,
+    )}
+    {...props}
+  />
+));
+TableCell.displayName = "TableCell";
 
-export function TableRow({
-  className,
-  ...props
-}: React.ComponentProps<"tr">): React.ReactElement {
-  return (
-    <tr
-      className={cn(
-        "relative border-b not-in-data-[variant=card]:hover:bg-[color-mix(in_srgb,var(--background),var(--color-black)_2%)] not-in-data-[variant=card]:data-[state=selected]:bg-[color-mix(in_srgb,var(--background),var(--color-black)_4%)] dark:not-in-data-[variant=card]:data-[state=selected]:bg-[color-mix(in_srgb,var(--background),var(--color-white)_4%)] dark:not-in-data-[variant=card]:hover:bg-[color-mix(in_srgb,var(--background),var(--color-white)_2%)]",
-        className,
-      )}
-      data-slot="table-row"
-      {...props}
-    />
-  );
-}
+const TableCaption = React.forwardRef<
+  HTMLTableCaptionElement,
+  React.HTMLAttributes<HTMLTableCaptionElement>
+>(({ className, ...props }, ref) => (
+  <caption
+    ref={ref}
+    className={cn(
+      "border-t", // TableCaption is aligned by parent Table at caption-bottom
+      "p-4 text-sm text-foreground-muted", // Match styling of TableCell
+      className,
+    )}
+    // Should only contain inline elements
+    {...props}
+  />
+));
+TableCaption.displayName = "TableCaption";
 
-export function TableHead({
-  className,
-  ...props
-}: React.ComponentProps<"th">): React.ReactElement {
-  return (
-    <th
-      className={cn(
-        "h-10 whitespace-nowrap px-2.5 text-left align-middle font-medium text-muted-foreground leading-none has-[[role=checkbox]]:w-px last:has-[[role=checkbox]]:ps-0 first:has-[[role=checkbox]]:pe-0",
-        className,
-      )}
-      data-slot="table-head"
-      {...props}
-    />
-  );
-}
-
-export function TableCell({
-  className,
-  ...props
-}: React.ComponentProps<"td">): React.ReactElement {
-  return (
-    <td
-      className={cn(
-        "whitespace-nowrap bg-clip-padding p-2.5 in-data-[slot=table-footer]:py-3.5 align-middle leading-none in-data-[variant=card]:first:ps-[calc(--spacing(2.5)-1px)] in-data-[variant=card]:last:pe-[calc(--spacing(2.5)-1px)] has-[[role=checkbox]]:w-px last:has-[[role=checkbox]]:ps-0 first:has-[[role=checkbox]]:pe-0",
-        className,
-      )}
-      data-slot="table-cell"
-      {...props}
-    />
-  );
-}
-
-export function TableCaption({
-  className,
-  ...props
-}: React.ComponentProps<"caption">): React.ReactElement {
-  return (
-    <caption
-      className={cn(
-        "in-data-[variant=card]:my-4 mt-4 text-muted-foreground text-sm",
-        className,
-      )}
-      data-slot="table-caption"
-      {...props}
-    />
-  );
-}
+export {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableHeadSort,
+  TableRow,
+};

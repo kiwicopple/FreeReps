@@ -1,94 +1,23 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@fontsource-variable/archivo/wght.css";
+@import "@fontsource-variable/inter/wght.css";
+@import "./styles/supabase/global.css";
+@import "./styles/supabase/semantic.css";
+@import "./styles/supabase/compat.css";
+@import "./styles/supabase/dark.css";
+@import "./styles/supabase/light.css";
+@import "./styles/supabase/colors.css";
+@import "./styles/supabase/theme.css";
+@import "./styles/supabase/charts.css";
+@import "./styles/supabase/utilities.css";
+@import "./styles/supabase/animations.css";
+@import "./styles/supabase/variants.css";
+@import "./styles/supabase/hit-area.css";
+
 @custom-variant dark (&:where(.dark, .dark *));
 :root {
-  --background: #fafafa;
-  --foreground: #202020;
-  --card: #f4f4f4;
-  --card-foreground: var(--foreground);
-  --popover: #ffffff;
-  --popover-foreground: var(--foreground);
-  --primary: #18794e;
-  --primary-foreground: #ffffff;
-  --secondary: #eeeeee;
-  --secondary-foreground: var(--foreground);
-  --muted: #f0f0f0;
-  --muted-foreground: #626262;
-  --accent: #e9e9e9;
-  --accent-foreground: var(--foreground);
-  --border: #d8d8d8;
-  --input: #c8c8c8;
-  --ring: #18794e;
-  --destructive: #c22c38;
-  --destructive-foreground: #b51e2b;
-  --success: #18794e;
-  --success-soft: #e9f9ef;
-  --success-foreground: #12633f;
-  --warning: #97601b;
-  --warning-soft: #f7eee4;
-  --warning-foreground: #8a5512;
-  --radius: 0.625rem;
-}
-.dark {
-  color-scheme: dark;
-  --background: #000000;
-  --foreground: #ededed;
-  --card: #111111;
-  --popover: #111111;
-  --primary: #3ecf8e;
-  --primary-foreground: #052e1c;
-  --secondary: #1a1a1a;
-  --muted: #191919;
-  --muted-foreground: #a8a8a8;
-  --accent: #252525;
-  --border: #303030;
-  --input: #404040;
-  --ring: #3ecf8e;
-  --destructive: #e5484d;
-  --destructive-foreground: #ff8b90;
-  --success: #3ecf8e;
-  --success-soft: #0d251a;
-  --success-foreground: #85e0b3;
-  --warning: #e0a95c;
-  --warning-soft: #2e2418;
-  --warning-foreground: #e0a95c;
-}
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-success: var(--success);
-  --color-success-soft: var(--success-soft);
-  --color-success-foreground: var(--success-foreground);
-  --color-warning: var(--warning);
-  --color-warning-soft: var(--warning-soft);
-  --color-warning-foreground: var(--warning-foreground);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-}
-
-:root {
-  --font-heading: "Archivo Variable", "Archivo", system-ui, sans-serif;
-  --font-body: "Archivo Variable", "Archivo", system-ui, sans-serif;
+  --font-heading: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-body: "Inter Variable", "Inter", system-ui, sans-serif;
   --page-x: 32px;
   --space-1: 4px;
   --space-2: 8px;
@@ -98,26 +27,26 @@
   --space-8: 32px;
   --color-data-1: #76a4a4;
   --color-data-2: #538e8e;
-  --color-data-3: #337475;
+  --color-data-3: var(--chart-1);
   --color-respiratory: #087e96;
   --color-data-4: #1b5454;
   --color-data-5: #133b3b;
   --color-stage-deep: var(--color-data-5);
   --color-stage-core: var(--color-data-4);
-  --color-stage-rem: var(--color-data-3);
+  --color-stage-rem: #337475;
   --color-stage-awake: var(--color-data-1);
   --color-data-band: #dfeaea;
 }
 .dark {
   --color-data-1: #185455;
   --color-data-2: #307475;
-  --color-data-3: #469091;
+  --color-data-3: var(--chart-1);
   --color-respiratory: #45cee5;
   --color-data-4: #63a8a8;
   --color-data-5: #8bc3c3;
   --color-stage-deep: var(--color-data-1);
   --color-stage-core: var(--color-data-2);
-  --color-stage-rem: var(--color-data-3);
+  --color-stage-rem: #469091;
   --color-stage-awake: var(--color-data-5);
   --color-data-band: #192a2a;
 }
@@ -160,7 +89,7 @@
   h5,
   h6 {
     font-family: var(--font-heading);
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.12;
     letter-spacing: -0.015em;
     margin: 0;
@@ -224,6 +153,9 @@
   height: 100%;
   padding: 16px;
   gap: 8px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
   align-items: stretch;
   justify-content: flex-start;
   border-color: var(--border);
@@ -267,7 +199,7 @@
   flex-shrink: 0;
   padding: 0 20px;
   font-size: 19px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--foreground);
 }
 .sidebar-mark {
@@ -412,7 +344,7 @@ p a {
 }
 
 /* The shared picker is the only visible calendar trigger on editable dates. */
-.date-entry input::-webkit-calendar-picker-indicator {
+.date-entry::-webkit-calendar-picker-indicator {
   display: none;
 }
 
@@ -454,19 +386,25 @@ p a {
     grid-area: composition;
   }
 }
-@media (max-width: 767px) {
-  [data-slot="card-header"],
-  [data-slot="card-frame-header"] {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  [data-slot="card-action"],
-  [data-slot="card-frame-action"] {
-    grid-column: 1;
-    grid-row: auto;
-    justify-self: start;
-    max-width: 100%;
-  }
-}
 
 .mobile-nav-item[aria-current="page"] svg,
-.mobile-nav-item[data-active="true"] svg { color: var(--primary); }
+.mobile-nav-item[data-active="true"] svg {
+  color: var(--primary);
+}
+
+/* Domain status colors use the design system semantic scales. */
+:root {
+  --success: var(--primary);
+  --success-soft: color-mix(in srgb, var(--primary) 10%, transparent);
+  --success-foreground: var(--primary);
+  --warning-soft: hsl(var(--warning-200));
+  --warning-foreground: hsl(var(--warning-default));
+}
+@theme inline {
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
+}

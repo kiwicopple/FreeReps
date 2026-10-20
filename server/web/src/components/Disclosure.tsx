@@ -1,11 +1,11 @@
-import type { ReactNode, CSSProperties } from "react";
+import { useState, type ReactNode, type CSSProperties } from "react";
 import {
   Collapsible,
   CollapsibleTrigger,
-  CollapsiblePanel,
+  CollapsibleContent,
 } from "./ui/collapsible";
 import { Button } from "./ui/button";
-/** Independent disclosure; content stays mounted to preserve form drafts. */
+/** Keep drafts mounted while closed; hidden content cannot receive focus. */
 export default function Disclosure({
   trigger,
   children,
@@ -17,19 +17,25 @@ export default function Disclosure({
   className?: string;
   style?: CSSProperties;
 }) {
+  const [open, setOpen] = useState(false);
   return (
-    <Collapsible className={className} style={style}>
-      <CollapsibleTrigger
-        render={
-          <Button
-            variant="ghost"
-            className="h-auto justify-start whitespace-normal text-left"
-          />
-        }
-      >
-        {trigger}
+    <Collapsible
+      open={open}
+      onOpenChange={setOpen}
+      className={className}
+      style={style}
+    >
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          className="h-auto justify-start whitespace-normal text-left"
+        >
+          {trigger}
+        </Button>
       </CollapsibleTrigger>
-      <CollapsiblePanel keepMounted>{children}</CollapsiblePanel>
+      <CollapsibleContent forceMount hidden={!open}>
+        {children}
+      </CollapsibleContent>
     </Collapsible>
   );
 }

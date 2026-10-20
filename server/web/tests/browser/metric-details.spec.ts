@@ -191,14 +191,19 @@ test("metric history loading, failures and retry remain distinct", async ({
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
-  await page.route(url => url.pathname === "/api/v1/metrics/latest" && url.searchParams.get("range") === "90d", async (r) => {
-    await gate;
-    await r.fulfill(
-      fail
-        ? { status: 500, json: { error: "Synthetic failure" } }
-        : { json: response("90d") },
-    );
-  });
+  await page.route(
+    (url) =>
+      url.pathname === "/api/v1/metrics/latest" &&
+      url.searchParams.get("range") === "90d",
+    async (r) => {
+      await gate;
+      await r.fulfill(
+        fail
+          ? { status: 500, json: { error: "Synthetic failure" } }
+          : { json: response("90d") },
+      );
+    },
+  );
   await rows(page).getByRole("button", { name: "View HRV details" }).click();
   const sheet = page.getByRole("dialog", { name: "HRV", exact: true });
   await sheet.getByRole("radio", { name: "90d", exact: true }).click();
@@ -240,7 +245,9 @@ for (const colorScheme of ["light", "dark"] as const)
           return !!box && !!panel && box.width > 100 && box.width < panel.width;
         })
         .toBe(true);
-      const panel = sheet.locator('[data-slot="scroll-area-viewport"]');
+      const panel = sheet.locator(
+        '[data-slot="sheet-panel"], [data-slot="drawer-panel"]',
+      );
       await panel.evaluate((el) => {
         el.scrollTop = el.scrollHeight;
       });
@@ -249,7 +256,6 @@ for (const colorScheme of ["light", "dark"] as const)
       ).toBeInViewport();
       if (width === 390 || width === 1440) {
         const audit = await new AxeBuilder({ page })
-          .exclude("[data-base-ui-focus-guard]")
           .withTags(["wcag2a", "wcag2aa"])
           .analyze();
         expect(

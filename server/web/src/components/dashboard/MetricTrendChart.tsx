@@ -53,7 +53,7 @@ export default function MetricTrendChart({
           ticks: { stroke: grid },
           space: 85,
           size: 38,
-          font: "11px Archivo, system-ui, sans-serif",
+          font: "11px Inter, system-ui, sans-serif",
           splits: (u) => {
             const every = Math.max(
               1,
@@ -70,7 +70,7 @@ export default function MetricTrendChart({
           grid: { stroke: grid },
           ticks: { show: false },
           size: 50,
-          font: "11px Archivo, system-ui, sans-serif",
+          font: "11px Inter, system-ui, sans-serif",
           values: (_u, values) => values.map((v) => formatNumber(v)),
         },
       ],

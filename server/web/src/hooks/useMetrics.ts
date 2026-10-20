@@ -68,7 +68,7 @@ export function useAvailableMetrics() {
   }, [options]);
 
   // Keep selected option objects stable when unrelated chart queries refresh.
-  // Base UI synchronizes its search text when the selected object changes.
+  // Keep metric option identities stable across background statistics refreshes.
   const choiceOptions = useMemo(
     () =>
       groups.flatMap((group) =>

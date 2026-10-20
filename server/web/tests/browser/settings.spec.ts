@@ -15,9 +15,16 @@ test("all nine settings sections and tab URLs remain available", async ({
   isMobile,
 }) => {
   await page.goto("/settings?tab=sources");
-  await expect(page.getByRole("tabpanel", { name: "Sources", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("tabpanel", { name: "Sources", exact: true }),
+  ).toBeVisible();
   for (const [id, label] of sections) {
     const tab = page.getByRole("tab", { name: label, exact: true });
+    await expect(
+      tab
+        .or(page.getByRole("combobox", { name: "Settings section" }))
+        .filter({ visible: true }),
+    ).toBeVisible();
     if (await tab.isVisible()) await tab.click();
     else {
       await page.getByRole("combobox", { name: "Settings section" }).click();
@@ -384,9 +391,9 @@ for (const provider of ["oura", "withings"])
       name: provider === "oura" ? "Oura" : "Withings",
       exact: true,
     });
-    await expect(panel.getByRole("textbox", { name: "Redirect URI", exact: true })).toHaveValue(
-      `https://example.invalid/${provider}/callback`,
-    );
+    await expect(
+      panel.getByRole("textbox", { name: "Redirect URI", exact: true }),
+    ).toHaveValue(`https://example.invalid/${provider}/callback`);
     await panel.getByRole("button", { name: /Authorize with/ }).click();
     await expect(page).toHaveURL(/synthetic_authorized=true/);
     expect(count).toBe(1);
@@ -513,7 +520,7 @@ test("identity fields wait for initial preferences before accepting edits", asyn
     name: "Date of birth",
     exact: true,
   });
-  const heart = page.getByRole("textbox", {
+  const heart = page.getByRole("spinbutton", {
     name: "Maximum heart rate in bpm",
     exact: true,
   });

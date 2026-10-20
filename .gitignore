@@ -108,3 +108,6 @@ release/framed/
 # Python local test caches
 __pycache__/
 *.pyc
+
+# Local migration research and synthetic verification logs
+.swarm/

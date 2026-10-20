@@ -242,7 +242,7 @@ test("night selection and responsive layout retain the selected metric and refre
   }
 });
 
-// Theme changes, compact widths and sidebar resizing must not clip bars or the coss controls.
+// Theme changes, compact widths and sidebar resizing must not clip bars or the shared controls.
 for (const theme of ["light", "dark"] as const) {
   test(`vital chart fits and stays accessible in ${theme} theme`, async ({
     safePage: page,

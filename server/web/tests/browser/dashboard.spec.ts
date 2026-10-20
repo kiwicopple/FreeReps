@@ -5,6 +5,11 @@ import AxeBuilder from "@axe-core/playwright";
 async function settingsSection(page: Page, label: string) {
   await expect(page.getByRole("tabpanel")).toBeVisible();
   const tab = page.getByRole("tab", { name: label, exact: true });
+  await expect(
+    tab
+      .or(page.getByRole("combobox", { name: "Settings section" }))
+      .filter({ visible: true }),
+  ).toBeVisible();
   if (await tab.isVisible()) await tab.click();
   else {
     await page.getByRole("combobox", { name: "Settings section" }).click();
@@ -246,7 +251,7 @@ test("detail sheets close on history changes and trend navigation focuses Overvi
   ).toHaveAttribute("aria-selected", "true");
   await expect(
     page.getByRole("combobox", { name: "Trend nutrient" }),
-  ).toHaveValue("Cholesterol");
+  ).toHaveText("Cholesterol");
   await expect(page.locator("#nutrition-trend")).toBeFocused();
 });
 

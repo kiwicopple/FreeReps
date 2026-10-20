@@ -16,3 +16,8 @@ freereps
 *.exe
 coverage.out
 coverage.html
+
+# Local credentials and synthetic browser artifacts are not build inputs.
+freereps-local.yaml
+web/test-results/
+web/playwright-report/

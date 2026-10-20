@@ -34,11 +34,7 @@ const ThemeContext = createContext<ThemeContextValue>({
   setTheme: () => {},
 });
 
-/**
- * Sets data-theme on <html>. The token sheet re-points every colour variable
- * under [data-theme="dark"], and under [data-theme="auto"] inside a
- * prefers-color-scheme block, so nothing else has to know which ground it is on.
- */
+/** Resolve Auto before applying the Supabase theme; keep the stored preference unchanged. */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemePreference>(readStored);
 
@@ -49,7 +45,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const query = window.matchMedia("(prefers-color-scheme: dark)");
     const apply = () => {
       setSystemDark(query.matches);
-      document.documentElement.setAttribute("data-theme", theme);
+      document.documentElement.setAttribute(
+        "data-theme",
+        theme === "dark" || (theme === "auto" && query.matches)
+          ? "dark"
+          : "light",
+      );
       document.documentElement.classList.toggle(
         "dark",
         theme === "dark" || (theme === "auto" && query.matches),

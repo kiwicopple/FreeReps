@@ -1,9 +1,5 @@
 import type { CSSProperties } from "react";
-import {
-  NumberField,
-  NumberFieldGroup,
-  NumberFieldInput,
-} from "./ui/number-field";
+import { Input } from "./ui/input";
 /** Null is the editable empty state; callers decide when a value is required. */
 export default function NumericField({
   value,
@@ -33,21 +29,26 @@ export default function NumericField({
   "aria-label"?: string;
 }) {
   return (
-    <NumberField
+    <Input
       id={id}
-      value={value}
-      onValueChange={onValueChange}
+      type="number"
+      value={value ?? ""}
+      onChange={(event) =>
+        onValueChange(
+          event.currentTarget.value === ""
+            ? null
+            : event.currentTarget.valueAsNumber,
+        )
+      }
       min={min}
       max={max}
       step={step ?? "any"}
       required={required}
       disabled={disabled}
+      aria-label={label}
+      placeholder={placeholder}
       className={className}
       style={style}
-    >
-      <NumberFieldGroup>
-        <NumberFieldInput aria-label={label} placeholder={placeholder} />
-      </NumberFieldGroup>
-    </NumberField>
+    />
   );
 }

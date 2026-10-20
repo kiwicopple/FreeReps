@@ -72,9 +72,9 @@ export default function ResponsiveDetails({
     <Card
       className="summary-card nutrition-detail-trigger"
       render={
-        <Button
-          variant="ghost"
-          className="h-auto w-full whitespace-normal text-left sm:h-auto"
+        <button
+          type="button"
+          className="focus-ring cursor-pointer h-auto w-full whitespace-normal text-left sm:h-auto"
         />
       }
     />

@@ -1,7 +1,6 @@
 import { Button } from "../ui/button";
 import { Field, FieldLabel, FieldDescription, FieldError } from "../ui/field";
 import { Copy } from "lucide-react";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useId, useState, type ReactNode } from "react";
 
@@ -23,9 +22,7 @@ export function Row({
         { "--setting-label-width": `${labelWidth}px` } as React.CSSProperties
       }
     >
-      <Label render={<span />} className="kick">
-        {label}
-      </Label>
+      <span className="kick">{label}</span>
       <div className="w-full min-w-0">{children}</div>
     </div>
   );

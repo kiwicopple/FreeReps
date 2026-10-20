@@ -59,7 +59,7 @@
 .chat-message {
   max-width: 92%;
   padding: 16px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -79,7 +79,7 @@
   gap: 10px;
   padding: 12px;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--card);
 }
 .chat-composer textarea {

@@ -59,7 +59,11 @@ test("all four nutrition cards open accessible scrolling sheets at every width",
     const sheet = page.getByRole("dialog", { name, exact: true });
     await expect(sheet).toBeVisible();
     await expect(sheet).not.toHaveAttribute("data-starting-style", "");
-    await sheet.evaluate(async element => { await Promise.all(element.getAnimations().map(animation => animation.finished)); });
+    await sheet.evaluate(async (element) => {
+      await Promise.all(
+        element.getAnimations().map((animation) => animation.finished),
+      );
+    });
     await expect(
       sheet.getByRole("region", { name: `About ${name}` }),
     ).toBeVisible();
@@ -69,7 +73,9 @@ test("all four nutrition cards open accessible scrolling sheets at every width",
         animations: "disabled",
         scale: "css",
       });
-    const panel = sheet.locator('[data-slot="scroll-area-viewport"]');
+    const panel = sheet.locator(
+      '[data-slot="sheet-panel"], [data-slot="drawer-panel"]',
+    );
     await expect
       .poll(() => panel.evaluate((el) => el.scrollHeight > el.clientHeight))
       .toBe(true);
@@ -81,7 +87,6 @@ test("all four nutrition cards open accessible scrolling sheets at every width",
     expect(await page.evaluate(() => window.scrollY)).toBe(pageScroll);
     if (name === "Calories") {
       const audit = await new AxeBuilder({ page })
-        .exclude("[data-base-ui-focus-guard]")
         .withTags(["wcag2a", "wcag2aa"])
         .analyze();
       expect(

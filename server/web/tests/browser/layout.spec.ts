@@ -204,7 +204,7 @@ test("nested nutrient trend navigation closes the drawer stack", async ({
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(
     page.getByRole("combobox", { name: "Trend nutrient" }),
-  ).toHaveValue("Cholesterol");
+  ).toHaveText("Cholesterol");
 });
 
 // Review overlays in both palettes: their portals inherit theme and reduced-motion preferences.
@@ -217,12 +217,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     await page.getByRole("button", { name: "Choose end date" }).click();
     await expect(page.getByLabel("Enter date", { exact: true })).toBeVisible();
     const violations = (
-      await new AxeBuilder({ page })
-        // Base UI's invisible VoiceOver focus sentinels deliberately have role=button
-        // without names. Audit all application controls, excluding only these internals.
-        .exclude("[data-base-ui-focus-guard]")
-        .withTags(["wcag2a", "wcag2aa"])
-        .analyze()
+      await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze()
     ).violations;
     expect(
       violations.filter((v) =>
@@ -237,8 +232,7 @@ for (const colorScheme of ["light", "dark"] as const) {
   });
 }
 
-// The coss Input puts className on its wrapper; hide the native date icon on
-// the inner input so editable form dates have a single visible picker trigger.
+// Native editable dates retain validation and one visible calendar trigger.
 test("form dates retain editing and a single calendar trigger", async ({
   safePage: page,
 }, info) => {

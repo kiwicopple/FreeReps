@@ -1,84 +1,92 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import type * as React from "react";
+import * as React from "react";
+
 import { cn } from "@/lib/utils";
 
-const alertVariants = cva(
-  "relative grid w-full items-start gap-x-2 gap-y-0.5 rounded-xl border px-3.5 py-3 text-card-foreground text-sm has-[>svg]:has-data-[slot=alert-action]:grid-cols-[calc(var(--spacing)*4)_1fr_auto] has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-data-[slot=alert-action]:grid-cols-[1fr_auto] has-[>svg]:gap-x-2 [&>svg]:h-lh [&>svg]:w-4",
+export const alertVariants = cva(
+  cn(
+    // Container
+    "relative w-full text-sm rounded-lg border p-4",
+    // Icon SVG
+    "[&>svg~*]:pl-10 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg]:w-[23px] [&>svg]:h-[23px] [&>svg]:p-1 [&>svg]:flex [&>svg]:rounded-sm",
+  ),
   {
-    defaultVariants: {
-      variant: "default",
-    },
     variants: {
       variant: {
         default:
-          "bg-transparent dark:bg-input/32 [&>svg]:text-muted-foreground",
-        error:
-          "border-destructive/32 bg-destructive/4 [&>svg]:text-destructive",
-        info: "border-info/32 bg-info/4 [&>svg]:text-info",
-        success: "border-success/32 bg-success/4 [&>svg]:text-success",
-        warning: "border-warning/32 bg-warning/4 [&>svg]:text-warning",
+          "bg-surface-200/25 border-default text-foreground [&>svg]:text-background [&>svg]:bg-foreground",
+        error: "bg-destructive-200 border-destructive-400 text-foreground",
+        success: "bg-brand-default/10 border-brand-500 text-foreground",
+        info: "bg-surface-200/25 border-default text-foreground",
+        destructive:
+          "bg-destructive-200 border-destructive-400 text-foreground [&>svg]:text-destructive-200 [&>svg]:bg-destructive-600",
+        warning:
+          "bg-warning-200 border-warning-400 text-foreground [&>svg]:text-warning-200 [&>svg]:bg-warning-600",
       },
+    },
+    defaultVariants: {
+      variant: "default",
     },
   },
 );
 
-export function Alert({
-  className,
-  variant,
-  ...props
-}: React.ComponentProps<"div"> &
-  VariantProps<typeof alertVariants>): React.ReactElement {
-  return (
-    <div
-      className={cn(alertVariants({ variant }), className)}
-      data-slot="alert"
-      role="alert"
-      {...props}
-    />
-  );
-}
+const Alert = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
+>(({ className, variant, ...props }, ref) => (
+  <div
+    ref={ref}
+    data-slot="alert"
+    role="alert"
+    className={cn(alertVariants({ variant }), className)}
+    {...props}
+  />
+));
+Alert.displayName = "Alert";
 
-export function AlertTitle({
-  className,
-  ...props
-}: React.ComponentProps<"div">): React.ReactElement {
-  return (
-    <div
-      className={cn("font-medium [svg~&]:col-start-2", className)}
-      data-slot="alert-title"
-      {...props}
-    />
-  );
-}
+const AlertTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    data-slot="alert-title"
+    className={cn("!mt-0 mb-0.5 font-medium", className)}
+    {...props}
+  />
+));
+AlertTitle.displayName = "AlertTitle";
 
-export function AlertDescription({
-  className,
-  ...props
-}: React.ComponentProps<"div">): React.ReactElement {
+const AlertDescription = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => {
+  // Automatically wrap primitive text nodes (string/number) in <p> tags for semantic HTML
+  const content =
+    typeof children === "string" || typeof children === "number" ? (
+      <p>{children}</p>
+    ) : (
+      children
+    );
+
   return (
     <div
-      className={cn(
-        "flex flex-col gap-2.5 text-muted-foreground [svg~&]:col-start-2",
-        className,
-      )}
+      ref={ref}
       data-slot="alert-description"
-      {...props}
-    />
-  );
-}
-
-export function AlertAction({
-  className,
-  ...props
-}: React.ComponentProps<"div">): React.ReactElement {
-  return (
-    <div
       className={cn(
-        "flex gap-1 max-sm:col-start-2 max-sm:mt-2 sm:row-start-1 sm:row-end-3 sm:self-center sm:[[data-slot=alert-description]~&]:col-start-2 sm:[[data-slot=alert-title]~&]:col-start-2 sm:[svg~&]:col-start-2 sm:[svg~[data-slot=alert-description]~&]:col-start-3 sm:[svg~[data-slot=alert-title]~&]:col-start-3",
+        "text-sm text-foreground-light font-normal",
+        // Optically align text in container
+        "mb-0.5",
+        // Handle paragraphs (keep Studio density; shadcn uses mb-4)
+        "[&_p]:mb-0.5 [&_p:last-child]:mb-0",
         className,
       )}
-      data-slot="alert-action"
       {...props}
-    />
+    >
+      {content}
+    </div>
   );
-}
+});
+AlertDescription.displayName = "AlertDescription";
+
+export { Alert, AlertDescription, AlertTitle };
