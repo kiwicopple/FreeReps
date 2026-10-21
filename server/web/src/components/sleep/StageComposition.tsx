@@ -23,7 +23,7 @@ export default function StageComposition({ totals, compact = false }: Props) {
   const sum = STAGE_COMPOSITION_ORDER.reduce((a, s) => a + (totals[s] || 0), 0);
   if (sum <= 0) {
     return (
-      <Empty style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+      <Empty style={{ color: "var(--muted-foreground)" }} className="text-sm">
         No stage breakdown for this night.
       </Empty>
     );
@@ -75,9 +75,7 @@ export default function StageComposition({ totals, compact = false }: Props) {
             }}
           >
             {compact ? (
-              <span className="kick" style={{ fontSize: 9 }}>
-                {s.stage}
-              </span>
+              <span className="kick text-xs">{s.stage}</span>
             ) : (
               <>
                 <span
@@ -90,9 +88,9 @@ export default function StageComposition({ totals, compact = false }: Props) {
                 />
                 <span
                   style={{
-                    font: "500 12.5px var(--font-body)",
                     color: "var(--muted-foreground)",
                   }}
+                  className="text-xs font-medium"
                 >
                   {s.stage}
                 </span>
@@ -106,9 +104,10 @@ export default function StageComposition({ totals, compact = false }: Props) {
               <span
                 style={{
                   fontWeight: 400,
-                  fontSize: 12,
+
                   color: "var(--muted-foreground)",
                 }}
+                className="text-xs"
               >
                 {compact ? formatHoursMinutes(s.hours) : `${s.pct.toFixed(0)}%`}
               </span>

@@ -120,8 +120,8 @@ export default function SleepPage() {
       {message ? (
         <Alert
           variant="error"
-          className="page-x"
-          style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+          className="page-x text-sm"
+          style={{ color: "var(--muted-foreground)" }}
         >
           {message}
           <Button variant="outline" onClick={() => query.refetch()}>
@@ -137,8 +137,8 @@ export default function SleepPage() {
         </div>
       ) : !last ? (
         <Empty
-          className="page-x"
-          style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+          className="page-x text-sm"
+          style={{ color: "var(--muted-foreground)" }}
         >
           No sleep recorded for this date. Choose another night or return to
           Latest.
@@ -352,9 +352,7 @@ function NightRow({ session }: { session: SleepSession }) {
 
   return (
     <div className="row" style={{ paddingTop: 10, paddingBottom: 10 }}>
-      <span
-        style={{ font: "500 13px var(--font-body)", width: 44, flex: "none" }}
-      >
+      <span style={{ width: 44, flex: "none" }} className="text-sm font-medium">
         {dateOnlyToLocalDate(session.Date).toLocaleDateString("en-GB", {
           weekday: "short",
         })}
@@ -368,9 +366,8 @@ function NightRow({ session }: { session: SleepSession }) {
         ))}
       </div>
       <span
-        className="num"
+        className="num text-sm font-semibold"
         style={{
-          font: "600 13px var(--font-body)",
           width: 46,
           textAlign: "right",
           flex: "none",

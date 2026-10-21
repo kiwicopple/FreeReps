@@ -30,3 +30,7 @@ Local adaptations:
 
 Supabase's own compatibility token file is included because the pinned upstream
 components consume those aliases. Protocol's former hand-authored palette is gone.
+
+The sidebar menu variants in `sidebar-menu.ts` come from the same pinned
+`shadcn/ui/sidebar.tsx`. They style native router links; Protocol retains its
+existing responsive shell and collapse preference.

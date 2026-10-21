@@ -10,8 +10,8 @@ main > .nutrition-page {
 }
 .nutrition-muted {
   color: var(--muted-foreground);
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.5;
 }
 .nutrition-intro {
   display: flex;
@@ -36,7 +36,7 @@ main > .nutrition-page {
   padding-right: 20px;
 }
 .nutrition-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 .nutrition-value {
@@ -46,7 +46,7 @@ main > .nutrition-page {
   line-height: 1.2;
 }
 .nutrition-value small {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   letter-spacing: 0;
   color: var(--muted-foreground);
@@ -68,7 +68,7 @@ main > .nutrition-page {
 .nutrition-nutrient .nutrition-detail-trigger {
   flex-direction: column;
   align-items: stretch;
-  gap: 6px;
+  gap: 8px;
 }
 .nutrition-nutrient .nutrition-value {
   text-align: right;
@@ -88,13 +88,13 @@ main > .nutrition-page {
   }
 }
 .nutrition-detail {
-  font-size: 13px;
-  line-height: 1.6;
-  padding: 14px 0;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 16px 0;
   overflow-wrap: anywhere;
 }
 .nutrition-detail p {
-  margin: 10px 0;
+  margin: 8px 0;
 }
 .nutrition-contribution {
   display: grid;
@@ -143,16 +143,16 @@ main > .nutrition-page {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding: 14px 0;
+  padding: 16px 0;
 }
 .nutrition-editor label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 13px;
+  gap: 8px;
+  font-size: 14px;
 }
 .nutrition-editor textarea {
-  min-height: 75px;
+  min-height: 80px;
 }
 .nutrition-notice {
   padding: 12px 0;
@@ -174,13 +174,13 @@ main > .nutrition-page {
   margin-bottom: 20px;
   padding-bottom: 18px;
   border-bottom: 1px solid var(--border);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 .nutrition-explainer p {
   margin: 0 0 8px;
 }
 .nutrition-explainer a {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .nutrition-detail-trigger {

@@ -141,10 +141,10 @@ export default function TrendsPage() {
           {message ? (
             <Alert
               variant="error"
-              className="page-x"
+              className="page-x text-sm"
               style={{
                 color: "var(--muted-foreground)",
-                fontSize: 13,
+
                 paddingTop: 16,
               }}
             >
@@ -211,9 +211,8 @@ function SmallMultiples({
               {metric.label || metric.metric_name}
             </Link>
             <div
-              className="num"
+              className="num text-3xl font-medium leading-tight"
               style={{
-                font: "800 30px/1 var(--font-heading)",
                 letterSpacing: "-0.03em",
                 marginTop: 10,
               }}
@@ -221,10 +220,10 @@ function SmallMultiples({
               {displayValue(metric)}
               <span
                 style={{
-                  font: "500 11.5px var(--font-body)",
                   color: "var(--muted-foreground)",
                   marginLeft: 5,
                 }}
+                className="text-xs font-medium"
               >
                 {metric.unit}
               </span>
@@ -238,9 +237,8 @@ function SmallMultiples({
               }}
             >
               <span
-                className="num"
+                className="num text-xs font-semibold"
                 style={{
-                  font: "700 12.5px var(--font-body)",
                   color: VERDICT_COLOR[fit.verdict],
                 }}
               >
@@ -248,9 +246,9 @@ function SmallMultiples({
               </span>
               <span
                 style={{
-                  font: "400 11.5px var(--font-body)",
                   color: "var(--muted-foreground)",
                 }}
+                className="text-xs font-normal"
               >
                 {fit.verdict}
               </span>
@@ -267,10 +265,11 @@ function SmallMultiples({
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                font: "400 10px var(--font-body)",
+
                 color: "var(--muted-foreground)",
                 marginTop: 4,
               }}
+              className="text-xs font-normal"
             >
               <span>{formatDayMonth(start)}</span>
               <span>{formatDayMonth(end)}</span>
@@ -303,18 +302,17 @@ function TrendRows({ items }: { items: TrendItem[] }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div
                     style={{
-                      font: "500 13.5px var(--font-body)",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                     }}
+                    className="text-sm font-medium"
                   >
                     {metric.label || metric.metric_name}
                   </div>
                   <div
-                    className="num"
+                    className="num text-xs font-semibold"
                     style={{
-                      font: "600 11px var(--font-body)",
                       marginTop: 4,
                       color: VERDICT_COLOR[fit.verdict],
                     }}
@@ -330,9 +328,8 @@ function TrendRows({ items }: { items: TrendItem[] }) {
                   cssWidth={104}
                 />
                 <div
-                  className="num"
+                  className="num text-sm font-semibold"
                   style={{
-                    font: "700 15px var(--font-body)",
                     width: 64,
                     textAlign: "right",
                     flex: "none",
@@ -342,9 +339,10 @@ function TrendRows({ items }: { items: TrendItem[] }) {
                   <span
                     style={{
                       fontWeight: 400,
-                      fontSize: 10,
+
                       color: "var(--muted-foreground)",
                     }}
+                    className="text-xs"
                   >
                     {metric.unit}
                   </span>
@@ -468,9 +466,10 @@ function LegendLine({ color, label }: { color: string; label: string }) {
         display: "flex",
         alignItems: "center",
         gap: 9,
-        font: "500 11.5px var(--font-body)",
+
         color: "var(--muted-foreground)",
       }}
+      className="text-xs font-medium"
     >
       <span style={{ width: 16, height: 2, background: color }} />
       {label}

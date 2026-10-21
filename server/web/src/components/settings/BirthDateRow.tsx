@@ -71,7 +71,6 @@ export default function BirthDateRow() {
             variant="outline"
             type="button"
 
-            style={{ fontSize: 12 }}
             disabled={!loaded || saving || draft === stored}
             onClick={() => commit(draft)}
           >
@@ -82,7 +81,6 @@ export default function BirthDateRow() {
               variant="ghost"
               type="button"
 
-              style={{ fontSize: 12 }}
               disabled={!loaded || saving}
               onClick={() => {
                 setDraft("");

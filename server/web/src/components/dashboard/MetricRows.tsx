@@ -42,8 +42,8 @@ export default function MetricRows({ groups, loading, onSelect }: Props) {
   if (groups.length === 0) {
     return (
       <Empty
-        className="page-x"
-        style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+        className="page-x text-sm"
+        style={{ color: "var(--muted-foreground)" }}
       >
         No metrics selected. Pick which metrics the list shows in Settings.
       </Empty>
@@ -85,20 +85,20 @@ function MetricRow({
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            font: "500 14px var(--font-body)",
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
           }}
+          className="text-sm font-medium"
         >
           {m.label || m.metric_name}
         </div>
         <div
           style={{
-            font: "400 11px var(--font-body)",
             color: "var(--muted-foreground)",
             marginTop: 3,
           }}
+          className="text-xs font-normal"
         >
           {meta || "no readings"}
         </div>
@@ -114,22 +114,22 @@ function MetricRow({
       />
 
       <div style={{ textAlign: "right", flex: "none", width: 82 }}>
-        <div className="num" style={{ font: "700 15px var(--font-body)" }}>
+        <div className="num text-sm font-semibold">
           {displayValue(m)}{" "}
           <span
             style={{
               fontWeight: 400,
-              fontSize: 11,
+
               color: "var(--muted-foreground)",
             }}
+            className="text-xs"
           >
             {m.unit}
           </span>
         </div>
         <div
-          className="num"
+          className="num text-xs font-semibold"
           style={{
-            font: "600 11px var(--font-body)",
             marginTop: 3,
             color: deltaColor(m.metric_name, m.delta_7d),
           }}

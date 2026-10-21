@@ -164,10 +164,10 @@ export default function DashboardPage() {
           {message ? (
             <Alert
               variant="error"
-              className="page-x"
+              className="page-x text-sm"
               style={{
                 color: "var(--muted-foreground)",
-                fontSize: 13,
+
                 paddingTop: 4,
               }}
             >
@@ -248,8 +248,8 @@ function MetricsTable({
   if (groups.length === 0) {
     return (
       <Empty
-        className="page-x"
-        style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+        className="page-x text-sm"
+        style={{ color: "var(--muted-foreground)" }}
       >
         No metrics selected. Pick which metrics the table lists in Settings.
       </Empty>
@@ -352,10 +352,10 @@ function MetricRow({
         </span>
       </TableCell>
       <TableCell
-        className="num"
+        className="num text-xs"
         style={{
           textAlign: "right",
-          fontSize: 12.5,
+
           fontWeight: 600,
           color: deltaColor(m.metric_name, m.delta_7d),
         }}
@@ -363,10 +363,10 @@ function MetricRow({
         {displayDelta(m)}
       </TableCell>
       <TableCell
-        className="num"
+        className="num text-xs"
         style={{
           textAlign: "right",
-          fontSize: 12.5,
+
           color: "var(--muted-foreground)",
           whiteSpace: "nowrap",
         }}
@@ -383,10 +383,16 @@ function MetricRow({
           strokeWidth={1.4}
         />
       </TableCell>
-      <TableCell style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
+      <TableCell
+        style={{ color: "var(--muted-foreground)" }}
+        className="text-xs"
+      >
         {sourceLabel(m.source)}
       </TableCell>
-      <TableCell style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>
+      <TableCell
+        style={{ color: "var(--muted-foreground)" }}
+        className="text-xs"
+      >
         {m.time ? formatTimeAgo(m.time) : "—"}
       </TableCell>
     </TableRow>

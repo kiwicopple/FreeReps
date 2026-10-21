@@ -76,8 +76,8 @@
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-body);
-    font-size: 15px;
-    line-height: 1.55;
+    font-size: 14px;
+    line-height: 1.5;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
   }
@@ -121,10 +121,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Kicker — the 10px uppercase label above a value, and the table header face. */
+/* Shared secondary label, following the standard small text scale. */
 .kick {
-  font: 600 10px var(--font-body);
-  letter-spacing: 0.14em;
+  font: 500 12px var(--font-body);
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--muted-foreground);
 }
@@ -193,11 +193,11 @@
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  height: 68px;
+  gap: 8px;
+  height: 64px;
   flex-shrink: 0;
   padding: 0 20px;
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--foreground);
 }
@@ -208,14 +208,12 @@
 }
 .sidebar-link {
   width: 100%;
-  min-height: 44px;
-  justify-content: flex-start;
-  padding-inline: 12px;
-  color: var(--muted-foreground);
+  justify-content: center;
 }
 .sidebar-link[aria-current="page"] {
-  background: var(--accent);
+  background: var(--sidebar-accent);
   color: var(--foreground);
+  font-weight: 500;
 }
 .sidebar-label {
   display: none;
@@ -242,6 +240,9 @@
   }
   .app-shell:not([data-collapsed="true"]) .app-main {
     margin-left: 224px;
+  }
+  .app-shell:not([data-collapsed="true"]) .sidebar-link {
+    justify-content: flex-start;
   }
   .app-shell:not([data-collapsed="true"]) .sidebar-label {
     display: block;

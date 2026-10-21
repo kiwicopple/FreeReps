@@ -135,10 +135,10 @@ export default function HevyTab() {
             />
             <p
               style={{
-                font: "400 12px/1.5 var(--font-body)",
                 color: "var(--muted-foreground)",
                 margin: "6px 0 0",
               }}
+              className="text-xs font-normal leading-normal"
             >
               Workouts that started before this date are ignored. Keep it at the
               switchover date so an Alpha Progression history later uploaded to

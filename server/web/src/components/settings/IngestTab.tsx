@@ -47,7 +47,9 @@ export default function IngestTab() {
       </div>
 
       <div style={{ paddingTop: 30 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700 }}>Recent ingests</h3>
+        <h3 style={{ fontWeight: 700 }} className="text-sm">
+          Recent ingests
+        </h3>
         <div
           style={{
             borderTop: "1px solid var(--border)",
@@ -100,11 +102,11 @@ function IngestRow({ log }: { log: ImportLog }) {
       }}
     >
       <span
-        className="num"
+        className="num text-xs font-normal"
         style={{
           width: 150,
           flex: "none",
-          font: "400 12px var(--font-body)",
+
           color: "var(--muted-foreground)",
         }}
       >
@@ -116,7 +118,8 @@ function IngestRow({ log }: { log: ImportLog }) {
         })}
       </span>
       <span
-        style={{ width: 180, flex: "none", font: "500 13px var(--font-body)" }}
+        style={{ width: 180, flex: "none" }}
+        className="text-sm font-medium"
       >
         {log.source || "—"}
       </span>
@@ -124,9 +127,10 @@ function IngestRow({ log }: { log: ImportLog }) {
         style={{
           flex: "1 1 180px",
           minWidth: 0,
-          font: "400 12.5px var(--font-body)",
+
           color: "var(--muted-foreground)",
         }}
+        className="text-xs font-normal"
       >
         {log.error_message || summary || "nothing new"}
       </span>

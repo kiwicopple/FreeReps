@@ -80,3 +80,13 @@ color override. Shared cards retain the pinned Supabase source's 8px rounding.
 
 Responsive layout, safe-area handling, chat keyboard geometry, measurement colors
 and accessible focus behavior remain application responsibilities.
+
+### Mobile typography and navigation consistency
+
+Page text and secondary labels use the standard text-sm/text-xs scale instead of
+fractional pixel fonts. Action buttons inherit Studio sizes without page-specific
+font overrides. Nutrition detail spacing follows the shared spacing scale.
+Sidebar links use the pinned Supabase sidebar menu variants (32px rows, 20px icons),
+with centered icons in the collapsed rail. Mobile navigation keeps its touch
+targets, six destinations and safe-area geometry; editable mobile inputs retain
+the Safari focus-zoom safeguards.

@@ -287,7 +287,9 @@ function StatusPanel({
 
       {status.sync_states && Object.keys(status.sync_states).length > 0 ? (
         <div style={{ paddingTop: 30 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700 }}>Pull schedule</h3>
+          <h3 style={{ fontWeight: 700 }} className="text-sm">
+            Pull schedule
+          </h3>
           <Table style={{ marginTop: 12 }}>
             <TableHeader>
               <TableRow>
@@ -304,9 +306,9 @@ function StatusPanel({
                   <TableRow key={job}>
                     <TableCell
                       style={{
-                        font: "500 13.5px var(--font-body)",
                         paddingLeft: 0,
                       }}
+                      className="text-sm font-medium"
                     >
                       {job.replace(/_/g, " ")}
                     </TableCell>

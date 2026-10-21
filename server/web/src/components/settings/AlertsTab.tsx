@@ -44,16 +44,19 @@ function ConditionRow({ c }: { c: AlertCondition }) {
         }}
       />
       <span className="text-sm font-semibold">{c.service}</span>
-      <span style={{ ...MONO, fontSize: 12, color: "var(--muted-foreground)" }}>
+      <span
+        style={{ ...MONO, color: "var(--muted-foreground)" }}
+        className="text-xs"
+      >
         {c.monitor_id}
       </span>
       <span
         style={{
-          font: "400 12px/1.5 var(--font-body)",
           color: "var(--muted-foreground)",
           flex: 1,
           minWidth: 0,
         }}
+        className="text-xs font-normal leading-normal"
       >
         {c.firing ? "reported as a problem" : "quiet"} · checked{" "}
         {describeAge(c.checked_at)}
@@ -187,7 +190,7 @@ export default function AlertsTab() {
                   checked={settings.enabled}
                   onCheckedChange={(checked) => patch({ enabled: checked })}
                 />
-                <span style={{ font: "400 13px var(--font-body)" }}>
+                <span className="text-sm font-normal">
                   {settings.enabled
                     ? "Conditions are reported"
                     : "Nothing is reported"}
@@ -259,9 +262,7 @@ export default function AlertsTab() {
                       patchNumber("check_interval_sec", value, MIN, 1)
                     }
                   />
-                  <span style={{ font: "400 13px var(--font-body)" }}>
-                    minutes
-                  </span>
+                  <span className="text-sm font-normal">minutes</span>
                 </span>
                 <FieldError />
               </div>
@@ -291,9 +292,9 @@ export default function AlertsTab() {
                   />
                   <span
                     style={{
-                      font: "400 12px/1.5 var(--font-body)",
                       color: "var(--muted-foreground)",
                     }}
+                    className="text-xs font-normal leading-normal"
                   >
                     consecutive failed runs of one source for one user. At a
                     30-minute sync interval, 3 means a defect is reported within
@@ -328,9 +329,9 @@ export default function AlertsTab() {
                   />
                   <span
                     style={{
-                      font: "400 12px/1.5 var(--font-body)",
                       color: "var(--muted-foreground)",
                     }}
+                    className="text-xs font-normal leading-normal"
                   >
                     hours without a Health Auto Export delivery before the
                     ingress counts as down. 0 turns the rule off.

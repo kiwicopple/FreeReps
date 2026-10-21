@@ -208,14 +208,18 @@ export default function CorrelationPage() {
         <div className="dashboard-panels">
           <PageSection title="Metric relationship">
             {sameMetric ? (
-              <p style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+              <p
+                style={{ color: "var(--muted-foreground)" }}
+                className="text-sm"
+              >
                 Pick two different metrics. A metric correlates with itself
                 perfectly, which says nothing.
               </p>
             ) : message ? (
               <Alert
                 variant="error"
-                style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+                style={{ color: "var(--muted-foreground)" }}
+                className="text-sm"
               >
                 {message}
                 <Button
@@ -256,21 +260,21 @@ export default function CorrelationPage() {
             />
 
             <div className="mt-6 mb-3">
-              <h3 style={{ fontSize: 15, fontWeight: 700 }}>
+              <h3 style={{ fontWeight: 700 }} className="text-sm">
                 Correlation by lag
               </h3>
               <p
                 style={{
-                  font: "400 11.5px var(--font-body)",
                   color: "var(--muted-foreground)",
                   margin: "6px 0 0",
                 }}
+                className="text-xs font-normal"
               >
                 Y shifted forward by n days.
               </p>
             </div>
 
-            <Table style={{ fontSize: 13.5 }}>
+            <Table className="text-sm">
               <TableHeader>
                 <TableRow>
                   <TableHead>Lag</TableHead>
@@ -327,10 +331,10 @@ export default function CorrelationPage() {
             >
               <p
                 style={{
-                  font: "400 12px/1.5 var(--font-body)",
                   color: "var(--muted-foreground)",
                   margin: 0,
                 }}
+                className="text-xs font-normal leading-normal"
               >
                 {CAVEAT}
               </p>
@@ -338,7 +342,7 @@ export default function CorrelationPage() {
                 variant="ghost"
                 type="button"
 
-                style={{ fontSize: 12.5, marginTop: 12, marginLeft: -4 }}
+                style={{ marginTop: 12, marginLeft: -4 }}
                 disabled={!active || active.pairs.length === 0}
                 onClick={() =>
                   exportPairs(active?.pairs ?? [], xMetric, yMetric, lag)
@@ -381,9 +385,8 @@ function PearsonBlock({
     >
       <div className="kick">Pearson r</div>
       <div
-        className="num"
+        className="num text-4xl font-medium leading-tight"
         style={{
-          font: "700 36px/1.2 var(--font-heading)",
           letterSpacing: "-0.04em",
           marginTop: 10,
           color,
@@ -393,19 +396,19 @@ function PearsonBlock({
       </div>
       <div
         style={{
-          font: "600 13px var(--font-body)",
           color,
           marginTop: 12,
         }}
+        className="text-sm font-semibold"
       >
         {r != null ? strengthPhrase(r) : "No pairing"}
       </div>
       <p
         style={{
-          font: "400 12.5px/1.55 var(--font-body)",
           color: "var(--muted-foreground)",
           margin: "8px 0 0",
         }}
+        className="text-xs font-normal leading-normal"
       >
         {r == null
           ? "Pick two different metrics with overlapping days."

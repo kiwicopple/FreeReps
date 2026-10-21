@@ -208,9 +208,8 @@ export default function WorkoutsPage() {
             workoutsQuery.data && (
               <>
                 <span
-                  className="num"
+                  className="num text-xs font-normal"
                   style={{
-                    font: "400 12px var(--font-body)",
                     color: "var(--muted-foreground)",
                   }}
                 >
@@ -225,7 +224,7 @@ export default function WorkoutsPage() {
                         variant="outline"
                         type="button"
 
-                        style={{ marginLeft: "auto", fontSize: 12 }}
+                        style={{ marginLeft: "auto" }}
                         disabled={page === 0}
                         onClick={() => setParam("page", String(page - 1))}
                       >
@@ -237,7 +236,6 @@ export default function WorkoutsPage() {
                         variant="outline"
                         type="button"
 
-                        style={{ fontSize: 12 }}
                         disabled={(page + 1) * PAGE_SIZE >= filtered.length}
                         onClick={() => setParam("page", String(page + 1))}
                       >
@@ -268,8 +266,8 @@ export default function WorkoutsPage() {
           {message ? (
             <Alert
               variant="error"
-              className="page-x"
-              style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+              className="page-x text-sm"
+              style={{ color: "var(--muted-foreground)" }}
             >
               {message}
               <Button variant="outline" onClick={() => workoutsQuery.refetch()}>
@@ -280,8 +278,8 @@ export default function WorkoutsPage() {
             <Spinner className="mx-auto my-6 size-6" />
           ) : filtered.length === 0 ? (
             <Empty
-              className="page-x"
-              style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+              className="page-x text-sm"
+              style={{ color: "var(--muted-foreground)" }}
             >
               No workouts in this window.
             </Empty>
@@ -329,9 +327,10 @@ export default function WorkoutsPage() {
                   display: "flex",
                   alignItems: "center",
                   gap: 8,
-                  font: "400 11.5px var(--font-body)",
+
                   color: "var(--muted-foreground)",
                 }}
+                className="text-xs font-normal"
               >
                 <span
                   style={{ width: 11, height: 11, background: ZONE_COLORS[i] }}
@@ -348,9 +347,10 @@ export default function WorkoutsPage() {
             <span
               style={{
                 marginLeft: "auto",
-                font: "400 11px var(--font-body)",
+
                 color: "var(--muted-foreground)",
               }}
+              className="text-xs font-normal"
             >
               Bands from a maximum of {formatNumber(maxHR)} bpm
             </span>
@@ -416,7 +416,7 @@ function WorkoutTable({
                 }}
                 onClick={() => onOpen(w.ID)}
               >
-                <TableCell className="num" style={{ fontSize: 12.5 }}>
+                <TableCell className="num text-xs">
                   {formatClock(w.StartTime)}
                 </TableCell>
                 <TableCell>
@@ -431,10 +431,10 @@ function WorkoutTable({
                   {formatDuration(w.DurationSec)}
                 </TableCell>
                 <TableCell
-                  className="num"
+                  className="num text-xs"
                   style={{
                     textAlign: "right",
-                    fontSize: 12.5,
+
                     color: "var(--muted-foreground)",
                   }}
                 >
@@ -446,10 +446,10 @@ function WorkoutTable({
                   <ZoneBar shares={zonesById.get(w.ID) ?? null} />
                 </TableCell>
                 <TableCell
-                  className="num"
+                  className="num text-xs"
                   style={{
                     textAlign: "right",
-                    fontSize: 12.5,
+
                     color: "var(--muted-foreground)",
                   }}
                 >
@@ -458,17 +458,18 @@ function WorkoutTable({
                     : "—"}
                 </TableCell>
                 <TableCell
-                  className="num"
+                  className="num text-xs"
                   style={{
                     textAlign: "right",
-                    fontSize: 12.5,
+
                     color: "var(--muted-foreground)",
                   }}
                 >
                   {formatDistance(w.Distance, w.DistanceUnits)}
                 </TableCell>
                 <TableCell
-                  style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}
+                  style={{ color: "var(--muted-foreground)" }}
+                  className="text-xs"
                 >
                   {sourceLabel(w.Source)}
                 </TableCell>
@@ -512,13 +513,10 @@ function WorkoutCards({
               onClick={() => onOpen(w.ID)}
             >
               <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-                <span style={{ font: "600 14px var(--font-body)", flex: 1 }}>
+                <span style={{ flex: 1 }} className="text-sm font-semibold">
                   {getWorkoutDisplayName(w)}
                 </span>
-                <span
-                  className="num"
-                  style={{ font: "700 14px var(--font-body)" }}
-                >
+                <span className="num text-sm font-semibold">
                   {formatDuration(w.DurationSec)}
                 </span>
               </div>
@@ -532,7 +530,6 @@ function WorkoutCards({
               >
                 <span
                   style={{
-                    font: "400 11.5px var(--font-body)",
                     color: "var(--muted-foreground)",
                     flex: 1,
                     minWidth: 0,
@@ -540,15 +537,15 @@ function WorkoutCards({
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}
+                  className="text-xs font-normal"
                 >
                   {[noteFor(w), sourceLabel(w.Source)]
                     .filter(Boolean)
                     .join(" · ")}
                 </span>
                 <span
-                  className="num"
+                  className="num text-xs font-medium"
                   style={{
-                    font: "500 11.5px var(--font-body)",
                     color: "var(--muted-foreground)",
                     whiteSpace: "nowrap",
                     flex: "none",

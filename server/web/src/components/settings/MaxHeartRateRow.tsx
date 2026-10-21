@@ -83,9 +83,9 @@ export default function MaxHeartRateRow() {
           />
           <span
             style={{
-              font: "400 12px var(--font-body)",
               color: "var(--muted-foreground)",
             }}
+            className="text-xs font-normal"
           >
             bpm
           </span>
@@ -93,7 +93,6 @@ export default function MaxHeartRateRow() {
             variant="outline"
             type="button"
 
-            style={{ fontSize: 12 }}
             disabled={!loaded || saving || draft === ""}
             onClick={() => commit(Number(draft))}
           >
@@ -104,7 +103,6 @@ export default function MaxHeartRateRow() {
               variant="ghost"
               type="button"
 
-              style={{ fontSize: 12 }}
               disabled={!loaded || saving}
               onClick={() => {
                 setDraft("");

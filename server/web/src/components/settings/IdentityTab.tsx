@@ -87,10 +87,10 @@ export default function IdentityTab() {
         />
         <p
           style={{
-            font: "400 12px var(--font-body)",
             color: "var(--muted-foreground)",
             margin: "8px 0 0",
           }}
+          className="text-xs font-normal"
         >
           Auto follows the system setting. The choice is stored in this browser.
         </p>

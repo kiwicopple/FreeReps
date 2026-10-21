@@ -166,7 +166,6 @@ export default function MetricsPage() {
                 variant="outline"
                 type="button"
 
-                style={{ fontSize: 12 }}
                 onClick={() => exportCSV(points, multiplier, metric)}
                 disabled={points.length === 0}
               >
@@ -178,7 +177,8 @@ export default function MetricsPage() {
               {message ? (
                 <Alert
                   variant="error"
-                  style={{ color: "var(--muted-foreground)", fontSize: 13 }}
+                  style={{ color: "var(--muted-foreground)" }}
+                  className="text-sm"
                 >
                   {message}
                   <Button

@@ -75,9 +75,12 @@ export default function RecoveryScore({ session }: { session: SleepSession }) {
                 marginTop: 10,
               }}
             >
-              <strong className="num" style={{ fontSize: 40 }}>
+              <strong className="num text-4xl">
                 {result.score ?? "—"}
-                <span style={{ fontSize: 16, fontWeight: 400 }}> / 100</span>
+                <span style={{ fontWeight: 400 }} className="text-base">
+                  {" "}
+                  / 100
+                </span>
               </strong>
               <Badge variant="secondary">
                 {result.score == null
@@ -91,10 +94,10 @@ export default function RecoveryScore({ session }: { session: SleepSession }) {
             </div>
             <p
               style={{
-                fontSize: 12,
                 color: "var(--muted-foreground)",
                 marginTop: 6,
               }}
+              className="text-xs"
             >
               Data coverage: {result.coverage}% of the model. A personal trend
               indicator, not a medical assessment or clearance to train.
@@ -109,8 +112,8 @@ export default function RecoveryScore({ session }: { session: SleepSession }) {
                   style={{
                     padding: "10px 0",
                     borderBottom: "1px solid var(--border)",
-                    fontSize: 13,
                   }}
+                  className="text-sm"
                 >
                   <div
                     style={{
@@ -135,7 +138,10 @@ export default function RecoveryScore({ session }: { session: SleepSession }) {
                   </div>
                 </div>
               ))}
-              <div style={{ fontSize: 12, lineHeight: 1.7, marginTop: 12 }}>
+              <div
+                style={{ lineHeight: 1.7, marginTop: 12 }}
+                className="text-xs"
+              >
                 <p>
                   Score = weighted average of available contributors. Missing
                   contributors are excluded and remaining weights are rescaled.

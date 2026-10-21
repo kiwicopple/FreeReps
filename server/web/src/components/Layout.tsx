@@ -1,3 +1,4 @@
+import { sidebarMenuButtonVariants } from "./ui/sidebar-menu";
 import { useQuery } from "@tanstack/react-query";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState, type ReactNode } from "react";
@@ -83,10 +84,10 @@ export default function Layout({ children }: { children: ReactNode }) {
     <Tooltip key={item.to}>
       <TooltipTrigger
         render={
-          <Button
-            variant="ghost"
-            className="sidebar-link"
-            render={<NavLink to={item.to} end={item.end} />}
+          <NavLink
+            to={item.to}
+            end={item.end}
+            className={`${sidebarMenuButtonVariants()} sidebar-link`}
           />
         }
       >
@@ -111,7 +112,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               <nav aria-label="Main navigation" className="space-y-1 px-2">
                 {[CHAT, ...PRIMARY].map(navItem)}
                 <Separator className="my-4" />
-                <p className="sidebar-label px-3 pb-2 text-xs text-muted-foreground">
+                <p className="sidebar-label px-1.5 pb-2 text-xs text-muted-foreground">
                   Analysis
                 </p>
                 {ANALYSIS.map(navItem)}
@@ -119,7 +120,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </ScrollArea>
             <div className="space-y-2 border-t p-2">
               {navItem(SETTINGS)}
-              <p className="sidebar-label truncate px-3 text-xs text-muted-foreground">
+              <p className="sidebar-label truncate px-1.5 text-xs text-muted-foreground">
                 {user?.display_name || user?.login}
               </p>
               <Button
